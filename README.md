@@ -1,434 +1,284 @@
 # SpectraBench-Vision 🔍
 
-**Hardware-aware multimodal model evaluation system with automated Docker container management**
+> **English**: [README.en.md](README.en.md) | **한국어**: README.md
 
-## 🐳 Automated Multi-Version Support
+**한 번의 다운로드로 30개 VLM 모델을 평가하는 완전 통합 시스템**
 
-SpectraBench-Vision automatically manages **5 Docker containers** with different transformer versions, enabling seamless evaluation of **30 models** without dependency conflicts.
+---
 
-**How it works:**
-1. **Model Selection**: Choose any model from the comprehensive list
-2. **Automatic Container**: System selects the right transformer version container
-3. **GPU Allocation**: Automatically configures GPU access for the container
-4. **Seamless Execution**: Run evaluation without knowing technical details
-5. **Result Collection**: All results saved in unified format for analysis
+## 📋 개요
 
-**User Experience:**
+SpectraBench-Vision은 **KISTI 초거대AI연구센터**에서 개발한 **Docker-in-Docker 기반 통합 VLM 평가 시스템**입니다. 이 시스템은 연구자들이 복잡한 환경 설정이나 모델이 사용하는 transfomer 버전을 신경 쓸 필요없이 30개의 최신 Vision-Language 모델을 쉽게 평가할 수 있도록 설계되었습니다.
+
+## ✨ 주요 특징
+
+- 🚀 **1분 설치**: 단일 Docker 명령으로 전체 시스템 즉시 사용
+- 🤖 **완전 자동화**: 모델별 최적 transformer 버전 컨테이너 자동 선택
+- 📦 **완전한 재현성**: 어디서든 동일한 평가 환경 보장  
+- 🎯 **30개 모델 지원**: SmolVLM부터 Qwen2.5-VL-72B까지 모든 최신 모델
+- 📊 **24개 벤치마크**: MMBench, TextVQA, DocVQA 등 표준 벤치마크 모두 지원
+- 🔧 **GPU 최적화**: 단일 GPU부터 다중 GPU 클러스터까지 자동 최적화
+
+## 🚀 빠른 시작
+
+### 기본 사용법 (권장)
+
 ```bash
-python scripts/main.py
-# Select model: "Qwen2.5-VL-7B"
-# ✅ System automatically uses transformers 4.49.0 container
-# ✅ Downloads pre-built image from GitHub registry
-# ✅ Configures GPU access and runs evaluation
-# ✅ Results saved in standard format
+# 1. 통합 시스템 시작 (모든 30개 모델 자동 지원)
+docker run -it --gpus all \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v $(pwd)/outputs:/workspace/outputs \
+  ghcr.io/gwleee/spectrabench-vision:latest
+
+# 2. 컨테이너 내부에서 대화형 모드
+python3 scripts/docker_main.py --mode interactive
 ```
 
-**Supported Transformer Versions:**
-- **4.33.0**: Legacy models - VisualGLM, Qwen series (9 models) - `spectravision-4.33`
-- **4.37.2**: Current stable - LLaVA, InternVL series (8 models) - `spectravision-4.37`
-- **4.43.0**: Mid-range modern models (2 models) - `spectravision-4.43` 
-- **4.49.0**: Latest generation - SmolVLM, Qwen2.5-VL series (9 models) - `spectravision-4.49`
-- **4.51.0**: Cutting-edge models (2 models) - `spectravision-4.51`
+### 직접 평가 실행
 
-**Total Coverage: 30 models × 24 benchmarks = 720 evaluation combinations**
+```bash
+# 특정 모델로 벤치마크 평가 (한 줄 명령)
+docker run --gpus all \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v $(pwd)/outputs:/workspace/outputs \
+  ghcr.io/gwleee/spectrabench-vision:latest \
+  python3 scripts/docker_main.py --mode batch \
+  --models "SmolVLM" --benchmarks "MMBench"
+```
 
-**AI Platform Team** at **KISTI Large-scale AI Research Center** ([Korea Institute of Science and Technology Information](https://www.kisti.re.kr/)) developed SpectraBench-Vision to provide intelligent model-benchmark combinations based on available GPU resources with comprehensive performance monitoring and analysis capabilities. 
+> 📖 **더 많은 사용법**: [Docker 사용 가이드](DOCKER_USAGE_GUIDE.md) | [Docker Usage Guide (EN)](DOCKER_USAGE_GUIDE_EN.md)
 
-The Large-scale AI Research Center was officially launched in March 2024, building upon KISTI's generative large language model 'KONI (KISTI Open Natural Intelligence)' unveiled in December 2023. As the **AI Platform Team is responsible for developing AI model and Agent service technologies**, SpectraBench-Vision represents their commitment to advancing AI infrastructure and creating sophisticated evaluation frameworks for the research community.
+## 🏛️ 개발 배경
 
+**KISTI 초거대AI연구센터 AI플랫폼팀**에서 개발한 SpectraBench-Vision은 GPU 자원에 따른 모델-벤치마크 조합 제공과 종합적인 성능 모니터링 및 분석 기능을 제공합니다.
+
+초거대AI연구센터는 2024년 3월 공식 출범하였으며, 2023년 12월 공개된 KISTI의 생성형 대규모 언어모델 'KONI(KISTI Open Natural Intelligence)'를 기반으로 합니다. **AI 플랫폼팀은 AI 모델 및 에이전트 서비스 기술 개발을 담당**하며, SpectraBench-Vision은 연구 커뮤니티를 위한 정교한 평가 프레임워크 구축에 대한 연구 센터의 노력을 보여줍니다.
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![CUDA Required](https://img.shields.io/badge/CUDA-Required-green.svg)](https://developer.nvidia.com/cuda-downloads)
 
-## 🚀 Quick Start
+## 📊 지원 모델 및 벤치마크
 
-### Ultra-Fast Docker Setup (Recommended) 🐳
+### 🤖 지원 모델 (30개)
 
-**Complete setup in 2 minutes with integrated system container:**
+| Transformer 버전 | 주요 모델 | 메모리 범위 | 용도 |
+|-----------------|----------|------------|-----|
+| **4.33.0** | Qwen-VL, VisualGLM | 8GB - 48GB | 레거시 모델 |
+| **4.37.2** | InternVL2, LLaVA | 8GB - 45GB | 안정적인 모델 |
+| **4.43.0** | Phi-3.5-Vision | 8GB - 18GB | 중급 모델 |
+| **4.49.0** | SmolVLM, Qwen2.5-VL | 3GB - 300GB | 최신 모델 |
+| **4.51.0** | Phi-4-Vision | 45GB - 200GB | 실험적 모델 |
 
+**인기 모델:**
+- **SmolVLM**: 256M, 500M, 1.7B (초경량, 3-8GB 메모리)
+- **Qwen2.5-VL**: 3B, 7B, 32B, 72B (최신세대, 12GB-300GB 메모리)  
+- **InternVL2**: 2B, 8B (고성능, 8GB-30GB 메모리)
+- **LLaVA**: 7B, 13B (안정적, 25GB-45GB 메모리)
+
+### 📊 지원 벤치마크 (24개)
+
+| 분야 | 주요 벤치마크 | 설명 |
+|------|-------------|------|
+| **기본 VQA** | MMBench, TextVQA, GQA | 멀티모달 추론, 텍스트 이해, 구성적 추론 |
+| **문서 이해** | DocVQA, ChartQA, InfoVQA | 문서 질의응답, 차트/그래프 이해 |
+| **과학/전문** | ScienceQA, AI2D, MMMU | 과학 문제해결, 다이어그램 이해 |
+| **고급 평가** | HallusionBench, MMStar, RealWorldQA | 환각 감지, 실세계 추론 |
+| **한국어** | K-MMBench, K-SEED, Korean-OCR | 한국어 멀티모달 평가 |
+
+**총 평가 조합: 720개** (30개 모델 × 24개 벤치마크)
+
+## 🔧 추가 사용법
+
+### 대화형 모드
 ```bash
-# Option 1: All-in-One Container (Fastest)
-docker run -it --gpus all -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectrabench-vision:latest
+# 컨테이너 내부에서 메뉴로 모델 선택
+python3 scripts/docker_main.py --mode interactive
+```
 
-# Option 2: Clone and Run
-git clone https://github.com/gwleee/SpectraBench-Vision.git
-cd SpectraBench-Vision
-cp .env.template .env  # Add your HF_TOKEN
-
-# Run integrated container with .env file
-docker run -it --gpus all -v $(pwd):/workspace \
+### 다중 모델 비교 평가
+```bash
+# 여러 모델로 성능 비교
+docker run --gpus all \
+  -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/outputs:/workspace/outputs \
-  --env-file .env \
+  ghcr.io/gwleee/spectrabench-vision:latest \
+  python3 scripts/docker_main.py --mode batch \
+  --models "SmolVLM" "InternVL2-8B" "Qwen2.5-VL-3B" \
+  --benchmarks "MMBench" "TextVQA"
+```
+
+### 메모리/GPU 최적화
+
+```bash
+# 최신 모델만 사용 (메모리 절약)
+docker run -it --gpus all -e PULL_IMAGES=minimal \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  ghcr.io/gwleee/spectrabench-vision:latest
+
+# 다중 GPU 활용
+docker run -it --gpus all -e NVIDIA_VISIBLE_DEVICES=0,1,2,3 \
+  -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/gwleee/spectrabench-vision:latest
 ```
 
-### Advanced Multi-Version Docker Setup 🔧
-
-**Option 1: Automatic Multi-Version CLI (Recommended) 🚀**
+### 시스템 테스트
 ```bash
-# Clone and setup
-git clone https://github.com/gwleee/SpectraBench-Vision.git
-cd SpectraBench-Vision
-cp .env.template .env  # Add your HF_TOKEN
-
-# Zero-configuration multi-version evaluation
-python scripts/main.py --multi-version --models "SmolVLM-1.7B,Qwen2.5-VL-7B" --benchmarks "MMBench,TextVQA"
-# ✅ System automatically selects transformer versions for each model
-# ✅ Downloads appropriate Docker images from GitHub Container Registry  
-# ✅ Handles GPU allocation and container orchestration
-# ✅ Integrates results across all versions
-```
-
-**Option 2: Interactive Multi-Version Setup**
-```bash
-# Clone and setup with interactive mode
-git clone https://github.com/gwleee/SpectraBench-Vision.git
-cd SpectraBench-Vision
-cp .env.template .env  # Add your HF_TOKEN
-
-# Start evaluation (interactive selection)
-python scripts/main.py
-```
-
-**Advanced Setup Benefits:**
-- **Container Selection**: System picks the right transformer version for your model
-- **Image Download**: Pre-built images pulled from GitHub Container Registry
-- **GPU Configuration**: Automatic GPU allocation and Docker GPU access setup  
-- **Dependency Isolation**: Each transformer version runs in isolated container
-- **Result Integration**: All results saved in unified format for analysis
-
-**Total Coverage**: 30 models, 5 transformer versions, 720 evaluations, zero conflicts!
-
-📖 **For detailed usage instructions:**
-- **Korean**: [Docker Usage Guide](DOCKER_USAGE_GUIDE.md) 
-- **English**: [Docker Usage Guide (EN)](DOCKER_USAGE_GUIDE_EN.md)
-
-### Alternative: Local Installation (Not Recommended)
-
-```bash
-# Clone and setup everything automatically
-git clone https://github.com/gwleee/SpectraBench-Vision.git
-cd SpectraBench-Vision
-./quick_start.sh
-```
-
-The quick start script will:
-- Check all prerequisites (Python, pip, git, NVIDIA GPU)
-- Set up virtual environment (optional)
-- Install all dependencies with correct versions
-- Download and configure VLMEvalKit
-- Clone Yi repository for Yi-VL support
-- Install LLaVA from source
-- **Set up personal API keys and environment configuration**
-- Run quick availability tests
-- Show usage examples
-
-**Script Options:**
-```bash
-./quick_start.sh --help              # Show all options
-./quick_start.sh --quick             # Skip tests, faster setup
-./quick_start.sh --skip-prerequisites # Skip system checks
-```
-
-### Manual Local Setup (Advanced Users)
-
-#### Step 1: Clone and Install Dependencies
-```bash
-# Clone the repository
-git clone https://github.com/gwleee/SpectraBench-Vision.git
-cd SpectraBench-Vision
-
-# Install dependencies and setup
-pip install -r requirements.txt
-python scripts/setup_dependencies.py
-```
-
-#### Step 2: Configure Personal API Keys
-```bash
-# Copy environment template
-cp .env.template .env
-
-# Edit .env file and add your personal keys
-nano .env  # Add your HF_TOKEN and other keys
-```
-
-**Required**: Get your Hugging Face token from https://huggingface.co/settings/tokens and add it to the .env file.
-
-See the Environment Configuration section below for detailed setup.
-
-#### Step 3: Run Tests
-```bash
-# Run availability tests
-python scripts/main.py --mode test --test-time-limit 90
-```
-
-## 📋 Supported Models (30+ Models)
-
-### Multi-Version Docker Architecture
-
-| Transformer Version | Models | Memory Range | Container |
-|---------------------|---------|--------------|-----------|
-| **4.33.0** | VisualGLM-6B, Qwen2-VL-2B, Qwen-VL-Chat, mPLUG-Owl2-7B, Monkey-7B, InternLM-XComposer2-7B, IDEFICS-9B, InstructBLIP-13B, PandaGPT-13B | 8GB - 48GB | `spectravision-4.33` |
-| **4.37.2** | InternVL2-2B, MiniCPM-V-2_6, LLaVA-1.5-7B, CogVLM-7B, InternVL2-8B, InternLM-XComposer2-VL, mPLUG-Owl2, LLaVA-1.5-13B | 8GB - 45GB | `spectravision-4.37` |
-| **4.43.0** | Phi-3.5-Vision, Moondream2 | 8GB - 18GB | `spectravision-4.43` |
-| **4.49.0** | SmolVLM-256M, SmolVLM-500M, SmolVLM-1.7B, Qwen2.5-VL-3B, Aria-3.9B, Qwen2.5-VL-7B, Pixtral-12B, Qwen2.5-VL-32B, Qwen2.5-VL-72B | 3GB - 300GB | `spectravision-4.49` |
-| **4.51.0** | Phi-4-Vision, Llama-4-Scout-17B | 45GB - 200GB | `spectravision-4.51` |
-
-**Key Features:**
-- **Automatic Selection**: System picks the right container for each model
-- **Pre-built Images**: Download from GitHub Container Registry (ghcr.io)
-- **GPU Scaling**: From single GPU (8GB) to multi-GPU clusters (1TB+)
-- **Zero Conflicts**: Each transformer version isolated in separate container
-
-**Popular Models:**
-- **SmolVLM Series**: 256M, 500M, 1.7B (Ultra-efficient, 3-8GB) - `4.49.0`
-- **Qwen2.5-VL**: 3B, 7B, 32B, 72B (Latest generation, 12GB-300GB) - `4.49.0`
-- **InternVL2**: 2B, 8B (High performance, 8GB-30GB) - `4.37.2`
-- **LLaVA Series**: 7B, 13B (Stable and reliable, 25GB-45GB) - `4.37.2`
-
-## 🎯 Supported Benchmarks (24 Benchmarks)
-
-| Category | Benchmark | Purpose | Samples |
-|----------|-----------|---------|---------|
-| **Vision-Language** | MMBench | Multi-modal reasoning | 2,974 |
-| | TextVQA | Reading text in images | 5,000 |
-| | GQA | Compositional reasoning | 12,578 |
-| | MMMU | College-level multi-discipline | 900 |
-| **Document** | DocVQA | Document question answering | 5,349 |
-| | ChartQA | Chart and graph understanding | 1,250 |
-| | InfoVQA | Infographic understanding | 2,118 |
-| **Scene/Object** | OCRBench | OCR capabilities | 1,000 |
-| | AI2D | Science diagram understanding | 3,088 |
-| **Scientific** | ScienceQA | Science question answering | 4,241 |
-| **Spatial** | POPE | Object existence evaluation | 3,000 |
-| **Instruction** | MME | Comprehensive evaluation | 2,374 |
-| **Advanced** | HallusionBench | Hallucination detection | 346 |
-| | MMStar | Multi-modal understanding | 1,500 |
-| | RealWorldQA | Real-world reasoning | 700 |
-| | NaturalBench | Natural imagery VQA | 3,000 |
-| | VisOnlyQA | Visual perception | 2,000 |
-| | VizWiz | Visual QA for visually impaired | 4,000 |
-| | SEED | Spatial reasoning | 19,000 |
-| | BLINK | Multimodal reasoning | 3,807 |
-| **Korean** | K-MMBench | Multi-modal reasoning (Korean) | 3,000 |
-| | K-SEED | Spatial reasoning (Korean) | 19,000 |
-| | K-MMStar | Multi-modal understanding (Korean) | 1,500 |
-| | Korean-OCR | Korean OCR capabilities | 150 |
-
-**Total: 720 evaluation combinations** (30 models × 24 benchmarks)
-
-## 🔧 Usage Examples
-
-### Integrated Docker Container (Recommended)
-
-```bash
-# Start integrated container
-docker run -it --gpus all -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectrabench-vision:latest
-
-# Inside container - Interactive mode
-python scripts/main.py
-# ✅ All models and versions pre-installed
-# ✅ Select from 30 models across 5 transformer versions
-
-# Direct evaluation from host
-docker run --gpus all -v $(pwd)/outputs:/workspace/outputs \
+# 설치 확인 및 GPU 테스트  
+docker run --rm --gpus all \
+  -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/gwleee/spectrabench-vision:latest \
-  python scripts/main.py --models "Qwen2.5-VL-7B" --benchmarks "MMBench"
-
-# Multi-model evaluation
-docker run --gpus all -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectrabench-vision:latest \
-  python scripts/main.py --models "SmolVLM-1.7B" "InternVL2-8B" --benchmarks "TextVQA"
+  python3 scripts/docker_main.py --mode test
 ```
 
-💡 **Need more Docker options?** Check the Docker Usage Guide ([Korean](DOCKER_USAGE_GUIDE.md) / [English](DOCKER_USAGE_GUIDE_EN.md)) for advanced configuration, manual image management, and troubleshooting.
-
-### Advanced Multi-Version Docker Usage
-
+### 개별 컨테이너 직접 사용 (고급)
 ```bash
-# Clone repository for multi-version setup
-git clone https://github.com/gwleee/SpectraBench-Vision.git
-cd SpectraBench-Vision
+# 특정 transformer 버전 직접 사용 (개발/디버깅용)
+docker run --gpus all -it ghcr.io/gwleee/spectravision-4.49:latest
 
-# Interactive mode with automatic container management
-python scripts/main.py
-# ✅ Automatically downloads individual transformer version containers
-# ✅ Perfect isolation between transformer versions
-
-# Test specific transformer version
-python scripts/main.py --models "Qwen2.5-VL-7B" --benchmarks "MMBench"
-# ✅ Uses transformers 4.49.0 container automatically
-
-# Multi-version evaluation  
-python scripts/main.py --models "SmolVLM-1.7B" "InternVL2-8B" --benchmarks "TextVQA"
-# ✅ Uses different containers for each model automatically
+# VLMEvalKit 직접 사용
+cd /workspace/VLMEvalKit
+python run.py --model SmolVLM-Instruct --data MMBench_DEV_EN
 ```
 
-### Advanced Configuration
-
-```bash
-# Automatic multi-version evaluation (recommended)
-python scripts/main.py --multi-version --models "SmolVLM-1.7B,Qwen2.5-VL-7B" --benchmarks "MMBench,TextVQA"
-
-# Production deployment with Docker Compose  
-docker-compose -f docker/docker-compose.prod.yml --profile stable up -d
-
-# Custom hardware detection
-python scripts/main.py --hardware a100_single
-
-# Extended time limit for complex benchmarks
-python scripts/main.py --mode test --test-time-limit 180
-
-# Non-interactive single-environment mode (legacy)
-python scripts/main.py --models "LLaVA-1.5-7B" "CogVLM-7B" --benchmarks "TextVQA" "GQA" --mode full
-
-# Build local images (for offline environments)
-./scripts/build_local_images.sh
-```
-
-## 📁 Project Structure
+## 📁 프로젝트 구조
 
 ```
 SpectraBench-Vision/
-├── .env.template              # Environment variables template
-├── ENV_SETUP.md               # Personal API key setup guide
-├── requirements.txt           # Python dependencies
-├── quick_start.sh             # One-command setup script
+├── .env.template              # 환경 변수 템플릿
+├── requirements.txt           # Python 의존성
+├── quick_start.sh             # 원클릭 설정 스크립트
 │
-├── configs/                   # Configuration files
-│   ├── hardware.yaml          # GPU memory limits and detection
-│   ├── models.yaml            # Model definitions by hardware tier (single-env mode)
-│   ├── models_docker.yaml     # Docker multi-version model definitions
-│   └── benchmarks.yaml        # Unified benchmark list (24 benchmarks)
+├── configs/                   # 설정 파일들
+│   ├── hardware.yaml          # GPU 메모리 제한 및 감지
+│   ├── models.yaml            # 모델 정의 (통합됨)
+│   └── benchmarks.yaml        # 통합 벤치마크 목록 (24개)
 │
-├── scripts/                   # Main execution scripts
-│   ├── main.py                # Main entry point
-│   └── setup_dependencies.py  # Automated dependency setup
+├── scripts/                   # 메인 실행 스크립트
+│   ├── main.py                # 메인 진입점
+│   └── setup_dependencies.py  # 자동화된 의존성 설정
 │
-├── spectravision/             # Core evaluation system
-│   ├── config.py              # Configuration management
-│   ├── docker_orchestrator.py # Docker container management
-│   ├── env_manager.py         # Environment variable management
-│   ├── evaluator.py           # Sequential evaluation engine
-│   ├── monitor.py             # Performance monitoring
-│   ├── multi_version_evaluator.py # Multi-version orchestration
-│   └── utils.py               # Logging and utility functions
+├── spectravision/             # 핵심 평가 시스템
+│   ├── config.py              # 설정 관리
+│   ├── docker_orchestrator.py # Docker 컨테이너 관리
+│   ├── env_manager.py         # 환경 변수 관리
+│   ├── evaluator.py           # 순차 평가 엔진
+│   ├── monitor.py             # 성능 모니터링
+│   ├── multi_version_evaluator.py # 다중 버전 오케스트레이션
+│   └── utils.py               # 로깅 및 유틸리티 함수
 │
-├── analysis/                  # Performance analysis tools
-│   ├── analyzer.py            # Performance analysis engine
-│   └── visualizer.py          # Results visualization
+├── analysis/                  # 성능 분석 도구
+│   ├── analyzer.py            # 성능 분석 엔진
+│   └── visualizer.py          # 결과 시각화
 │
-├── VLMEvalKit/               # Auto-downloaded evaluation framework
-├── outputs/                  # Results, logs, and reports
+├── VLMEvalKit/               # 자동 다운로드된 평가 프레임워크
+├── outputs/                  # 결과, 로그 및 리포트
 │
-└── .env                      # Your personal environment config (not in git)
+└── .env                      # 개인 환경 설정 (git 미포함)
 ```
 
-## 🛠️ Configuration
+## 🛠️ 설정
 
-### Environment Configuration
+### 환경 설정
 
-**Personal API Keys**: Copy `.env.template` to `.env` and add your keys:
+**개인 API 키**: `.env.template`을 `.env`로 복사하고 키를 추가하세요:
 ```bash
 cp .env.template .env
-nano .env  # Add your HF_TOKEN and other keys
+nano .env  # HF_TOKEN 등 키 추가
 ```
 
-**GPU Configuration**: Set which GPU(s) to use in `.env`:
+**GPU 설정**: `.env`에서 사용할 GPU 설정:
 ```bash
-CUDA_VISIBLE_DEVICES=0,1  # Use first two GPUs
+CUDA_VISIBLE_DEVICES=0,1  # 첫 번째와 두 번째 GPU 사용
 ```
 
-See [ENV_SETUP.md](ENV_SETUP.md) for detailed environment configuration guide.
+자세한 환경 설정은 `.env.template` 파일을 참고하세요.
 
-### Adding New Models
+### 새 모델 추가
 
-1. Check if the model is supported in VLMEvalKit
-2. Add to appropriate hardware tier in `configs/models.yaml`:
+1. VLMEvalKit에서 모델이 지원되는지 확인
+2. `configs/models.yaml`의 적절한 하드웨어 계층에 추가:
 
 ```yaml
-# Under appropriate hardware section (e.g., a6000_models)
+# 적절한 하드웨어 섹션에 (예: a6000_models)
 - name: "New-Model-7B"
-  vlm_id: "exact_vlmevalkit_id"  # Must match VLMEvalKit
+  vlm_id: "exact_vlmevalkit_id"  # VLMEvalKit과 정확히 일치해야 함
   memory_gb: 28
 ```
 
-### Adding New Benchmarks
+### 새 벤치마크 추가
 
-1. Verify benchmark exists in VLMEvalKit
-2. Add to the unified benchmark list in `configs/benchmarks.yaml`:
+1. VLMEvalKit에 벤치마크가 존재하는지 확인
+2. `configs/benchmarks.yaml`의 통합 벤치마크 목록에 추가:
 
 ```yaml
 benchmarks:
   - name: "NewBench"
-    vlm_name: "NewBench_DEV"  # Must match VLMEvalKit dataset name
+    vlm_name: "NewBench_DEV"  # VLMEvalKit 데이터셋 이름과 일치해야 함
     samples: 100
-    purpose: "Description of benchmark purpose"
+    purpose: "벤치마크 목적 설명"
 ```
 
-## 🔍 Troubleshooting
+## 🔍 문제 해결
 
-### Common Issues
+### 일반적인 문제
 
-**"HF_TOKEN is required" or "You are trying to access a gated repo"**
-- Configure your personal HF token in `.env` file
-- Get your token from https://huggingface.co/settings/tokens
-- Add `HF_TOKEN=your_token` to your `.env` file
+**"HF_TOKEN is required" 또는 "You are trying to access a gated repo"**
+- `.env` 파일에 개인 HF 토큰 설정
+- https://huggingface.co/settings/tokens 에서 토큰 발급
+- `.env` 파일에 `HF_TOKEN=your_token` 추가
 
 **"No module named 'llava'"**
 ```bash
-python scripts/setup_dependencies.py  # Re-run setup
+python scripts/setup_dependencies.py  # 설정 재실행
 ```
 
 **"TypeError: expected str, bytes or os.PathLike object, not NoneType" (Yi-VL)**
-- Ensure Yi repository was cloned properly
-- Run setup script again: `python scripts/setup_dependencies.py`
-- Check if Yi_ROOT is set correctly in VLMEvalKit/vlmeval/config.py
+- Yi 저장소가 제대로 클론되었는지 확인
+- 설정 스크립트 재실행: `python scripts/setup_dependencies.py`
+- VLMEvalKit/vlmeval/config.py에서 Yi_ROOT가 올바르게 설정되었는지 확인
 
-**".env file not found" warning**
+**".env file not found" 경고**
 ```bash
-cp .env.template .env  # Create from template
-nano .env              # Add your API keys
+cp .env.template .env  # 템플릿에서 생성
+nano .env              # API 키 추가
 ```
 
-**GPU Memory Errors**
-- Check available GPU memory with `nvidia-smi`
-- Use smaller models or reduce batch size
-- Enable memory cleanup with `--enable-cleanup`
+**GPU 메모리 오류**
+- `nvidia-smi`로 사용 가능한 GPU 메모리 확인
+- 더 작은 모델 사용 또는 배치 크기 감소
+- `--enable-cleanup`으로 메모리 정리 활성화
 
-### Getting Help
+### 도움말
 
-1. **Environment Setup**: Use `.env.template` to configure API keys
-2. **Commands**: Run `python scripts/main.py --help` for command options
-3. **Quick Start**: Use `./quick_start.sh` for automated setup
+1. **환경 설정**: `.env.template`을 사용하여 API 키 구성
+2. **명령어**: `python scripts/main.py --help`로 명령어 옵션 확인
+3. **빠른 시작**: `./quick_start.sh`로 자동 설정 사용
 
-## 📊 Results
+## 📊 결과
 
-Results are saved to `outputs/` with timestamps:
-- **Availability tests**: Quick compatibility checks
-- **Full evaluations**: Complete benchmark results
-- **Performance reports**: Resource utilization analysis
-- **Logs**: Detailed execution logs
+결과는 타임스탬프와 함께 `outputs/`에 저장됩니다:
+- **가용성 테스트**: 빠른 호환성 확인
+- **전체 평가**: 완전한 벤치마크 결과
+- **성능 리포트**: 리소스 사용률 분석
+- **로그**: 상세한 실행 로그
 
-## 📄 License
+## 📄 라이선스
 
-This project is licensed under the Apache License 2.0 - see the LICENSE file for details.
+이 프로젝트는 Apache License 2.0에 따라 라이선스가 부여됩니다 - 자세한 내용은 LICENSE 파일을 참조하세요.
 
-## 🙏 Acknowledgments
+## 🙏 감사의 말
 
-- Built on top of [VLMEvalKit](https://github.com/open-compass/VLMEvalKit)
-- Supports models from Hugging Face, LLaVA, and other frameworks
-- Developed for hardware-aware multimodal evaluation
+- [VLMEvalKit](https://github.com/open-compass/VLMEvalKit) 기반으로 구축
+- Hugging Face, LLaVA 및 기타 프레임워크의 모델 지원
+- 하드웨어 인식 멀티모달 평가를 위해 개발
 
-## 🏛️ Citation
+## 🏛️ 인용
 
 ```bibtex
 @software{spectrabench-vision2025,
   title={SpectraBench-Vision},
-  author={KISTI Large-scale AI Research Center},
+  author={KISTI 초거대AI연구센터},
   year={2025},
   url={https://github.com/gwleee/SpectraBench-Vision/},
   license={Apache-2.0},

@@ -1,55 +1,47 @@
-# SpectraBench-Vision Docker Usage Guide
+# 🐳 SpectraBench-Vision Docker Usage Guide
 
-## Quick Start (2 minutes) - Integrated Container
+## 🎯 System Overview
 
-```bash
-# Option 1: Direct Run (Fastest)
-docker run -it --gpus all -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectrabench-vision:latest
+SpectraBench-Vision is a **Docker-in-Docker integrated system** designed for **reproducibility and ease of use**:
 
-# Option 2: With Environment Files
-# 1. Clone repository (optional)
-git clone https://github.com/gwleee/SpectraBench-Vision.git
-cd SpectraBench-Vision
+- **Integrated Image**: Complete 30-model VLM evaluation system with single download
+- **Automatic Container Management**: Pulls/starts/stops individual transformer version containers as needed
+- **Docker-in-Docker**: Complete isolation with multi-version support
 
-# 2. Environment setup
-cp .env.template .env
-# Open .env file and add your HF_TOKEN
+## 📦 System Architecture
 
-# 3. Run integrated container
-docker run -it --gpus all -v $(pwd):/workspace \
-  -v $(pwd)/outputs:/workspace/outputs \
-  --env-file .env \
-  ghcr.io/gwleee/spectrabench-vision:latest
-```
+### 🎯 Integrated System (Recommended)
 
-## Advanced Usage - Multi-Version Containers
+| Image | Description | Models | Usage |
+|--------|-------------|--------|-------|
+| **spectrabench-vision** | **Complete Integrated System** | **30** | **All Users** |
 
-```bash
-# 1. Clone repository
-git clone https://github.com/gwleee/SpectraBench-Vision.git
-cd SpectraBench-Vision
+**Key Features:**
+- ✅ Docker-in-Docker architecture for complete automation
+- ✅ Automatic container pull/start/stop as needed
+- ✅ Built-in DockerOrchestrator for intelligent model management
+- ✅ Single command access to entire system
+- ✅ Automatic GPU detection and optimization
 
-# 2. Environment setup
-cp .env.template .env
-# Open .env file and add your HF_TOKEN
+### 🔧 Individual Containers (Advanced Users/Developers)
 
-# 3. Download individual images (optional)
-docker pull ghcr.io/gwleee/spectravision-4.49:latest  # Latest models
-docker pull ghcr.io/gwleee/spectravision-4.37:latest  # Stable version
+Managed automatically by integrated system, but can be used directly:
 
-# 4. Run multi-version mode
-python scripts/main.py
-# Select "2. Multi-Version Docker"
-```
+| Image | Transformers | Main Models | Purpose |
+|--------|-------------|-------------|---------|
+| **spectravision-4.33** | 4.33.0 | Qwen-VL, VisualGLM | Legacy models |
+| **spectravision-4.37** | 4.37.2 | InternVL2, LLaVA | Stable version |
+| **spectravision-4.43** | 4.43.0 | Phi-3.5-Vision | Mid-range models |
+| **spectravision-4.49** | 4.49.0 | SmolVLM, Qwen2.5-VL | Latest models |
+| **spectravision-4.51** | 4.51.0 | Phi-4-Vision | Experimental |
 
-## Available Images
+## 📥 Image Downloads
 
 ### Recommended Image
 
 | Image | Description | Models | Use Case | Download |
-|-------|-------------|---------|----------|----------|
-| **spectrabench-vision** | Integrated system | **30 models** | **General users** | `docker pull ghcr.io/gwleee/spectrabench-vision:latest` |
+|-------|-------------|--------|----------|----------|
+| **spectrabench-vision** | Integrated System | **30 models** | **General Users** | `docker pull ghcr.io/gwleee/ghcr.io/gwleee/spectrabench-vision:latest` |
 
 ### Developer - Multi-Version Images
 
@@ -59,187 +51,159 @@ python scripts/main.py
 | **spectravision-4.37** | 4.37.2 | InternVL2, LLaVA | Stable version | `docker pull ghcr.io/gwleee/spectravision-4.37:latest` |
 | **spectravision-4.43** | 4.43.0 | Phi-3.5-Vision | Mid-range models | `docker pull ghcr.io/gwleee/spectravision-4.43:latest` |
 | **spectravision-4.49** | 4.49.0 | SmolVLM, Qwen2.5-VL | Latest models | `docker pull ghcr.io/gwleee/spectravision-4.49:latest` |
-| **spectravision-4.51** | 4.51.0 | Cutting-edge models | Experimental | `docker pull ghcr.io/gwleee/spectravision-4.51:latest` |
+| **spectravision-4.51** | 4.51.0 | Phi-4-Vision | Experimental | `docker pull ghcr.io/gwleee/spectravision-4.51:latest` |
 
-### Base Environment
-| Image | Purpose | Download |
-|-------|---------|----------|
-| **spectravision-base** | CUDA + common dependencies | `docker pull ghcr.io/gwleee/spectravision-base:latest` |
+### Quick Download Methods
 
-## Model-Specific Recommendations
-
-### Quick Start (Recommended)
 ```bash
-# Integrated container - includes all models
-docker run -it --gpus all -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectrabench-vision:latest
+# Integrated system (recommended)
+docker pull ghcr.io/gwleee/ghcr.io/gwleee/spectrabench-vision:latest
+
+# Latest models only
+docker pull ghcr.io/gwleee/spectravision-4.49:latest
+
+# Stable versions only  
+docker pull ghcr.io/gwleee/spectravision-4.37:latest
 ```
 
-### By Model Type (Advanced users)
-```bash  
+## 🚀 Quick Start (1 minute)
+
+### Basic Usage
+```bash
+# 1. Start integrated system (automatic support for all 30 models)
+docker run -it --gpus all \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v $(pwd)/outputs:/workspace/outputs \
+  ghcr.io/gwleee/ghcr.io/gwleee/spectrabench-vision:latest
+
+# 2. Interactive mode inside container
+python3 scripts/main.py --mode interactive
+```
+
+### Direct Evaluation
+```bash
+# Benchmark evaluation with specific model (one-line command)
+docker run --gpus all \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v $(pwd)/outputs:/workspace/outputs \
+  ghcr.io/gwleee/ghcr.io/gwleee/spectrabench-vision:latest \
+  python3 scripts/main.py --mode docker \
+  --models "SmolVLM" --benchmarks "MMBench"
+```
+
+### Memory Optimization Options
+```bash
 # Latest models only (SmolVLM, Qwen2.5-VL)
-docker run -it --gpus all ghcr.io/gwleee/spectravision-4.49:latest
+docker run -it --gpus all \
+  -e PULL_IMAGES=minimal \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v $(pwd)/outputs:/workspace/outputs \
+  ghcr.io/gwleee/ghcr.io/gwleee/spectrabench-vision:latest
 
-# Stable models (LLaVA, InternVL2)
-docker run -it --gpus all ghcr.io/gwleee/spectravision-4.37:latest
-
-# Legacy models (Qwen-VL, VisualGLM)
-docker run -it --gpus all ghcr.io/gwleee/spectravision-4.33:latest
+# Stable versions (InternVL2, LLaVA)
+docker run -it --gpus all \
+  -e PULL_IMAGES=stable \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v $(pwd)/outputs:/workspace/outputs \
+  ghcr.io/gwleee/ghcr.io/gwleee/spectrabench-vision:latest
 ```
 
-## Integrated vs Multi-Version Comparison
+## ⚡ Multi-GPU Usage
 
-### Integrated Container (Recommended)
-**Advantages:**
-- Instant use: All functionality with a single command
-- Complete compatibility: Supports all 30 models
-- Simple setup: No complex environment configuration
-- Quick start: Begin evaluation within 2 minutes
-
-**Use Cases:**
-- General users
-- Quick prototyping
-- Demos and education
-
-### Multi-Version Containers (Advanced)
-**Advantages:**
-- Perfect isolation: Independent environment per transformer version
-- Memory efficient: Use only required versions
-- Development friendly: Easy debugging per version
-- Fine control: Detailed configuration per environment
-
-**Use Cases:**
-- Research developers
-- Performance comparison across transformer versions
-- Memory-constrained environments
-
-## Usage Methods
-
-### Method 1: Integrated execution via main.py (Recommended)
 ```bash
-python scripts/main.py
-# Select "2. Multi-Version Docker" from menu
-# Automatically selects and runs appropriate container
+# Multi-GPU utilization
+docker run -it --gpus all \
+  -e NVIDIA_VISIBLE_DEVICES=0,1,2,3 \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v $(pwd)/outputs:/workspace/outputs \
+  ghcr.io/gwleee/ghcr.io/gwleee/spectrabench-vision:latest \
+  python3 scripts/main.py --mode docker \
+  --models "Qwen2.5-VL-32B" "Qwen2.5-VL-72B" \
+  --benchmarks "MMBench" --gpu-ids 0 1 2 3
 ```
 
-### Method 2: Using Docker Compose
+## 🛠️ Advanced Configuration
+
+### Docker Compose Usage (For Developers)
 ```bash
-# Start specific version only
+# Start specific versions only
 docker-compose -f docker/docker-compose.prod.yml --profile latest up -d
 
-# Start all versions (requires significant resources)  
-docker-compose -f docker/docker-compose.prod.yml --profile all up -d
+# Direct container usage
+docker run --gpus all -it ghcr.io/gwleee/spectravision-4.49:latest
 ```
 
-### Method 3: Direct container execution
+## 🛠️ Troubleshooting
+
+### Common Issues
+
+**Docker daemon connection error**
 ```bash
-# Interactive mode container entry
-docker run --gpus all -it \
-  -v $(pwd)/VLMEvalKit:/workspace/VLMEvalKit \
-  -v $(pwd)/outputs:/workspace/outputs \
-  -e HF_TOKEN=$HF_TOKEN \
-  ghcr.io/gwleee/spectravision-4.49:latest
-
-# Run evaluation inside container
-cd /workspace/VLMEvalKit
-python run.py --model SmolVLM-Instruct --data MMBench_DEV_EN
-```
-
-## Environment Configuration
-
-### .env File Setup
-```bash
-# Add the following to .env file
-HF_TOKEN=your_huggingface_token_here
-CUDA_VISIBLE_DEVICES=0
-```
-
-### GPU Configuration Check
-```bash
-# Check NVIDIA Docker runtime
-docker run --rm --gpus all nvidia/cuda:11.8-runtime-ubuntu22.04 nvidia-smi
-
-# Test GPU with SpectraVision image
-docker run --rm --gpus all ghcr.io/gwleee/spectravision-minimal:latest python -c "import torch; print(f'CUDA available: {torch.cuda.is_available()}')"
-```
-
-## Performance Comparison
-
-### Setup Time Comparison
-| Method | Time | Success Rate | Supported Models |
-|--------|------|--------------|------------------|
-| Traditional local setup | 30-60 min | Low | 8 models |
-| **Docker method** | **5-10 min** | **High** | **30 models** |
-
-### Memory Usage
-| Image | Size | Recommended GPU Memory |
-|-------|------|-----------------------|
-| minimal | 12.2GB | 16GB+ |
-| 4.33 | 27.9GB | 32GB+ |  
-| 4.43/4.49/4.51 | 12.2GB | 16GB+ |
-
-## Troubleshooting
-
-### Image Download Failed
-```bash
-# Docker login (if needed)
-docker login ghcr.io
-
-# Retry on network issues
-docker pull ghcr.io/gwleee/spectravision-minimal:latest --retry 3
-```
-
-### GPU Not Recognized
-```bash
-# Check NVIDIA Docker installation
-nvidia-docker version
-
-# Restart Docker daemon
 sudo systemctl restart docker
+docker version
 ```
 
-### Memory Shortage
-```bash  
-# Clean Docker
+**GPU not recognized**
+```bash
+nvidia-smi
+docker run --rm --gpus all nvidia/cuda:11.8-runtime-ubuntu22.04 nvidia-smi
+```
+
+**Memory insufficient**
+```bash
 docker system prune -f
 docker volume prune -f
-
-# Remove unused images
-docker image prune -a
 ```
 
-### Container Internal Debugging
+## 🎉 System Verification
+
+### Success Test
 ```bash
-# Enter container
-docker exec -it <container_name> /bin/bash
+# 1. Basic system test
+docker run --rm --gpus all \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  ghcr.io/gwleee/spectrabench-vision:latest \
+  python3 scripts/main.py --mode test
 
-# Check logs
-docker logs <container_name>
-```
-
-## Post-Setup Verification
-
-### Success Tests
-```bash
-# 1. Verify image works normally
-docker run --rm ghcr.io/gwleee/spectravision-minimal:latest python -c "import transformers; print(f'Transformers {transformers.__version__} ready!')"
-
-# 2. Verify GPU availability  
-docker run --rm --gpus all ghcr.io/gwleee/spectravision-minimal:latest python -c "import torch; print(f'CUDA: {torch.cuda.is_available()}')"
-
-# 3. Full system test
-python scripts/main.py --mode test
+# 2. GPU and Docker connection check
+docker run --rm --gpus all \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  ghcr.io/gwleee/spectrabench-vision:latest \
+  python3 -c "import torch; import docker; print(f'✅ CUDA: {torch.cuda.is_available()}'); print('✅ Docker: Connected'); print('🎯 SpectraBench-Vision ready!')"
 ```
 
 ### Expected Results
 ```
-Transformers 4.37.2 ready!
-CUDA: True
-30 models, 24 benchmarks, 720 evaluation combinations available!
+✅ CUDA: True
+✅ GPU Count: 4
+✅ Docker: Connected
+🎯 SpectraBench-Vision integrated system ready!
+
+📦 Pulling transformer version images...
+✅ spectravision-4.49:latest ready
+🎯 30 models, 24 benchmarks, 720 evaluation combinations available!
 ```
 
 ---
 
-**Congratulations!** SpectraVision Docker multi-version system has been successfully set up. You can now freely evaluate 30 VLM models in just 5 minutes!
+## 🎊 Success! Complete Integrated System Ready
 
-**Next Steps**: Run `python scripts/main.py` and select "2. Multi-Version Docker" to start powerful multi-model evaluation!
+**🎯 Congratulations!** SpectraBench-Vision integrated Docker system has been successfully set up!
+
+### ✨ What you can do now:
+- 🚀 **1-minute start**: Complete 30-model system with single command
+- 🤖 **Full automation**: Optimal container auto-selection and management
+- 📈 **Scalability**: Easy addition of new models/versions
+- 🔧 **Reproducibility**: Identical evaluation environment anywhere
+
+### 🎯 Next Steps:
+```bash
+# Start powerful VLM evaluation with integrated system!
+docker run -it --gpus all \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v $(pwd)/outputs:/workspace/outputs \
+  ghcr.io/gwleee/spectrabench-vision:latest
+```
+
+**Happy Evaluating! 🚀✨**
+
