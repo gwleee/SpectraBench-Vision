@@ -1,0 +1,138 @@
+# SpectraVision Production Docker Compose Configuration
+# Uses pre-built images from GitHub Container Registry
+# Optimized for production with scaling support and improved resource management
+version: '3.8'
+
+# Define common configurations using YAML anchors
+x-common-prod-config: &common-prod-config
+  runtime: nvidia
+  restart: unless-stopped
+  environment:
+    - HF_TOKEN=${HF_TOKEN}
+    - PYTHONPATH=/workspace:/workspace/VLMEvalKit
+    - HF_DATASETS_OFFLINE=0
+  volumes:
+    - shared_outputs:/workspace/outputs  # Named volume for outputs
+    - shared_data:/workspace/data        # Named volume for data
+    - model_cache:/root/.cache/huggingface  # HF model cache volume
+    # Note: Source code is embedded in the container images for production
+  deploy:
+    resources:
+      reservations:
+        devices:
+          - driver: nvidia
+            count: ${GPU_COUNT:-1}
+            capabilities: [gpu]
+
+services:
+  # Legacy models container (transformers 4.33.0)
+  transformers-4-33:
+    <<: *common-prod-config
+    image: ghcr.io/gwleee/spectravision-4.33:latest
+    # No container_name for scaling support
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0}
+      - HF_TOKEN=${HF_TOKEN}
+      - PYTHONPATH=/workspace:/workspace/VLMEvalKit
+      - HF_DATASETS_OFFLINE=0
+    shm_size: ${SHM_SIZE_LEGACY:-8gb}
+    profiles: ["legacy", "all"]
+
+  # Current stable models container (transformers 4.37.2)
+  transformers-4-37:
+    <<: *common-prod-config
+    image: ghcr.io/gwleee/spectravision-4.37:latest
+    # No container_name for scaling support
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0,1}
+      - HF_TOKEN=${HF_TOKEN}
+      - PYTHONPATH=/workspace:/workspace/VLMEvalKit
+      - HF_DATASETS_OFFLINE=0
+    shm_size: ${SHM_SIZE_STABLE:-16gb}
+    profiles: ["stable", "all"]
+
+  # Mid-range modern models container (transformers 4.43.0)
+  transformers-4-43:
+    <<: *common-prod-config
+    image: ghcr.io/gwleee/spectravision-4.43:latest
+    # No container_name for scaling support
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0,1,2}
+      - HF_TOKEN=${HF_TOKEN}
+      - PYTHONPATH=/workspace:/workspace/VLMEvalKit
+      - HF_DATASETS_OFFLINE=0
+    shm_size: ${SHM_SIZE_MODERN:-8gb}
+    profiles: ["modern", "all"]
+
+  # Latest models container (transformers 4.49.0)
+  transformers-4-49:
+    <<: *common-prod-config
+    image: ghcr.io/gwleee/spectravision-4.49:latest
+    # No container_name for scaling support
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0,1,2,3}
+      - HF_TOKEN=${HF_TOKEN}
+      - PYTHONPATH=/workspace:/workspace/VLMEvalKit
+      - HF_DATASETS_OFFLINE=0
+    shm_size: ${SHM_SIZE_LATEST:-16gb}
+    profiles: ["latest", "all"]
+
+  # Cutting-edge models container (transformers 4.51.0)
+  transformers-4-51:
+    <<: *common-prod-config
+    image: ghcr.io/gwleee/spectravision-4.51:latest
+    # No container_name for scaling support
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-all}
+      - HF_TOKEN=${HF_TOKEN}
+      - PYTHONPATH=/workspace:/workspace/VLMEvalKit
+      - HF_DATASETS_OFFLINE=0
+    shm_size: ${SHM_SIZE_CUTTING_EDGE:-32gb}
+    profiles: ["cutting-edge", "all"]
+
+# Named volumes for shared data - persist across container restarts
+volumes:
+  shared_outputs:
+    driver: local
+  shared_data:
+    driver: local
+  model_cache:
+    driver: local
+
+# Networks for inter-container communication
+networks:
+  spectravision:
+    driver: bridge
+
+# Usage examples:
+# ===============
+
+# Single GPU (default):
+#   docker-compose -f docker/docker-compose.prod.yml --profile stable up -d
+
+# Multi-GPU A100 dual setup:
+#   GPU_COUNT=2 NVIDIA_VISIBLE_DEVICES=0,1 docker-compose -f docker/docker-compose.prod.yml --profile stable up -d
+
+# Multi-GPU A100 quad setup:
+#   GPU_COUNT=4 NVIDIA_VISIBLE_DEVICES=0,1,2,3 docker-compose -f docker/docker-compose.prod.yml --profile all up -d
+
+# High-density GPU cluster (10+ GPUs):
+#   GPU_COUNT=16 NVIDIA_VISIBLE_DEVICES=all docker-compose -f docker/docker-compose.prod.yml --profile all up -d
+
+# Specific GPU selection (e.g., use GPUs 0,2,4,6):
+#   NVIDIA_VISIBLE_DEVICES=0,2,4,6 docker-compose -f docker/docker-compose.prod.yml --profile latest up -d
+
+# Scaling support (start 3 instances of transformers-4-37):
+#   docker-compose -f docker/docker-compose.prod.yml --profile stable up -d --scale transformers-4-37=3
+
+# Pull all images:
+#   docker-compose -f docker/docker-compose.prod.yml pull
+
+# Start all containers:
+#   docker-compose -f docker/docker-compose.prod.yml --profile all up -d
+
+# Monitor logs:
+#   docker-compose -f docker/docker-compose.prod.yml logs -f
+
+# Enter a running container (replace service_name_1 with actual container name):
+#   docker exec -it $(docker-compose -f docker/docker-compose.prod.yml ps -q transformers-4-37 | head -1) /bin/bash

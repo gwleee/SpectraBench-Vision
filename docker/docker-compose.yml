@@ -1,0 +1,145 @@
+# SpectraVision Multi-Version Docker Compose Configuration - Development
+# Orchestrates multiple transformer version containers for comprehensive VLM evaluation
+# Optimized with YAML anchors to reduce duplication and improve maintainability
+
+version: '3.8'
+
+# Define common configurations using YAML anchors
+x-common-config: &common-config
+  runtime: nvidia
+  tty: true
+  stdin_open: true
+  command: ["sleep", "infinity"]
+  environment:
+    - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0}
+    - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
+    - HF_TOKEN=${HF_TOKEN}
+    - PYTHONPATH=/workspace:/workspace/VLMEvalKit
+  volumes:
+    - ../VLMEvalKit:/workspace/VLMEvalKit:ro
+    - ../outputs:/workspace/outputs
+    - ../data:/workspace/data
+    - model_cache:/root/.cache/huggingface  # HF model cache volume
+    - /tmp/.X11-unix:/tmp/.X11-unix:rw  # GUI support for development
+  deploy:
+    resources:
+      reservations:
+        devices:
+          - driver: nvidia
+            count: ${GPU_COUNT:-1}
+            capabilities: [gpu]
+
+x-build-context: &build-context
+  context: ..
+
+services:
+  # Base service (not started by default, used for building)
+  spectravision-base:
+    build:
+      <<: *build-context
+      dockerfile: docker/base/Dockerfile
+    image: spectravision-base:latest
+    profiles: ["build-only"]
+
+  # Legacy models container (transformers 4.33.0)
+  transformers-4-33:
+    <<: *common-config
+    build:
+      <<: *build-context
+      dockerfile: docker/transformers-4.33/Dockerfile
+    image: spectravision-4.33:latest
+    container_name: spectravision-transformers-4-33  # Dev only for easy debugging
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0}
+      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
+      - CONTAINER_NAME=transformers-4-33
+      - HF_TOKEN=${HF_TOKEN}
+      - PYTHONPATH=/workspace:/workspace/VLMEvalKit
+    shm_size: ${SHM_SIZE_LEGACY:-8gb}
+    profiles: ["legacy", "all"]
+
+  # Current stable models container (transformers 4.37.2)
+  transformers-4-37:
+    <<: *common-config
+    build:
+      <<: *build-context
+      dockerfile: docker/transformers-4.37/Dockerfile
+    image: spectravision-4.37:latest
+    container_name: spectravision-transformers-4-37  # Dev only for easy debugging
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0}
+      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
+      - CONTAINER_NAME=transformers-4-37
+      - HF_TOKEN=${HF_TOKEN}
+      - PYTHONPATH=/workspace:/workspace/VLMEvalKit
+    shm_size: ${SHM_SIZE_STABLE:-16gb}
+    profiles: ["stable", "all"]
+
+  # Mid-range modern models container (transformers 4.43.0)
+  transformers-4-43:
+    <<: *common-config
+    build:
+      <<: *build-context
+      dockerfile: docker/transformers-4.43/Dockerfile
+    image: spectravision-4.43:latest
+    container_name: spectravision-transformers-4-43  # Dev only for easy debugging
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0}
+      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
+      - CONTAINER_NAME=transformers-4-43
+      - HF_TOKEN=${HF_TOKEN}
+      - PYTHONPATH=/workspace:/workspace/VLMEvalKit
+    shm_size: ${SHM_SIZE_MODERN:-8gb}
+    profiles: ["modern", "all"]
+
+  # Latest models container (transformers 4.49.0)
+  transformers-4-49:
+    <<: *common-config
+    build:
+      <<: *build-context
+      dockerfile: docker/transformers-4.49/Dockerfile
+    image: spectravision-4.49:latest
+    container_name: spectravision-transformers-4-49  # Dev only for easy debugging
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0}
+      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
+      - CONTAINER_NAME=transformers-4-49
+      - HF_TOKEN=${HF_TOKEN}
+      - PYTHONPATH=/workspace:/workspace/VLMEvalKit
+    shm_size: ${SHM_SIZE_LATEST:-16gb}
+    profiles: ["latest", "all"]
+
+  # Cutting-edge models container (transformers 4.51.0)
+  transformers-4-51:
+    <<: *common-config
+    build:
+      <<: *build-context
+      dockerfile: docker/transformers-4.51/Dockerfile
+    image: spectravision-4.51:latest
+    container_name: spectravision-transformers-4-51  # Dev only for easy debugging
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0}
+      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
+      - CONTAINER_NAME=transformers-4-51
+      - HF_TOKEN=${HF_TOKEN}
+      - PYTHONPATH=/workspace:/workspace/VLMEvalKit
+    shm_size: ${SHM_SIZE_CUTTING_EDGE:-32gb}
+    profiles: ["cutting-edge", "all"]
+
+# Named volumes for shared data
+volumes:
+  vlmevalkit_data:
+  shared_outputs:
+  model_cache:
+
+# Networks for inter-container communication
+networks:
+  spectravision:
+    driver: bridge
+
+# Usage examples:
+# Build all images: docker-compose build
+# Start stable models only: docker-compose --profile stable up -d
+# Start latest models only: docker-compose --profile latest up -d  
+# Start all containers: docker-compose --profile all up -d
+# Scale specific service: docker-compose --profile stable up -d --scale transformers-4-37=2

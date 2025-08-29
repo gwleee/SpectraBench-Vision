@@ -1,0 +1,209 @@
+# SpectraVision Hardware Configurations
+# Comprehensive GPU support from consumer to enterprise level
+
+# Consumer/Gaming GPUs (16-24GB)
+rtx4090:
+  name: "NVIDIA GeForce RTX 4090"
+  memory_gb: 24
+  max_model_memory: 20  # Leave 4GB buffer
+  tier: "consumer_high"
+
+rtx4090_dual:
+  name: "NVIDIA GeForce RTX 4090 x2"
+  memory_gb: 24  # Per GPU
+  max_model_memory: 20  # Per GPU
+  total_memory_gb: 48  # Combined memory
+  gpu_count: 2
+  multi_gpu_support: true
+  tier: "consumer_high"
+
+rtx4080:
+  name: "NVIDIA GeForce RTX 4080"
+  memory_gb: 16
+  max_model_memory: 13  # Leave 3GB buffer
+  tier: "consumer_mid"
+
+rtx4080_dual:
+  name: "NVIDIA GeForce RTX 4080 x2"
+  memory_gb: 16  # Per GPU
+  max_model_memory: 13  # Per GPU
+  total_memory_gb: 32  # Combined memory
+  gpu_count: 2
+  multi_gpu_support: true
+  tier: "consumer_mid"
+
+# Professional/Workstation GPUs (24-48GB)
+rtx6000_ada:
+  name: "NVIDIA RTX 6000 Ada"
+  memory_gb: 48
+  max_model_memory: 42  # Leave 6GB buffer
+  tier: "professional"
+
+a6000:
+  name: "NVIDIA RTX A6000"
+  memory_gb: 48
+  max_model_memory: 40  # Leave 8GB buffer
+  tier: "professional"
+
+rtx5000_ada:
+  name: "NVIDIA RTX 5000 Ada"
+  memory_gb: 32
+  max_model_memory: 28  # Leave 4GB buffer
+  tier: "professional"
+
+# Data Center GPUs - Current Generation (80GB)
+a100_single:
+  name: "NVIDIA A100 80GB"
+  memory_gb: 80
+  max_model_memory: 70  # Leave 10GB buffer
+  tier: "datacenter_current"
+
+a100_dual:
+  name: "NVIDIA A100 80GB x2"
+  memory_gb: 80  # Per GPU
+  max_model_memory: 70  # Per GPU
+  total_memory_gb: 160  # Combined memory for large models
+  gpu_count: 2
+  multi_gpu_support: true
+  tier: "datacenter_current"
+
+# Data Center GPUs - Next Generation (80-200GB)
+h100_80gb:
+  name: "NVIDIA H100 80GB"
+  memory_gb: 80
+  max_model_memory: 70  # Leave 10GB buffer
+  tier: "datacenter_next"
+
+h100_94gb:
+  name: "NVIDIA H100 94GB HBM3"
+  memory_gb: 94
+  max_model_memory: 85  # Leave 9GB buffer
+  tier: "datacenter_next"
+
+h200_141gb:
+  name: "NVIDIA H200 141GB"
+  memory_gb: 141
+  max_model_memory: 130  # Leave 11GB buffer
+  tier: "datacenter_premium"
+
+# A100 Quad GPU configuration for ultra-large models
+a100_quad:
+  name: "NVIDIA A100 80GB x4"
+  memory_gb: 80  # Per GPU
+  max_model_memory: 70  # Per GPU
+  total_memory_gb: 320  # Combined memory for ultra-large models
+  gpu_count: 4
+  multi_gpu_support: true
+  tier: "datacenter_current"
+
+# A100 Octo GPU configuration for massive models
+a100_octo:
+  name: "NVIDIA A100 80GB x8"
+  memory_gb: 80  # Per GPU
+  max_model_memory: 70  # Per GPU
+  total_memory_gb: 640  # Combined memory for massive models
+  gpu_count: 8
+  multi_gpu_support: true
+  tier: "datacenter_current"
+
+# High-density GPU cluster (10+ GPUs)
+gpu_cluster:
+  name: "Multi-GPU Cluster (10+ GPUs)"
+  memory_gb: "auto"  # Will be detected
+  max_model_memory: "auto"  # Will be calculated
+  total_memory_gb: "auto"  # Will be calculated
+  gpu_count: "auto"  # Will be detected
+  multi_gpu_support: true
+  cluster_mode: true
+  tier: "datacenter_cluster"
+
+# H100 Quad GPU configuration for next-gen models
+h100_quad:
+  name: "NVIDIA H100 x4"
+  memory_gb: 94  # Per GPU
+  max_model_memory: 85  # Per GPU
+  total_memory_gb: 376  # Combined memory for ultra-large models
+  gpu_count: 4
+  multi_gpu_support: true
+  tier: "datacenter_next"
+
+# Multi-GPU configurations for largest models
+h100_dual:
+  name: "NVIDIA H100 x2"
+  memory_gb: 94  # Per GPU (assuming HBM3 version)
+  max_model_memory: 85  # Per GPU
+  total_memory_gb: 188  # Combined memory for large models
+  gpu_count: 2
+  multi_gpu_support: true
+  tier: "datacenter_next"
+
+h200_dual:
+  name: "NVIDIA H200 x2"
+  memory_gb: 141  # Per GPU
+  max_model_memory: 130  # Per GPU
+  total_memory_gb: 282  # Combined memory for large models
+  gpu_count: 2
+  multi_gpu_support: true
+  tier: "datacenter_premium"
+
+# Legacy/Budget options (8-16GB)
+rtx3090:
+  name: "NVIDIA GeForce RTX 3090"
+  memory_gb: 24
+  max_model_memory: 20  # Leave 4GB buffer
+  tier: "legacy_high"
+
+rtx3080:
+  name: "NVIDIA GeForce RTX 3080"
+  memory_gb: 12
+  max_model_memory: 9   # Leave 3GB buffer
+  tier: "legacy_mid"
+
+v100:
+  name: "NVIDIA Tesla V100"
+  memory_gb: 16
+  max_model_memory: 12  # Leave 4GB buffer
+  tier: "legacy_datacenter"
+
+v100_quad:
+  name: "NVIDIA Tesla V100 x4"
+  memory_gb: 16  # Per GPU
+  max_model_memory: 12  # Per GPU
+  total_memory_gb: 64  # Combined memory
+  gpu_count: 4
+  multi_gpu_support: true
+  tier: "legacy_datacenter"
+
+# Auto-detection settings
+auto_detection:
+  # Memory thresholds for automatic hardware detection
+  h200_min_memory: 135    # H200 detection
+  h100_min_memory: 75     # H100 detection  
+  a100_min_memory: 75     # A100 detection
+  a6000_min_memory: 45    # A6000/RTX 6000 detection
+  rtx4090_min_memory: 22  # RTX 4090 detection
+  rtx_mid_min_memory: 14  # RTX 4080/3090 tier
+  rtx_low_min_memory: 10  # RTX 3080/lower tier
+  fallback: "rtx4080"     # Default if detection fails
+  
+  # Multi-GPU detection thresholds
+  multi_gpu_min_count: 2
+  quad_gpu_min_count: 4
+  octo_gpu_min_count: 8
+  cluster_gpu_min_count: 10
+  
+  # GPU detection methods (in order of priority)
+  detection_methods:
+    - "nvidia-smi"     # Primary: NVIDIA GPUs via nvidia-smi
+    - "pytorch_cuda"   # Fallback: Any CUDA GPU via PyTorch
+    - "conservative"   # Final: Safe default configuration
+  
+  # Detection priority (highest to lowest)
+  priority: ["gpu_cluster", "a100_octo", "h200_dual", "h100_quad", "h100_dual", "a100_quad", "a100_dual", "h200_141gb", "h100_94gb", "h100_80gb", "a100_single", "rtx6000_ada", "a6000", "rtx5000_ada", "rtx4090_dual", "rtx4090", "rtx3090", "rtx4080_dual", "rtx4080", "rtx3080", "v100_quad", "v100"]
+  
+  # Generic GPU support notes
+  generic_gpu_support:
+    note: "System supports any CUDA-compatible GPU through memory-based classification"
+    supported_vendors: ["NVIDIA", "Unknown CUDA GPUs"]
+    unsupported_vendors: ["AMD Radeon", "Intel Arc (non-CUDA)"]
+    fallback_behavior: "Conservative RTX 4080 configuration for maximum compatibility"

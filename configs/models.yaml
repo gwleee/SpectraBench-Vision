@@ -1,0 +1,226 @@
+# SpectraVision Docker Multi-Version Model Configuration
+# Separates models by transformer version requirements to avoid dependency conflicts
+
+# Current single-environment configuration (keep as reference)
+transformers_4_37:
+  description: "Current SpectraVision models - well tested and stable"
+  version: "4.37.2"
+  models:
+    # Small models (≤3B)
+    - name: "InternVL2-2B"
+      vlm_id: "InternVL2-2B"
+      memory_gb: 8
+      
+    - name: "MiniCPM-V-2_6"
+      vlm_id: "MiniCPM-V-2_6"
+      memory_gb: 12
+      
+    # Medium models (4-10B)
+    - name: "LLaVA-1.5-7B"
+      vlm_id: "llava_v1.5_7b"
+      memory_gb: 25
+      
+    - name: "CogVLM-7B"
+      vlm_id: "cogvlm-chat"
+      memory_gb: 28
+      
+    - name: "InternVL2-8B"
+      vlm_id: "InternVL2-8B"
+      memory_gb: 30
+      
+    - name: "InternLM-XComposer2-VL"
+      vlm_id: "XComposer2"
+      memory_gb: 26
+      
+    - name: "mPLUG-Owl2"
+      vlm_id: "mPLUG-Owl2"
+      memory_gb: 26
+      
+    # Large models (>10B)
+    - name: "LLaVA-1.5-13B"
+      vlm_id: "llava_v1.5_13b"
+      memory_gb: 45
+
+# Legacy models requiring older transformer versions
+transformers_4_33:
+  description: "Legacy models requiring transformers 4.33.0 - Qwen and older models"
+  version: "4.33.0"
+  models:
+    # Small models (≤6B)
+    - name: "VisualGLM-6B"
+      vlm_id: "VisualGLM_6b"
+      memory_gb: 18
+      
+    - name: "Qwen2-VL-2B"
+      vlm_id: "Qwen2-VL-2B-Instruct"
+      memory_gb: 8
+      
+    # Medium models (7-9B)
+    - name: "Qwen-VL-Chat"
+      vlm_id: "qwen_chat"
+      memory_gb: 25
+      
+    - name: "mPLUG-Owl2-7B"
+      vlm_id: "mPLUG-Owl2"
+      memory_gb: 26
+      
+    - name: "Monkey-7B"
+      vlm_id: "monkey"
+      memory_gb: 28
+      
+    - name: "InternLM-XComposer2-7B"
+      vlm_id: "XComposer2"
+      memory_gb: 26
+      
+    - name: "IDEFICS-9B"
+      vlm_id: "idefics_9b_instruct"
+      memory_gb: 32
+      
+    # Large models (13B)
+    - name: "InstructBLIP-13B"
+      vlm_id: "instructblip_13b"
+      memory_gb: 45
+      
+    - name: "PandaGPT-13B"
+      vlm_id: "PandaGPT_13B"
+      memory_gb: 48
+
+# Modern models requiring newer transformer versions
+transformers_4_43:
+  description: "Mid-range modern models requiring transformers 4.43.0-4.44.0"
+  version: "4.43.0"
+  models:
+    # Small-medium models
+    - name: "Phi-3.5-Vision"
+      vlm_id: "Phi-3.5-Vision"
+      memory_gb: 18
+      
+    - name: "Moondream2"
+      vlm_id: "Moondream2"
+      memory_gb: 8
+
+# Latest generation models
+transformers_4_49:
+  description: "Latest models requiring transformers 4.49.0+ - SmolVLM, Qwen2.5-VL series"
+  version: "4.49.0"
+  models:
+    # Ultra-small models (≤1B)
+    - name: "SmolVLM-256M"
+      vlm_id: "SmolVLM-256M"
+      memory_gb: 3
+      
+    - name: "SmolVLM-500M"
+      vlm_id: "SmolVLM-500M"
+      memory_gb: 4
+      
+    - name: "SmolVLM-1.7B"
+      vlm_id: "SmolVLM"
+      memory_gb: 8
+      
+    # Small models
+    - name: "Qwen2.5-VL-3B"
+      vlm_id: "Qwen2.5-VL-3B-Instruct"
+      memory_gb: 12
+      
+    - name: "Aria-3.9B"
+      vlm_id: "Aria"
+      memory_gb: 15
+      
+    # Medium models
+    - name: "Qwen2.5-VL-7B"
+      vlm_id: "Qwen2.5-VL-7B-Instruct"
+      memory_gb: 30
+      
+    - name: "Pixtral-12B"
+      vlm_id: "Pixtral-12B"
+      memory_gb: 40
+      
+    # Large models (multi-GPU recommended)
+    - name: "Qwen2.5-VL-32B"
+      vlm_id: "Qwen2.5-VL-32B-Instruct"
+      memory_gb: 140
+      multi_gpu_recommended: true
+      min_gpu_count: 2
+      
+    - name: "Qwen2.5-VL-72B"
+      vlm_id: "Qwen2.5-VL-72B-Instruct"
+      memory_gb: 300
+      multi_gpu_required: true
+      min_gpu_count: 4
+
+# Cutting-edge models
+transformers_4_51:
+  description: "Cutting-edge models requiring transformers 4.51.0+ - Latest releases"
+  version: "4.51.0"
+  models:
+    # Large modern models
+    - name: "Phi-4-Vision"
+      vlm_id: "Phi-4-Vision"
+      memory_gb: 45
+      
+    # Ultra-large MoE models (multi-GPU required)
+    - name: "Llama-4-Scout"
+      vlm_id: "Llama-4-Scout-17B-16E-Instruct"
+      memory_gb: 200
+      multi_gpu_required: true
+      min_gpu_count: 4
+      
+    # Note: Some experimental ultra-large models removed due to VLMEvalKit compatibility
+    # These models can be added back when VLMEvalKit adds support:
+    # - InternVL2-78B (no VLMEvalKit support)
+    # - Qwen2.5-VL-500B (no VLMEvalKit support) 
+    # - LLaVA-NeXT-405B (no VLMEvalKit support)
+
+# Hardware tier recommendations for Docker deployment
+hardware_tiers:
+  budget:
+    gpu_memory: "8-16GB"
+    recommended_containers: ["transformers_4_49"]  # SmolVLM series
+    max_models: 3
+    
+  consumer:
+    gpu_memory: "16-24GB" 
+    recommended_containers: ["transformers_4_37", "transformers_4_43"]
+    max_models: 8
+    
+  professional:
+    gpu_memory: "28-48GB"
+    recommended_containers: ["transformers_4_37", "transformers_4_33", "transformers_4_49"]
+    max_models: 15
+    
+  datacenter_single:
+    gpu_memory: "80GB (single GPU)"
+    recommended_containers: ["all"]
+    max_models: "25+ (single GPU models)"
+    
+  datacenter_multi:
+    gpu_memory: "Any GPU type, multiple cards"
+    gpu_count: "2-8 GPUs"
+    recommended_containers: ["all"]
+    max_models: "35+ (including ultra-large models)"
+    supports_distributed: true
+    note: "RTX 4090 x2, V100 x4, A100 x2, H100 x2, etc."
+    
+  cluster:
+    gpu_memory: "Any GPU type, 10+ cards"
+    gpu_count: "10-64+ GPUs"
+    recommended_containers: ["all"]
+    max_models: "40+ (including cluster-scale models)"
+    supports_distributed: true
+    cluster_mode: true
+    note: "Supports unlimited GPU count for massive model evaluation"
+    examples: ["DGX-2 (16x V100)", "DGX A100 (8x A100)", "Custom cluster (20+ RTX 4090)"]
+
+# Container deployment strategy
+deployment_strategy:
+  parallel_containers: true
+  gpu_allocation: "per_container"  # Each container gets dedicated GPU(s)
+  shared_volumes:
+    - "./outputs:/workspace/outputs"
+    - "./data:/workspace/data"
+    - "./configs:/workspace/configs"
+  
+# Total model expansion:
+# Current (4.37 only): ~8 models
+# With Docker multi-version: 30 models across all transformer versions (VLMEvalKit compatible)
+# Estimated performance improvement: 3.75x more comprehensive evaluation coverage

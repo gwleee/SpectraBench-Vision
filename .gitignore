@@ -1,0 +1,190 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyTorch
+*.pth
+*.pt
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Exclude all outputs and test results
+outputs/
+results/
+logs/
+checkpoints/
+wandb/
+
+# Exclude test files
+test_*.py
+*_test.py
+*_test.*
+test_*
+*test*
+
+# Development testing directory
+dev_tests/
+
+# Exclude config copy files
+*copy*.yaml
+*copy*.yml
+
+# Large model files and datasets
+*.bin
+*.safetensors
+models/
+datasets/
+data/
+
+# Cache directories
+.cache/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Runtime files
+*.log
+*.pid
+*.sock
+*.lock
+*.out
+*.err
+
+# Downloaded repositories (will be auto-downloaded by setup script)
+VLMEvalKit/
+Yi/
+DeepSeek-VL/
+
+# Exclude development files
+CLAUDE.md
+requirements_temp.txt
+
+# Development documentation files (not for end users)
+FOR_YOU_DEVELOPER.md
+DOCUMENTATION_GUIDE.md
+FINAL_DEPLOYMENT_STATUS.md
+FOR_USERS.md
+UNKNOWN_GPU_SUPPORT.md
+FINAL_MODEL_VERIFICATION_REPORT.md
+
+# Hugging Face cache
+.cache/huggingface/
+transformers_cache/
+
+# API keys and tokens
+*.key
+*.token
+secrets.json
+
+# Docker and deployment scripts (contain sensitive info or are environment-specific)
+deploy_to_registry.sh
+login_with_token.sh
+setup_github_registry.sh
+
+# Large files that should be downloaded/generated
+*.zip
+*.tar.gz
+*.tgz
+*.rar
+
+# Evaluation results and performance data
+performance_*.json
+evaluation_*.csv
+test_results_*.txt
+availability_test_results_*.json
+test_report_*.txt
+
+# System files
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+.Trash
+.fseventsd
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# Docker related
+docker-compose.override.yml
+.dockerignore
+Dockerfile.dev
+*.dockerfile
+
+# Backup and temporary IDE files
+*.backup
+*.bak
+*.orig
+*.rej
+.*.swp
+.*.swo
+
+# Environment and configuration backups
+*.env.backup
+*.yaml.backup
+*.yml.backup
+config.backup.*
