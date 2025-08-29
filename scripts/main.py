@@ -48,9 +48,9 @@ def select_execution_mode():
     print()
     
     if DOCKER_SUPPORT:
-        print("✅ Docker multi-version support: Available")
+        print("[INFO] Docker multi-version support: Available")
     else:
-        print("⚠️  Docker multi-version support: Not available (check Docker installation)")
+        print("[WARNING] Docker multi-version support: Not available (check Docker installation)")
     print()
     
     while True:
@@ -62,7 +62,7 @@ def select_execution_mode():
             if DOCKER_SUPPORT:
                 return "multi_version_docker"
             else:
-                print("❌ Docker multi-version support not available. Please install Docker and rebuild.")
+                print("[ERROR] Docker multi-version support not available. Please install Docker and rebuild.")
                 continue
         elif choice == "3":
             return "availability_test"
@@ -923,10 +923,10 @@ def parse_arguments():
 def run_multi_version_docker():
     """Run Docker multi-version evaluation"""
     if not DOCKER_SUPPORT:
-        print("❌ Docker multi-version support not available.")
+        print("[ERROR] Docker multi-version support not available.")
         return
     
-    print("\n🐳 Docker Multi-Version Evaluation")
+    print("\nDocker Multi-Version Evaluation")
     print("=" * 50)
     print("This mode uses Docker containers with different transformer versions")
     print("to evaluate 29 models across 24 benchmarks without version conflicts.")
@@ -943,7 +943,7 @@ def run_multi_version_docker():
         spectravision_images = [img for img in images if any('spectravision' in tag for tag in img.tags)]
         
         if not spectravision_images:
-            print("⚠️  Docker images not found. Building is required.")
+            print("[WARNING] Docker images not found. Building is required.")
             print()
             print("Quick setup options:")
             print("1. Build test container (5 minutes)")
@@ -969,14 +969,14 @@ def run_multi_version_docker():
                 return
         
     except Exception as e:
-        print(f"❌ Docker connection failed: {e}")
+        print(f"[ERROR] Docker connection failed: {e}")
         print("Please ensure Docker is running and try again.")
         return
     
     # Docker images are available, proceed with evaluation
     evaluator = MultiVersionEvaluator()
     
-    print("🎯 Multi-Version Evaluation Options:")
+    print("Multi-Version Evaluation Options:")
     print("1. Quick Test (30 evaluations, ~30 minutes)")  
     print("2. Container-Specific Test")
     print("3. Model-Specific Test")
@@ -987,7 +987,7 @@ def run_multi_version_docker():
     choice = input("\nSelect option (1-6): ").strip()
     
     if choice == "1":
-        print("\n🧪 Running Quick Test...")
+        print("\n[INFO] Running Quick Test...")
         results = evaluator.run_quick_test(max_models_per_container=2, max_benchmarks=3)
         print_multi_version_results(results)
         
@@ -998,10 +998,10 @@ def run_multi_version_docker():
         run_model_specific_test(evaluator)
         
     elif choice == "4":
-        print("\n⚠️  WARNING: Full evaluation will take 4-8 hours!")
+        print("\n[WARNING] Full evaluation will take 4-8 hours!")
         confirm = input("Continue? (yes/no): ").strip().lower()
         if confirm in ['yes', 'y']:
-            print("\n🚀 Running Full Evaluation...")
+            print("\n[INFO] Running Full Evaluation...")
             results = evaluator.run_full_evaluation()
             print_multi_version_results(results)
         else:
@@ -1018,11 +1018,11 @@ def run_multi_version_docker():
 def run_multi_version_docker_cli(args):
     """Run Docker multi-version evaluation with CLI arguments"""
     if not DOCKER_SUPPORT:
-        print("❌ Docker multi-version support not available.")
+        print("[ERROR] Docker multi-version support not available.")
         print("Please install Docker and ensure it's running.")
         return
     
-    print("\n🐳 Docker Multi-Version Evaluation (CLI Mode)")
+    print("\nDocker Multi-Version Evaluation (CLI Mode)")
     print("=" * 60)
     print("Automatically selecting transformer versions for each model...")
     print()
@@ -1032,9 +1032,9 @@ def run_multi_version_docker_cli(args):
         import docker
         client = docker.from_env()
         client.ping()
-        print("✅ Docker is available and running")
+        print("[INFO] Docker is available and running")
     except Exception as e:
-        print(f"❌ Docker connection failed: {e}")
+        print(f"[ERROR] Docker connection failed: {e}")
         print("Please ensure Docker is running and try again.")
         return
     
@@ -1042,16 +1042,16 @@ def run_multi_version_docker_cli(args):
     try:
         from spectravision.multi_version_evaluator import MultiVersionEvaluator
         evaluator = MultiVersionEvaluator()
-        print("✅ Multi-version evaluator initialized")
+        print("[INFO] Multi-version evaluator initialized")
     except ImportError as e:
-        print(f"❌ Failed to import MultiVersionEvaluator: {e}")
+        print(f"[ERROR] Failed to import MultiVersionEvaluator: {e}")
         return
     
     # Parse models and benchmarks from CLI arguments
     model_filter = args.models if args.models else None
     benchmark_filter = args.benchmarks if args.benchmarks else None
     
-    print(f"📋 Evaluation Configuration:")
+    print(f"Evaluation Configuration:")
     print(f"   Models: {model_filter if model_filter else 'All available'}")
     print(f"   Benchmarks: {benchmark_filter if benchmark_filter else 'All available'}")
     print(f"   Mode: Multi-version Docker (automatic version selection)")
@@ -1059,7 +1059,7 @@ def run_multi_version_docker_cli(args):
     
     try:
         # Run the evaluation
-        print("🚀 Starting multi-version evaluation...")
+        print("[INFO] Starting multi-version evaluation...")
         results = evaluator.run_full_evaluation(
             model_filter=model_filter,
             benchmark_filter=benchmark_filter
@@ -1069,7 +1069,7 @@ def run_multi_version_docker_cli(args):
         print_multi_version_results(results)
         
     except Exception as e:
-        print(f"❌ Evaluation failed: {e}")
+        print(f"[ERROR] Evaluation failed: {e}")
         import traceback
         traceback.print_exc()
 
@@ -1085,19 +1085,19 @@ def build_test_container():
             '.'
         ]
         result = subprocess.run(cmd, check=True, capture_output=True, text=True)
-        print("✅ Test container built successfully!")
+        print("[INFO] Test container built successfully!")
         
         # Test the container
-        print("🧪 Testing container...")
+        print("[INFO] Testing container...")
         cmd = ['docker', 'run', '--rm', 'spectravision-test-4.33:latest']
         result = subprocess.run(cmd, capture_output=True, text=True)
         print("Test result:", result.stdout)
         
     except subprocess.CalledProcessError as e:
-        print(f"❌ Failed to build test container: {e}")
+        print(f"[ERROR] Failed to build test container: {e}")
         print("Error output:", e.stderr)
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"[ERROR] Error: {e}")
 
 def build_production_containers():
     """Build production Docker containers"""
@@ -1129,7 +1129,7 @@ def build_production_containers():
             '.'
         ]
         subprocess.run(cmd, check=True)
-        print("✅ Base image built successfully!")
+        print("[INFO] Base image built successfully!")
         
         # Build each container
         for container in containers:
@@ -1140,18 +1140,18 @@ def build_production_containers():
                 'build', container
             ]
             subprocess.run(cmd, check=True)
-            print(f"✅ {container} built successfully!")
+            print(f"[INFO] {container} built successfully!")
             
-        print("\n🎉 All containers built successfully!")
+        print("\n[INFO] All containers built successfully!")
         
     except subprocess.CalledProcessError as e:
-        print(f"❌ Build failed: {e}")
+        print(f"[ERROR] Build failed: {e}")
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"[ERROR] Error: {e}")
 
 def show_build_instructions():
     """Show Docker build instructions"""
-    print("\n📋 Docker Build Instructions")
+    print("\nDocker Build Instructions")
     print("=" * 40)
     print()
     print("Manual build commands:")
@@ -1171,7 +1171,7 @@ def show_build_instructions():
 
 def run_container_specific_test(evaluator):
     """Run evaluation on specific containers"""
-    print("\n🐳 Container-Specific Test")
+    print("\nContainer-Specific Test")
     print("Available containers:")
     print("1. transformers_4_37 (Current stable, 8 models)")
     print("2. transformers_4_49 (Latest models, 9 models)")  
@@ -1190,7 +1190,7 @@ def run_container_specific_test(evaluator):
     
     if choice in container_map:
         container_name = container_map[choice]
-        print(f"\n🚀 Running evaluation on {container_name}...")
+        print(f"\n[INFO] Running evaluation on {container_name}...")
         results = evaluator.run_full_evaluation(container_filter=[container_name])
         print_multi_version_results(results)
     else:
@@ -1223,13 +1223,13 @@ def run_model_specific_test(evaluator):
         print("Invalid choice.")
         return
     
-    print(f"\n🚀 Running evaluation on {models}...")
+    print(f"\n[INFO] Running evaluation on {models}...")
     results = evaluator.run_full_evaluation(model_filter=models)
     print_multi_version_results(results)
 
 def show_evaluation_plan(evaluator):
     """Show evaluation plan without executing"""
-    print("\n📋 Evaluation Plan")
+    print("\nEvaluation Plan")
     plan = evaluator.get_evaluation_plan()
     print(f"Total evaluations: {len(plan)}")
     
@@ -1253,11 +1253,11 @@ def show_evaluation_plan(evaluator):
 def print_multi_version_results(results):
     """Print multi-version evaluation results"""
     if not results:
-        print("❌ No results to display.")
+        print("[ERROR] No results to display.")
         return
     
     print("\n" + "=" * 60)
-    print("🎯 MULTI-VERSION EVALUATION RESULTS")
+    print("MULTI-VERSION EVALUATION RESULTS")
     print("=" * 60)
     
     print(f"Session ID: {results.get('session_id', 'unknown')}")
@@ -1320,7 +1320,7 @@ def main():
             run_full_evaluation(args)
     elif args.multi_version and (args.models or args.benchmarks):
         # Multi-version Docker evaluation with specific models/benchmarks
-        print("🚀 Running Multi-Version Docker Evaluation (non-interactive)")
+        print("[INFO] Running Multi-Version Docker Evaluation (non-interactive)")
         print("   System will automatically select appropriate transformer versions for each model")
         print()
         run_multi_version_docker_cli(args)

@@ -17,7 +17,7 @@ NC='\033[0m' # No Color
 print_banner() {
     echo -e "${BLUE}"
     echo "=================================================================="
-    echo "  SpectraBench-Vision Quick Start 🔍"
+    echo "  SpectraBench-Vision Quick Start"
     echo "  Hardware-aware multimodal model evaluation system"
     echo "=================================================================="
     echo -e "${NC}"
@@ -33,22 +33,22 @@ print_step() {
 
 # Print info message
 print_info() {
-    echo -e "${BLUE}ℹ️  $1${NC}"
+    echo -e "${BLUE}[INFO] $1${NC}"
 }
 
 # Print warning message
 print_warning() {
-    echo -e "${YELLOW}⚠️  $1${NC}"
+    echo -e "${YELLOW}[WARNING] $1${NC}"
 }
 
 # Print error message
 print_error() {
-    echo -e "${RED}❌ $1${NC}"
+    echo -e "${RED}[ERROR] $1${NC}"
 }
 
 # Print success message
 print_success() {
-    echo -e "${GREEN}✅ $1${NC}"
+    echo -e "${GREEN}[SUCCESS] $1${NC}"
 }
 
 # Check if command exists
@@ -309,10 +309,10 @@ main() {
         
         show_usage
         
-        print_success "SpectraBench-Vision setup completed successfully! 🎉"
+        print_success "SpectraBench-Vision setup completed successfully!"
         echo ""
     fi
-    echo -e "${BLUE}Happy evaluating! 🚀${NC}"
+    echo -e "${BLUE}Happy evaluating!${NC}"
 }
 
 # Run main function with all arguments

@@ -129,11 +129,11 @@ class DockerOrchestrator:
         try:
             # Check if image exists locally
             self.docker_client.images.get(f"{image_name}:latest")
-            self.logger.info(f"✅ Image {image_name}:latest found locally")
+            self.logger.info(f"Image {image_name}:latest found locally")
             return True
             
         except docker.errors.ImageNotFound:
-            self.logger.info(f"🔍 Image {image_name}:latest not found locally")
+            self.logger.info(f"Image {image_name}:latest not found locally")
             
             # Try to pull from registry
             try:
@@ -144,12 +144,12 @@ class DockerOrchestrator:
                 image = self.docker_client.images.get(registry_image)
                 image.tag(image_name, "latest")
                 
-                self.logger.info(f"✅ Successfully pulled and tagged {image_name}:latest")
+                self.logger.info(f"Successfully pulled and tagged {image_name}:latest")
                 return True
                 
             except Exception as pull_error:
-                self.logger.error(f"❌ Failed to pull {registry_image}: {pull_error}")
-                self.logger.info("💡 You may need to build the image locally:")
+                self.logger.error(f"Failed to pull {registry_image}: {pull_error}")
+                self.logger.info("You may need to build the image locally:")
                 self.logger.info(f"   docker build -t {image_name}:latest -f docker/{container_name}/Dockerfile .")
                 return False
                 

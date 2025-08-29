@@ -133,10 +133,10 @@ class MultiVersionEvaluator:
         
         self.results['total_evaluations'] = len(evaluation_plan)
         
-        self.logger.info(f"🚀 Starting full multi-version evaluation")
-        self.logger.info(f"   📊 Total evaluations: {len(evaluation_plan)}")
+        self.logger.info(f"Starting full multi-version evaluation")
+        self.logger.info(f"   Total evaluations: {len(evaluation_plan)}")
         self.logger.info(f"   🐳 Max concurrent containers: {max_concurrent_containers}")
-        self.logger.info(f"   🎯 GPU allocation: {gpu_allocation}")
+        self.logger.info(f"   GPU allocation: {gpu_allocation}")
         
         # Group evaluations by container for sequential processing
         by_container = {}
@@ -167,13 +167,13 @@ class MultiVersionEvaluator:
             
             try:
                 # Start container
-                self.logger.info(f"   🚀 Starting container on GPU {gpu_id}")
+                self.logger.info(f"   Starting container on GPU {gpu_id}")
                 self.orchestrator.start_container(container_name, gpu_id)
                 
                 # Run all evaluations in this container
                 for i, eval_item in enumerate(container_evaluations, 1):
                     
-                    self.logger.info(f"\n   📋 Evaluation {i}/{len(container_evaluations)}")
+                    self.logger.info(f"\n   Evaluation {i}/{len(container_evaluations)}")
                     self.logger.info(f"      Model: {eval_item['model_name']}")
                     self.logger.info(f"      Benchmark: {eval_item['benchmark_name']}")
                     
@@ -198,7 +198,7 @@ class MultiVersionEvaluator:
                     # Progress update
                     total_progress = (self.results['successful_evaluations'] + self.results['failed_evaluations'])
                     progress_pct = (total_progress / self.results['total_evaluations']) * 100
-                    self.logger.info(f"      ✅ Overall progress: {total_progress}/{self.results['total_evaluations']} ({progress_pct:.1f}%)")
+                    self.logger.info(f"      Overall progress: {total_progress}/{self.results['total_evaluations']} ({progress_pct:.1f}%)")
                 
                 # Container completed
                 self.results['containers'][container_name]['end_time'] = datetime.now().isoformat()
@@ -207,10 +207,10 @@ class MultiVersionEvaluator:
                 
                 # Stop container
                 self.orchestrator.stop_container(container_name)
-                self.logger.info(f"   ✅ Container {container_name} completed successfully")
+                self.logger.info(f"   Container {container_name} completed successfully")
                 
             except Exception as e:
-                self.logger.error(f"   ❌ Container {container_name} failed: {e}")
+                self.logger.error(f"   Container {container_name} failed: {e}")
                 self.results['containers'][container_name]['error'] = str(e)
                 self.results['containers'][container_name]['end_time'] = datetime.now().isoformat()
                 
@@ -302,7 +302,7 @@ class MultiVersionEvaluator:
             else:
                 container_stats['success_rate'] = 0
         
-        self.logger.info(f"📊 Summary statistics calculated")
+        self.logger.info(f"Summary statistics calculated")
         self.logger.info(f"   Overall success rate: {success_rate:.1f}%")
         self.logger.info(f"   Total duration: {self.results.get('total_duration_seconds', 0):.1f} seconds")
     
@@ -320,7 +320,7 @@ class MultiVersionEvaluator:
             with open(results_file, 'w') as f:
                 json.dump(self.results, f, indent=2, default=str)
             
-            self.logger.info(f"📝 Results saved to: {results_file}")
+            self.logger.info(f"Results saved to: {results_file}")
             
             # Also save a summary report
             self.generate_summary_report(output_dir)
@@ -361,7 +361,7 @@ class MultiVersionEvaluator:
                 
                 f.write(f"\nDetailed results available in: {self.results['session_id']}_results.json\n")
             
-            self.logger.info(f"📋 Summary report saved to: {report_file}")
+            self.logger.info(f"Summary report saved to: {report_file}")
             
         except Exception as e:
             self.logger.error(f"Failed to generate summary report: {e}")
@@ -370,7 +370,7 @@ class MultiVersionEvaluator:
                       max_benchmarks: int = 3) -> Dict:
         """Run a quick test with limited models and benchmarks"""
         
-        self.logger.info(f"🧪 Running quick test")
+        self.logger.info(f"Running quick test")
         self.logger.info(f"   Max models per container: {max_models_per_container}")
         self.logger.info(f"   Max benchmarks: {max_benchmarks}")
         
