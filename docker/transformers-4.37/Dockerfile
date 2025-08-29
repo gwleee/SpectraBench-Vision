@@ -10,13 +10,30 @@ RUN pip install \
     sentencepiece==0.1.99 \
     protobuf==3.20.3
 
-# Install model-specific dependencies
+# Install LLaVA required dependencies first
 RUN pip install \
-    einops \
-    xformers
+    einops==0.6.1 \
+    einops-exts==0.0.4 \
+    markdown2[all] \
+    shortuuid \
+    accelerate==0.21.0 \
+    gradio==4.16.0 \
+    gradio-client==0.8.1 \
+    httpx==0.24.0
 
-# LLaVA dependencies
+# Install LLaVA
 RUN pip install --no-deps git+https://github.com/haotian-liu/LLaVA.git
+
+# Install compatible xformers (without forcing torch upgrade)
+RUN pip install xformers --no-deps
+
+# Ensure torch versions are correct
+RUN pip install --force-reinstall \
+    torch==2.1.2 \
+    torchvision==0.16.2
+
+# Fix NumPy compatibility issues (downgrade to 1.x after torch install)
+RUN pip install --force-reinstall numpy==1.26.4
 
 # CogVLM dependencies
 RUN pip install \

@@ -20,6 +20,9 @@ RUN pip install \
     flash-attn \
     || echo "flash-attn installation failed, continuing without it"
 
+# Fix NumPy compatibility issues (ensure 1.x after package installs)
+RUN pip install --force-reinstall numpy==1.26.4
+
 # Set container identifier
 ENV CONTAINER_VERSION="transformers-4.43"
 ENV CONTAINER_MODELS="Phi-3.5-vision-instruct,InternVL2-8B,InternVL2-26B"

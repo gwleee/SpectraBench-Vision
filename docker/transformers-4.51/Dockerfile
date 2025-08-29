@@ -21,6 +21,9 @@ RUN pip install \
     diffusers \
     optimum
 
+# Fix NumPy compatibility issues (ensure 1.x compatibility)
+RUN pip install --force-reinstall numpy==1.26.4
+
 # Set container identifier
 ENV CONTAINER_VERSION="transformers-4.51"
 ENV CONTAINER_MODELS="Phi-4-Vision,Latest-Experimental-Models"

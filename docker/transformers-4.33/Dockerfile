@@ -15,6 +15,9 @@ RUN pip install \
     einops \
     xformers
 
+# Fix NumPy compatibility issues (ensure 1.x after xformers install)
+RUN pip install --force-reinstall numpy==1.26.4
+
 # Qwen-VL specific dependencies
 RUN pip install \
     tiktoken \

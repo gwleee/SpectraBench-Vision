@@ -58,7 +58,51 @@ COPY scripts/ /workspace/scripts/
 # Copy VLMEvalKit (mounted as volume in dev, copied to image for prod)
 COPY VLMEvalKit/ /workspace/VLMEvalKit/
 
+# Install VLMEvalKit required dependencies first
+RUN pip install \
+    python-dotenv \
+    rich \
+    tabulate \
+    tqdm \
+    PyYAML \
+    requests \
+    pandas \
+    matplotlib \
+    seaborn \
+    scikit-learn==1.2.2 \
+    scipy \
+    datasets \
+    huggingface-hub \
+    safetensors \
+    protobuf \
+    sentencepiece \
+    timm \
+    omegaconf \
+    nltk \
+    imageio \
+    openpyxl \
+    portalocker \
+    tiktoken \
+    timeout-decorator \
+    xlsxwriter \
+    openai \
+    json-repair \
+    ipdb \
+    sty \
+    qwen-vl-utils
+
+# Install VLMEvalKit after all dependencies are ready
+WORKDIR /workspace/VLMEvalKit
+RUN pip install -e .
+
+# Remove conflicting packages that VLMEvalKit auto-installed
+RUN pip uninstall -y google-genai
+
+# Fix NumPy compatibility issues (downgrade to 1.x)
+RUN pip install --force-reinstall numpy==1.26.4
+
 # Create output directories
+WORKDIR /workspace
 RUN mkdir -p /workspace/outputs/{logs,reports,results,vlmevalkit_results}
 RUN mkdir -p /workspace/data
 
