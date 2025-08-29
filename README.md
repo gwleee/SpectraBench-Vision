@@ -104,9 +104,6 @@ python scripts/main.py
 📖 **For detailed usage instructions:**
 - **Korean**: [Docker Usage Guide](DOCKER_USAGE_GUIDE.md) 
 - **English**: [Docker Usage Guide (EN)](DOCKER_USAGE_GUIDE_EN.md)
-- **Production**: [Production Deployment Guide](PRODUCTION_GUIDE.md)
-- **Troubleshooting**: [Common Issues & Solutions](TROUBLESHOOTING.md)
-- **Compatibility**: [Model-Benchmark Matrix](COMPATIBILITY.md)
 
 ### Alternative: Local Installation (Not Recommended)
 
@@ -159,7 +156,7 @@ nano .env  # Add your HF_TOKEN and other keys
 
 **Required**: Get your Hugging Face token from https://huggingface.co/settings/tokens and add it to the .env file.
 
-See [ENV_SETUP.md](ENV_SETUP.md) for detailed configuration guide.
+See the Environment Configuration section below for detailed setup.
 
 #### Step 3: Run Tests
 ```bash
@@ -167,17 +164,17 @@ See [ENV_SETUP.md](ENV_SETUP.md) for detailed configuration guide.
 python scripts/main.py --mode test --test-time-limit 90
 ```
 
-## 📋 Supported Models (30 Models)
+## 📋 Supported Models (30+ Models)
 
-### Docker Multi-Version Coverage
+### Multi-Version Docker Architecture
 
-| Transformer Version | Model Examples | Count | GPU Memory Range | Container Image |
-|---------------------|----------------|-------|------------------|------------------|
-| **4.33.0** | VisualGLM-6B, Qwen2-VL-2B, PandaGPT-13B | **9** | 8GB - 48GB | `spectravision-4.33` |
-| **4.37.2** | InternVL2-2B, LLaVA-1.5-7B, InternVL2-8B | **8** | 8GB - 45GB | `spectravision-4.37` |
-| **4.43.0** | Phi-3.5-Vision, Moondream2 | **2** | 8GB - 18GB | `spectravision-4.43` |
-| **4.49.0** | SmolVLM-256M, Qwen2.5-VL-7B, Pixtral-12B | **9** | 3GB - 300GB | `spectravision-4.49` |
-| **4.51.0** | Phi-4-Vision, Llama-4-Scout | **2** | 45GB - 200GB | `spectravision-4.51` |
+| Transformer Version | Models | Memory Range | Container |
+|---------------------|---------|--------------|-----------|
+| **4.33.0** | VisualGLM-6B, Qwen2-VL-2B, Qwen-VL-Chat, mPLUG-Owl2-7B, Monkey-7B, InternLM-XComposer2-7B, IDEFICS-9B, InstructBLIP-13B, PandaGPT-13B | 8GB - 48GB | `spectravision-4.33` |
+| **4.37.2** | InternVL2-2B, MiniCPM-V-2_6, LLaVA-1.5-7B, CogVLM-7B, InternVL2-8B, InternLM-XComposer2-VL, mPLUG-Owl2, LLaVA-1.5-13B | 8GB - 45GB | `spectravision-4.37` |
+| **4.43.0** | Phi-3.5-Vision, Moondream2 | 8GB - 18GB | `spectravision-4.43` |
+| **4.49.0** | SmolVLM-256M, SmolVLM-500M, SmolVLM-1.7B, Qwen2.5-VL-3B, Aria-3.9B, Qwen2.5-VL-7B, Pixtral-12B, Qwen2.5-VL-32B, Qwen2.5-VL-72B | 3GB - 300GB | `spectravision-4.49` |
+| **4.51.0** | Phi-4-Vision, Llama-4-Scout-17B | 45GB - 200GB | `spectravision-4.51` |
 
 **Key Features:**
 - **Automatic Selection**: System picks the right container for each model
@@ -191,51 +188,36 @@ python scripts/main.py --mode test --test-time-limit 90
 - **InternVL2**: 2B, 8B (High performance, 8GB-30GB) - `4.37.2`
 - **LLaVA Series**: 7B, 13B (Stable and reliable, 25GB-45GB) - `4.37.2`
 
-## 🎯 Supported Benchmarks
+## 🎯 Supported Benchmarks (24 Benchmarks)
 
-**Vision-Language Understanding:**
-- **MMBench** - Multi-modal reasoning
-- **TextVQA** - Reading text in images
-- **GQA** - Compositional reasoning
-- **MMMU** - College-level multi-discipline understanding
+| Category | Benchmark | Purpose | Samples |
+|----------|-----------|---------|---------|
+| **Vision-Language** | MMBench | Multi-modal reasoning | 2,974 |
+| | TextVQA | Reading text in images | 5,000 |
+| | GQA | Compositional reasoning | 12,578 |
+| | MMMU | College-level multi-discipline | 900 |
+| **Document** | DocVQA | Document question answering | 5,349 |
+| | ChartQA | Chart and graph understanding | 1,250 |
+| | InfoVQA | Infographic understanding | 2,118 |
+| **Scene/Object** | OCRBench | OCR capabilities | 1,000 |
+| | AI2D | Science diagram understanding | 3,088 |
+| **Scientific** | ScienceQA | Science question answering | 4,241 |
+| **Spatial** | POPE | Object existence evaluation | 3,000 |
+| **Instruction** | MME | Comprehensive evaluation | 2,374 |
+| **Advanced** | HallusionBench | Hallucination detection | 346 |
+| | MMStar | Multi-modal understanding | 1,500 |
+| | RealWorldQA | Real-world reasoning | 700 |
+| | NaturalBench | Natural imagery VQA | 3,000 |
+| | VisOnlyQA | Visual perception | 2,000 |
+| | VizWiz | Visual QA for visually impaired | 4,000 |
+| | SEED | Spatial reasoning | 19,000 |
+| | BLINK | Multimodal reasoning | 3,807 |
+| **Korean** | K-MMBench | Multi-modal reasoning (Korean) | 3,000 |
+| | K-SEED | Spatial reasoning (Korean) | 19,000 |
+| | K-MMStar | Multi-modal understanding (Korean) | 1,500 |
+| | Korean-OCR | Korean OCR capabilities | 150 |
 
-**Document Understanding:**
-- **DocVQA** - Document question answering
-- **ChartQA** - Chart and graph understanding
-- **InfoVQA** - Infographic understanding
-
-**Scene and Object Understanding:**
-- **OCRBench** - OCR capabilities
-- **AI2D** - Science diagram understanding
-
-**Mathematical and Scientific Reasoning:**
-- **ScienceQA** - Science question answering
-
-**Spatial and Temporal Reasoning:**
-- **POPE** - Object existence evaluation
-
-**Instruction Following:**
-- **MME** - Comprehensive evaluation
-
-**Advanced Reasoning:**
-- **HallusionBench** - Hallucination detection
-
-**Additional Comprehensive Benchmarks:**
-- **MMStar** - Multi-modal understanding
-- **RealWorldQA** - Real-world reasoning
-- **NaturalBench** - Natural imagery VQA
-- **VisOnlyQA** - Visual perception capabilities
-- **VizWiz** - Visual QA for visually impaired
-- **SEED** - Spatial reasoning and understanding
-- **BLINK** - Multimodal reasoning benchmark
-
-**Korean Language Benchmarks:**
-- **K-MMBench** - Multi-modal reasoning (Korean)
-- **K-SEED** - Spatial reasoning (Korean)
-- **K-MMStar** - Multi-modal understanding (Korean)
-- **Korean-OCR** - Korean OCR capabilities
-
-**Total: 24 benchmarks** covering comprehensive multimodal evaluation including Korean language support.
+**Total: 720 evaluation combinations** (30 models × 24 benchmarks)
 
 ## 🔧 Usage Examples
 
@@ -395,7 +377,6 @@ benchmarks:
 - Configure your personal HF token in `.env` file
 - Get your token from https://huggingface.co/settings/tokens
 - Add `HF_TOKEN=your_token` to your `.env` file
-- See [ENV_SETUP.md](ENV_SETUP.md) for detailed setup
 
 **"No module named 'llava'"**
 ```bash
@@ -420,10 +401,9 @@ nano .env              # Add your API keys
 
 ### Getting Help
 
-1. **Environment Setup**: See [ENV_SETUP.md](ENV_SETUP.md) for API key configuration
-2. **Installation**: Check [SETUP.md](SETUP.md) for detailed setup instructions
-3. **Commands**: Run `python scripts/main.py --help` for command options
-4. **Quick Start**: Use `./quick_start.sh` for automated setup
+1. **Environment Setup**: Use `.env.template` to configure API keys
+2. **Commands**: Run `python scripts/main.py --help` for command options
+3. **Quick Start**: Use `./quick_start.sh` for automated setup
 
 ## 📊 Results
 

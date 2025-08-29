@@ -121,6 +121,12 @@ FOR_USERS.md
 UNKNOWN_GPU_SUPPORT.md
 FINAL_MODEL_VERIFICATION_REPORT.md
 
+# Consolidated documentation - these files are integrated into README.md
+COMPATIBILITY.md
+ENV_SETUP.md
+PRODUCTION_GUIDE.md
+TROUBLESHOOTING.md
+
 # Hugging Face cache
 .cache/huggingface/
 transformers_cache/
