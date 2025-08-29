@@ -19,34 +19,9 @@ SpectraBench-Vision is a **Docker-in-Docker based integrated VLM evaluation syst
 - 📊 **24 benchmarks**: Support for all standard benchmarks including MMBench, TextVQA, DocVQA
 - 🔧 **GPU optimization**: Automatic optimization from single GPU to multi-GPU clusters
 
-## 🚀 Quick Start
+## 🚀 Usage
 
-### Basic Usage (Recommended)
-
-```bash
-# 1. Start integrated system (automatic support for all 30 models)
-docker run -it --gpus all \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectrabench-vision:latest
-
-# 2. Interactive mode inside container
-python3 scripts/docker_main.py --mode interactive
-```
-
-### Direct Evaluation
-
-```bash
-# Benchmark evaluation with specific model (one-line command)
-docker run --gpus all \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectrabench-vision:latest \
-  python3 scripts/docker_main.py --mode batch \
-  --models "SmolVLM" --benchmarks "MMBench"
-```
-
-> 📖 **More usage**: [Docker Usage Guide (EN)](DOCKER_USAGE_GUIDE_EN.md) | [Docker 사용 가이드](DOCKER_USAGE_GUIDE.md)
+> [Docker Usage Guide (EN)](DOCKER_USAGE_GUIDE_EN.md) | [Docker 사용 가이드](DOCKER_USAGE_GUIDE.md)
 
 ## 🏛️ Development Background
 
@@ -93,7 +68,7 @@ The Large-scale AI Research Center officially launched in March 2024, building u
 ### Interactive Mode
 ```bash
 # Menu-based model selection inside container
-python3 scripts/docker_main.py --mode interactive
+python3 scripts/main.py --mode interactive
 ```
 
 ### Multi-Model Comparison
@@ -103,7 +78,7 @@ docker run --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/outputs:/workspace/outputs \
   ghcr.io/gwleee/spectrabench-vision:latest \
-  python3 scripts/docker_main.py --mode batch \
+  python3 scripts/main.py --mode batch \
   --models "SmolVLM" "InternVL2-8B" "Qwen2.5-VL-3B" \
   --benchmarks "MMBench" "TextVQA"
 ```
@@ -232,11 +207,6 @@ benchmarks:
 ```bash
 python scripts/setup_dependencies.py  # Re-run setup
 ```
-
-**"TypeError: expected str, bytes or os.PathLike object, not NoneType" (Yi-VL)**
-- Ensure Yi repository was cloned properly
-- Run setup script again: `python scripts/setup_dependencies.py`
-- Check if Yi_ROOT is set correctly in VLMEvalKit/vlmeval/config.py
 
 **".env file not found" warning**
 ```bash

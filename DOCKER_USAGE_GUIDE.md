@@ -53,7 +53,7 @@ SpectraBench-Vision은 **재현성과 편의성**을 위해 설계된 통합 Doc
 | **spectravision-4.49** | 4.49.0 | SmolVLM, Qwen2.5-VL | 최신 모델 | `docker pull ghcr.io/gwleee/spectravision-4.49:latest` |
 | **spectravision-4.51** | 4.51.0 | Phi-4-Vision | 실험용 | `docker pull ghcr.io/gwleee/spectravision-4.51:latest` |
 
-### 빠른 다운로드 방법
+### 빠른 다운로드 방법 (예시)
 
 ```bash
 # 통합 시스템 (권장)

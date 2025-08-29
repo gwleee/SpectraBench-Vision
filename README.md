@@ -19,34 +19,9 @@ SpectraBench-Vision은 **KISTI 초거대AI연구센터**에서 개발한 **Docke
 - 📊 **24개 벤치마크**: MMBench, TextVQA, DocVQA 등 표준 벤치마크 모두 지원
 - 🔧 **GPU 최적화**: 단일 GPU부터 다중 GPU 클러스터까지 자동 최적화
 
-## 🚀 빠른 시작
+## 🚀 사용법
 
-### 기본 사용법 (권장)
-
-```bash
-# 1. 통합 시스템 시작 (모든 30개 모델 자동 지원)
-docker run -it --gpus all \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectrabench-vision:latest
-
-# 2. 컨테이너 내부에서 대화형 모드
-python3 scripts/docker_main.py --mode interactive
-```
-
-### 직접 평가 실행
-
-```bash
-# 특정 모델로 벤치마크 평가 (한 줄 명령)
-docker run --gpus all \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectrabench-vision:latest \
-  python3 scripts/docker_main.py --mode batch \
-  --models "SmolVLM" --benchmarks "MMBench"
-```
-
-> 📖 **더 많은 사용법**: [Docker 사용 가이드](DOCKER_USAGE_GUIDE.md) | [Docker Usage Guide (EN)](DOCKER_USAGE_GUIDE_EN.md)
+> 📖 [Docker 사용 가이드](DOCKER_USAGE_GUIDE.md) | [Docker Usage Guide (EN)](DOCKER_USAGE_GUIDE_EN.md)
 
 ## 🏛️ 개발 배경
 
@@ -93,7 +68,7 @@ docker run --gpus all \
 ### 대화형 모드
 ```bash
 # 컨테이너 내부에서 메뉴로 모델 선택
-python3 scripts/docker_main.py --mode interactive
+python3 scripts/main.py --mode interactive
 ```
 
 ### 다중 모델 비교 평가
@@ -103,7 +78,7 @@ docker run --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/outputs:/workspace/outputs \
   ghcr.io/gwleee/spectrabench-vision:latest \
-  python3 scripts/docker_main.py --mode batch \
+  python3 scripts/main.py --mode batch \
   --models "SmolVLM" "InternVL2-8B" "Qwen2.5-VL-3B" \
   --benchmarks "MMBench" "TextVQA"
 ```
@@ -151,7 +126,7 @@ SpectraBench-Vision/
 │
 ├── configs/                   # 설정 파일들
 │   ├── hardware.yaml          # GPU 메모리 제한 및 감지
-│   ├── models.yaml            # 모델 정의 (통합됨)
+│   ├── models.yaml            # 모델 정의 
 │   └── benchmarks.yaml        # 통합 벤치마크 목록 (24개)
 │
 ├── scripts/                   # 메인 실행 스크립트
@@ -233,11 +208,6 @@ benchmarks:
 python scripts/setup_dependencies.py  # 설정 재실행
 ```
 
-**"TypeError: expected str, bytes or os.PathLike object, not NoneType" (Yi-VL)**
-- Yi 저장소가 제대로 클론되었는지 확인
-- 설정 스크립트 재실행: `python scripts/setup_dependencies.py`
-- VLMEvalKit/vlmeval/config.py에서 Yi_ROOT가 올바르게 설정되었는지 확인
-
 **".env file not found" 경고**
 ```bash
 cp .env.template .env  # 템플릿에서 생성
@@ -255,30 +225,30 @@ nano .env              # API 키 추가
 2. **명령어**: `python scripts/main.py --help`로 명령어 옵션 확인
 3. **빠른 시작**: `./quick_start.sh`로 자동 설정 사용
 
-## 📊 결과
+## 📊 Results
 
-결과는 타임스탬프와 함께 `outputs/`에 저장됩니다:
-- **가용성 테스트**: 빠른 호환성 확인
-- **전체 평가**: 완전한 벤치마크 결과
-- **성능 리포트**: 리소스 사용률 분석
-- **로그**: 상세한 실행 로그
+Results are saved to `outputs/` with timestamps:
+- **Availability tests**: Quick compatibility checks
+- **Full evaluations**: Complete benchmark results
+- **Performance reports**: Resource utilization analysis
+- **Logs**: Detailed execution logs
 
-## 📄 라이선스
+## 📄 License
 
-이 프로젝트는 Apache License 2.0에 따라 라이선스가 부여됩니다 - 자세한 내용은 LICENSE 파일을 참조하세요.
+This project is licensed under the Apache License 2.0 - see the LICENSE file for details.
 
-## 🙏 감사의 말
+## 🙏 Acknowledgments
 
-- [VLMEvalKit](https://github.com/open-compass/VLMEvalKit) 기반으로 구축
-- Hugging Face, LLaVA 및 기타 프레임워크의 모델 지원
-- 하드웨어 인식 멀티모달 평가를 위해 개발
+- Built on top of [VLMEvalKit](https://github.com/open-compass/VLMEvalKit)
+- Supports models from Hugging Face, LLaVA, and other frameworks
+- Developed for hardware-aware multimodal evaluation
 
-## 🏛️ 인용
+## 🏛️ Citation
 
 ```bibtex
 @software{spectrabench-vision2025,
   title={SpectraBench-Vision},
-  author={KISTI 초거대AI연구센터},
+  author={KISTI Large-scale AI Research Center},
   year={2025},
   url={https://github.com/gwleee/SpectraBench-Vision/},
   license={Apache-2.0},

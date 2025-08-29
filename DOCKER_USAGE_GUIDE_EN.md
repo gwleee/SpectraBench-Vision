@@ -53,8 +53,8 @@ Managed automatically by integrated system, but can be used directly:
 | **spectravision-4.49** | 4.49.0 | SmolVLM, Qwen2.5-VL | Latest models | `docker pull ghcr.io/gwleee/spectravision-4.49:latest` |
 | **spectravision-4.51** | 4.51.0 | Phi-4-Vision | Experimental | `docker pull ghcr.io/gwleee/spectravision-4.51:latest` |
 
-### Quick Download Methods
-
+### Quick Download Methods (examples)
+ 
 ```bash
 # Integrated system (recommended)
 docker pull ghcr.io/gwleee/ghcr.io/gwleee/spectrabench-vision:latest
