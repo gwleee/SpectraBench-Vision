@@ -7,10 +7,10 @@ version: '3.8'
 x-common-prod-config: &common-prod-config
   runtime: nvidia
   restart: unless-stopped
+  env_file:
+    - ../.env
   environment:
-    - HF_TOKEN=${HF_TOKEN}
     - PYTHONPATH=/workspace:/workspace/VLMEvalKit
-    - HF_DATASETS_OFFLINE=0
   volumes:
     - shared_outputs:/workspace/outputs  # Named volume for outputs
     - shared_data:/workspace/data        # Named volume for data
@@ -32,9 +32,6 @@ services:
     # No container_name for scaling support
     environment:
       - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0}
-      - HF_TOKEN=${HF_TOKEN}
-      - PYTHONPATH=/workspace:/workspace/VLMEvalKit
-      - HF_DATASETS_OFFLINE=0
     shm_size: ${SHM_SIZE_LEGACY:-8gb}
     profiles: ["legacy", "all"]
 
@@ -45,9 +42,6 @@ services:
     # No container_name for scaling support
     environment:
       - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0,1}
-      - HF_TOKEN=${HF_TOKEN}
-      - PYTHONPATH=/workspace:/workspace/VLMEvalKit
-      - HF_DATASETS_OFFLINE=0
     shm_size: ${SHM_SIZE_STABLE:-16gb}
     profiles: ["stable", "all"]
 
@@ -58,9 +52,6 @@ services:
     # No container_name for scaling support
     environment:
       - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0,1,2}
-      - HF_TOKEN=${HF_TOKEN}
-      - PYTHONPATH=/workspace:/workspace/VLMEvalKit
-      - HF_DATASETS_OFFLINE=0
     shm_size: ${SHM_SIZE_MODERN:-8gb}
     profiles: ["modern", "all"]
 
@@ -71,9 +62,6 @@ services:
     # No container_name for scaling support
     environment:
       - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0,1,2,3}
-      - HF_TOKEN=${HF_TOKEN}
-      - PYTHONPATH=/workspace:/workspace/VLMEvalKit
-      - HF_DATASETS_OFFLINE=0
     shm_size: ${SHM_SIZE_LATEST:-16gb}
     profiles: ["latest", "all"]
 
@@ -84,9 +72,6 @@ services:
     # No container_name for scaling support
     environment:
       - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-all}
-      - HF_TOKEN=${HF_TOKEN}
-      - PYTHONPATH=/workspace:/workspace/VLMEvalKit
-      - HF_DATASETS_OFFLINE=0
     shm_size: ${SHM_SIZE_CUTTING_EDGE:-32gb}
     profiles: ["cutting-edge", "all"]
 

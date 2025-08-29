@@ -57,7 +57,7 @@ git clone https://github.com/gwleee/SpectraBench-Vision.git
 cd SpectraBench-Vision
 cp .env.template .env  # Add your HF_TOKEN
 
-# Run integrated container
+# Run integrated container with .env file
 docker run -it --gpus all -v $(pwd):/workspace \
   -v $(pwd)/outputs:/workspace/outputs \
   --env-file .env \

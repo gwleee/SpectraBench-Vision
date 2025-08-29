@@ -10,10 +10,11 @@ x-common-config: &common-config
   tty: true
   stdin_open: true
   command: ["sleep", "infinity"]
+  env_file:
+    - ../.env
   environment:
     - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0}
     - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
-    - HF_TOKEN=${HF_TOKEN}
     - PYTHONPATH=/workspace:/workspace/VLMEvalKit
   volumes:
     - ../VLMEvalKit:/workspace/VLMEvalKit:ro
@@ -50,11 +51,7 @@ services:
     image: spectravision-4.33:latest
     container_name: spectravision-transformers-4-33  # Dev only for easy debugging
     environment:
-      - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0}
-      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
       - CONTAINER_NAME=transformers-4-33
-      - HF_TOKEN=${HF_TOKEN}
-      - PYTHONPATH=/workspace:/workspace/VLMEvalKit
     shm_size: ${SHM_SIZE_LEGACY:-8gb}
     profiles: ["legacy", "all"]
 
@@ -67,11 +64,7 @@ services:
     image: spectravision-4.37:latest
     container_name: spectravision-transformers-4-37  # Dev only for easy debugging
     environment:
-      - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0}
-      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
       - CONTAINER_NAME=transformers-4-37
-      - HF_TOKEN=${HF_TOKEN}
-      - PYTHONPATH=/workspace:/workspace/VLMEvalKit
     shm_size: ${SHM_SIZE_STABLE:-16gb}
     profiles: ["stable", "all"]
 
@@ -84,11 +77,7 @@ services:
     image: spectravision-4.43:latest
     container_name: spectravision-transformers-4-43  # Dev only for easy debugging
     environment:
-      - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0}
-      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
       - CONTAINER_NAME=transformers-4-43
-      - HF_TOKEN=${HF_TOKEN}
-      - PYTHONPATH=/workspace:/workspace/VLMEvalKit
     shm_size: ${SHM_SIZE_MODERN:-8gb}
     profiles: ["modern", "all"]
 
@@ -101,11 +90,7 @@ services:
     image: spectravision-4.49:latest
     container_name: spectravision-transformers-4-49  # Dev only for easy debugging
     environment:
-      - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0}
-      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
       - CONTAINER_NAME=transformers-4-49
-      - HF_TOKEN=${HF_TOKEN}
-      - PYTHONPATH=/workspace:/workspace/VLMEvalKit
     shm_size: ${SHM_SIZE_LATEST:-16gb}
     profiles: ["latest", "all"]
 
@@ -118,11 +103,7 @@ services:
     image: spectravision-4.51:latest
     container_name: spectravision-transformers-4-51  # Dev only for easy debugging
     environment:
-      - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0}
-      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
       - CONTAINER_NAME=transformers-4-51
-      - HF_TOKEN=${HF_TOKEN}
-      - PYTHONPATH=/workspace:/workspace/VLMEvalKit
     shm_size: ${SHM_SIZE_CUTTING_EDGE:-32gb}
     profiles: ["cutting-edge", "all"]
 
