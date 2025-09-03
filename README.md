@@ -65,20 +65,26 @@ SpectraBench-Vision은 **KISTI 초거대AI연구센터**에서 개발한 **Docke
 
 ## 🔧 추가 사용법
 
-### 대화형 모드
+### 🐳 Docker 통합 시스템 사용법 (권장)
+
+#### 대화형 모드
 ```bash
-# 컨테이너 내부에서 메뉴로 모델 선택
-python3 scripts/main.py --mode interactive
+# Docker 컨테이너 실행하고 대화형 모드로 진입
+docker run -it --gpus all \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v $(pwd)/outputs:/workspace/outputs \
+  ghcr.io/gwleee/spectrabench-vision:latest \
+  python3 scripts/docker_main.py --mode interactive
 ```
 
-### 다중 모델 비교 평가
+#### 다중 모델 비교 평가
 ```bash
 # 여러 모델로 성능 비교
 docker run --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/outputs:/workspace/outputs \
   ghcr.io/gwleee/spectrabench-vision:latest \
-  python3 scripts/main.py --mode batch \
+  python3 scripts/docker_main.py --mode batch \
   --models "SmolVLM" "InternVL2-8B" "Qwen2.5-VL-3B" \
   --benchmarks "MMBench" "TextVQA"
 ```
@@ -106,6 +112,19 @@ docker run --rm --gpus all \
   python3 scripts/docker_main.py --mode test
 ```
 
+### 💻 로컬 설치 사용법 (개발/연구용)
+
+```bash
+# 로컬 환경에서 직접 실행 (현재 설치된 transformer 버전으로 제한)
+python scripts/main.py --models "InternVL2-2B" --benchmarks "MMBench"
+python scripts/main.py --mode interactive  # 실행 모드 선택 메뉴
+python scripts/main.py --mode test         # 빠른 호환성 테스트
+
+# 특정 모드로 직접 실행
+python scripts/main.py --mode single      # 단일 환경 평가 (transformers 4.37.2)
+python scripts/main.py --mode docker      # Docker 다중 버전 평가 (Docker 지원시)
+```
+
 ### 개별 컨테이너 직접 사용 (고급)
 ```bash
 # 특정 transformer 버전 직접 사용 (개발/디버깅용)
@@ -121,24 +140,57 @@ python run.py --model SmolVLM-Instruct --data MMBench_DEV_EN
 ```
 SpectraBench-Vision/
 ├── .env.template              # 환경 변수 템플릿
+├── LICENSE                    # 라이선스 파일
+├── README.md                  # 프로젝트 문서 (한국어)
+├── README.en.md               # 프로젝트 문서 (영어)
+├── DOCKER_USAGE_GUIDE.md      # Docker 사용 가이드 (한국어)
+├── DOCKER_USAGE_GUIDE_EN.md   # Docker 사용 가이드 (영어)
 ├── requirements.txt           # Python 의존성
 ├── quick_start.sh             # 원클릭 설정 스크립트
 │
+├── .github/                   # GitHub Actions 워크플로우
+│   └── workflows/
+│       └── build-and-push-docker.yml  # Docker 자동 빌드 및 푸시
+│
 ├── configs/                   # 설정 파일들
 │   ├── hardware.yaml          # GPU 메모리 제한 및 감지
-│   ├── models.yaml            # 모델 정의 
+│   ├── models.yaml            # 모델 정의 (transformer 버전별)
 │   └── benchmarks.yaml        # 통합 벤치마크 목록 (24개)
 │
-├── scripts/                   # 메인 실행 스크립트
-│   ├── main.py                # 메인 진입점
-│   └── setup_dependencies.py  # 자동화된 의존성 설정
+├── scripts/                   # 실행 및 빌드 스크립트
+│   ├── main.py                # 로컬 평가 메인 진입점
+│   ├── setup_dependencies.py  # 자동화된 의존성 설정
+│   ├── build_local_images.sh  # 로컬 Docker 이미지 빌드
+│   ├── build_production_images.sh # 프로덕션 이미지 빌드
+│   ├── build_and_push_images.sh   # 이미지 빌드 및 푸시
+│   └── push_to_registry.sh    # Docker 레지스트리 푸시
+│
+├── docker/                    # Docker 인프라
+│   ├── docker-compose.yml     # 개발용 컨테이너 오케스트레이션
+│   ├── docker-compose.prod.yml # 프로덕션용 컨테이너 오케스트레이션
+│   ├── base/
+│   │   └── Dockerfile         # 기본 베이스 이미지
+│   ├── integrated/            # 통합 시스템 Docker-in-Docker
+│   │   ├── Dockerfile         # 통합 시스템 이미지
+│   │   ├── docker_main.py     # 통합 시스템 메인 스크립트
+│   │   └── start_spectrabench.sh # 통합 시스템 시작 스크립트
+│   ├── transformers-4.33/     # Transformer 4.33.0 컨테이너
+│   │   └── Dockerfile
+│   ├── transformers-4.37/     # Transformer 4.37.2 컨테이너
+│   │   └── Dockerfile
+│   ├── transformers-4.43/     # Transformer 4.43.0 컨테이너
+│   │   └── Dockerfile
+│   ├── transformers-4.49/     # Transformer 4.49.0 컨테이너
+│   │   └── Dockerfile
+│   └── transformers-4.51/     # Transformer 4.51.0 컨테이너
+│       └── Dockerfile
 │
 ├── spectravision/             # 핵심 평가 시스템
-│   ├── config.py              # 설정 관리
-│   ├── docker_orchestrator.py # Docker 컨테이너 관리
+│   ├── config.py              # 설정 관리 및 하드웨어 감지
+│   ├── docker_orchestrator.py # Docker 컨테이너 자동 관리
 │   ├── env_manager.py         # 환경 변수 관리
 │   ├── evaluator.py           # 순차 평가 엔진
-│   ├── monitor.py             # 성능 모니터링
+│   ├── monitor.py             # 성능 모니터링 및 리소스 추적
 │   ├── multi_version_evaluator.py # 다중 버전 오케스트레이션
 │   └── utils.py               # 로깅 및 유틸리티 함수
 │
@@ -146,10 +198,8 @@ SpectraBench-Vision/
 │   ├── analyzer.py            # 성능 분석 엔진
 │   └── visualizer.py          # 결과 시각화
 │
-├── VLMEvalKit/               # 자동 다운로드된 평가 프레임워크
-├── outputs/                  # 결과, 로그 및 리포트
-│
-└── .env                      # 개인 환경 설정 (git 미포함)
+├── VLMEvalKit/               # VLMEvalKit 서브모듈 (자동 다운로드)
+└── outputs/                  # 결과, 로그 및 리포트 (로컬 생성)
 ```
 
 ## 🛠️ 설정

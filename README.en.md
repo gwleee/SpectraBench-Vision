@@ -65,20 +65,26 @@ The Large-scale AI Research Center officially launched in March 2024, building u
 
 ## 🔧 Additional Usage
 
-### Interactive Mode
+### 🐳 Docker Integrated System Usage (Recommended)
+
+#### Interactive Mode
 ```bash
-# Menu-based model selection inside container
-python3 scripts/main.py --mode interactive
+# Run Docker container and enter interactive mode
+docker run -it --gpus all \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v $(pwd)/outputs:/workspace/outputs \
+  ghcr.io/gwleee/spectrabench-vision:latest \
+  python3 scripts/docker_main.py --mode interactive
 ```
 
-### Multi-Model Comparison
+#### Multi-Model Comparison
 ```bash
 # Performance comparison across multiple models
 docker run --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/outputs:/workspace/outputs \
   ghcr.io/gwleee/spectrabench-vision:latest \
-  python3 scripts/main.py --mode batch \
+  python3 scripts/docker_main.py --mode batch \
   --models "SmolVLM" "InternVL2-8B" "Qwen2.5-VL-3B" \
   --benchmarks "MMBench" "TextVQA"
 ```
@@ -106,6 +112,19 @@ docker run --rm --gpus all \
   python3 scripts/docker_main.py --mode test
 ```
 
+### 💻 Local Installation Usage (Development/Research)
+
+```bash
+# Direct execution in local environment (limited to installed transformer version)
+python scripts/main.py --models "InternVL2-2B" --benchmarks "MMBench"
+python scripts/main.py --mode interactive  # Execution mode selection menu
+python scripts/main.py --mode test         # Quick compatibility test
+
+# Direct execution with specific modes
+python scripts/main.py --mode single      # Single environment evaluation (transformers 4.37.2)
+python scripts/main.py --mode docker      # Docker multi-version evaluation (if Docker support available)
+```
+
 ### Individual Container Direct Usage (Advanced)
 ```bash
 # Direct use of specific transformer version (for development/debugging)
@@ -121,24 +140,57 @@ python run.py --model SmolVLM-Instruct --data MMBench_DEV_EN
 ```
 SpectraBench-Vision/
 ├── .env.template              # Environment variables template
+├── LICENSE                    # License file
+├── README.md                  # Project documentation (Korean)
+├── README.en.md               # Project documentation (English)
+├── DOCKER_USAGE_GUIDE.md      # Docker usage guide (Korean)
+├── DOCKER_USAGE_GUIDE_EN.md   # Docker usage guide (English)
 ├── requirements.txt           # Python dependencies
 ├── quick_start.sh             # One-command setup script
 │
+├── .github/                   # GitHub Actions workflows
+│   └── workflows/
+│       └── build-and-push-docker.yml  # Docker auto build and push
+│
 ├── configs/                   # Configuration files
 │   ├── hardware.yaml          # GPU memory limits and detection
-│   ├── models.yaml            # Model definitions (unified)
+│   ├── models.yaml            # Model definitions (by transformer version)
 │   └── benchmarks.yaml        # Unified benchmark list (24 benchmarks)
 │
-├── scripts/                   # Main execution scripts
-│   ├── main.py                # Main entry point
-│   └── setup_dependencies.py  # Automated dependency setup
+├── scripts/                   # Execution and build scripts
+│   ├── main.py                # Local evaluation main entry point
+│   ├── setup_dependencies.py  # Automated dependency setup
+│   ├── build_local_images.sh  # Local Docker image build
+│   ├── build_production_images.sh # Production image build
+│   ├── build_and_push_images.sh   # Image build and push
+│   └── push_to_registry.sh    # Docker registry push
+│
+├── docker/                    # Docker infrastructure
+│   ├── docker-compose.yml     # Development container orchestration
+│   ├── docker-compose.prod.yml # Production container orchestration
+│   ├── base/
+│   │   └── Dockerfile         # Base image
+│   ├── integrated/            # Integrated system Docker-in-Docker
+│   │   ├── Dockerfile         # Integrated system image
+│   │   ├── docker_main.py     # Integrated system main script
+│   │   └── start_spectrabench.sh # Integrated system startup script
+│   ├── transformers-4.33/     # Transformer 4.33.0 container
+│   │   └── Dockerfile
+│   ├── transformers-4.37/     # Transformer 4.37.2 container
+│   │   └── Dockerfile
+│   ├── transformers-4.43/     # Transformer 4.43.0 container
+│   │   └── Dockerfile
+│   ├── transformers-4.49/     # Transformer 4.49.0 container
+│   │   └── Dockerfile
+│   └── transformers-4.51/     # Transformer 4.51.0 container
+│       └── Dockerfile
 │
 ├── spectravision/             # Core evaluation system
-│   ├── config.py              # Configuration management
-│   ├── docker_orchestrator.py # Docker container management
+│   ├── config.py              # Configuration management and hardware detection
+│   ├── docker_orchestrator.py # Docker container automatic management
 │   ├── env_manager.py         # Environment variable management
 │   ├── evaluator.py           # Sequential evaluation engine
-│   ├── monitor.py             # Performance monitoring
+│   ├── monitor.py             # Performance monitoring and resource tracking
 │   ├── multi_version_evaluator.py # Multi-version orchestration
 │   └── utils.py               # Logging and utility functions
 │
@@ -146,10 +198,8 @@ SpectraBench-Vision/
 │   ├── analyzer.py            # Performance analysis engine
 │   └── visualizer.py          # Results visualization
 │
-├── VLMEvalKit/               # Auto-downloaded evaluation framework
-├── outputs/                  # Results, logs, and reports
-│
-└── .env                      # Your personal environment config (not in git)
+├── VLMEvalKit/               # VLMEvalKit submodule (auto-downloaded)
+└── outputs/                  # Results, logs, and reports (locally generated)
 ```
 
 ## 🛠️ Configuration
@@ -222,7 +272,8 @@ nano .env              # Add your API keys
 ### Getting Help
 
 1. **Environment Setup**: Use `.env.template` to configure API keys
-2. **Commands**: Run `python scripts/main.py --help` for command options
+2. **Commands**: Run `python scripts/main.py --help  # For local installation
+python scripts/docker_main.py --help  # For Docker integrated system` for command options
 3. **Quick Start**: Use `./quick_start.sh` for automated setup
 
 ## 📊 Results
