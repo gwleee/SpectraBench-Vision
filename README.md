@@ -67,6 +67,10 @@ SpectraBench-Vision은 **KISTI 초거대AI연구센터**에서 개발한 **Docke
 
 ### 🐳 Docker 통합 시스템 사용법 (권장)
 
+> 🏗️ **완전한 Docker 아키텍처**: Base Image → 개별 Transformer 버전 컨테이너 → 통합 시스템 → 프로덕션 환경
+> 
+> 📖 **자세한 내용**: [Docker 사용 가이드](DOCKER_USAGE_GUIDE.md) | [Docker Usage Guide (EN)](DOCKER_USAGE_GUIDE_EN.md)
+
 #### 대화형 모드
 ```bash
 # Docker 컨테이너 실행하고 대화형 모드로 진입

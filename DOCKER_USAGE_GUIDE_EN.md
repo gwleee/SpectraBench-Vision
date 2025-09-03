@@ -2,30 +2,29 @@
 
 ## 🎯 System Overview
 
-SpectraBench-Vision is a **Docker-in-Docker integrated system** designed for **reproducibility and ease of use**:
+SpectraBench-Vision is a **Docker-based VLM evaluation system** designed for **reproducibility and ease of use**:
 
-- **Integrated Image**: Complete 30-model VLM evaluation system with single download
-- **Automatic Container Management**: Pulls/starts/stops individual transformer version containers as needed
-- **Docker-in-Docker**: Complete isolation with multi-version support
+- **Multi-Container System**: Independent containers for each transformer version
+- **DockerOrchestrator**: Intelligent automatic container management system
+- **Docker-in-Docker Support**: Complete isolation with multi-version support
 
 ## 📦 System Architecture
 
-### 🎯 Integrated System (Recommended)
+### 🔧 Complete Docker Architecture
 
-| Image | Description | Models | Usage |
-|--------|-------------|--------|-------|
-| **spectrabench-vision** | **Complete Integrated System** | **30** | **All Users** |
+SpectraBench-Vision features a layered Docker architecture:
 
-**Key Features:**
-- ✅ Docker-in-Docker architecture for complete automation
-- ✅ Automatic container pull/start/stop as needed
-- ✅ Built-in DockerOrchestrator for intelligent model management
-- ✅ Single command access to entire system
-- ✅ Automatic GPU detection and optimization
+#### 🎯 1. Base Image (Common Foundation)
+- **`spectravision-base:latest`** - Base image for all containers
+- CUDA 11.8, Python 3, VLMEvalKit basic installation
+- Common dependencies and SpectraVision codebase included
 
-### 🔧 Individual Containers (Advanced Users/Developers)
+#### 🚀 2. Integrated System (Recommended)
+- **`spectrabench-vision:latest`** - Docker-in-Docker integrated system
+- Includes DockerOrchestrator for automatic container management
+- User-friendly single entry point
 
-Managed automatically by integrated system, but can be used directly:
+#### 🔧 3. Individual Transformer Version Containers
 
 | Image | Transformers | Main Models | Purpose |
 |--------|-------------|-------------|---------|
@@ -35,18 +34,19 @@ Managed automatically by integrated system, but can be used directly:
 | **spectravision-4.49** | 4.49.0 | SmolVLM, Qwen2.5-VL | Latest models |
 | **spectravision-4.51** | 4.51.0 | Phi-4-Vision | Experimental |
 
+#### 🏭 4. Production Environment
+- **`docker-compose.prod.yml`** - Production environment orchestration
+- Uses GitHub Container Registry images (`ghcr.io/gwleee/spectravision-*`)
+- Scaling support and advanced resource management
+
 ## 📥 Image Downloads
 
-### Recommended Image
-
-| Image | Description | Models | Use Case | Download |
-|-------|-------------|--------|----------|----------|
-| **spectrabench-vision** | Integrated System | **30 models** | **General Users** | `docker pull ghcr.io/gwleee/ghcr.io/gwleee/spectrabench-vision:latest` |
-
-### Developer - Multi-Version Images
+### Available Images
 
 | Image | Transformers | Key Models | Use Case | Download |
 |-------|-------------|------------|----------|----------|
+| **spectravision-base** | Base | Common foundation | Base image | `docker build -t spectravision-base:latest -f docker/base/Dockerfile .` |
+| **spectrabench-vision** | Latest | Integrated system | Recommended | `docker build -t spectrabench-vision:latest -f docker/integrated/Dockerfile .` |
 | **spectravision-4.33** | 4.33.0 | Qwen-VL, VisualGLM | Legacy models | `docker pull ghcr.io/gwleee/spectravision-4.33:latest` |
 | **spectravision-4.37** | 4.37.2 | InternVL2, LLaVA | Stable version | `docker pull ghcr.io/gwleee/spectravision-4.37:latest` |
 | **spectravision-4.43** | 4.43.0 | Phi-3.5-Vision | Mid-range models | `docker pull ghcr.io/gwleee/spectravision-4.43:latest` |
@@ -56,81 +56,150 @@ Managed automatically by integrated system, but can be used directly:
 ### Quick Download Methods (examples)
  
 ```bash
-# Integrated system (recommended)
-docker pull ghcr.io/gwleee/ghcr.io/gwleee/spectrabench-vision:latest
+# Build integrated system (recommended)
+docker build -t spectrabench-vision:latest -f docker/integrated/Dockerfile .
 
-# Latest models only
+# Latest models (SmolVLM, Qwen2.5-VL)
 docker pull ghcr.io/gwleee/spectravision-4.49:latest
 
-# Stable versions only  
-docker pull ghcr.io/gwleee/spectravision-4.37:latest
-```
-
-## 🚀 Quick Start (1 minute)
-
-### Basic Usage
-```bash
-# 1. Start integrated system (automatic support for all 30 models)
-docker run -it --gpus all \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/ghcr.io/gwleee/spectrabench-vision:latest
-
-# 2. Interactive mode inside container
-python3 scripts/main.py --mode interactive
-```
-
-### Direct Evaluation
-```bash
-# Benchmark evaluation with specific model (one-line command)
-docker run --gpus all \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/ghcr.io/gwleee/spectrabench-vision:latest \
-  python3 scripts/main.py --mode docker \
-  --models "SmolVLM" --benchmarks "MMBench"
-```
-
-### Memory Optimization Options
-```bash
-# Latest models only (SmolVLM, Qwen2.5-VL)
-docker run -it --gpus all \
-  -e PULL_IMAGES=minimal \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/ghcr.io/gwleee/spectrabench-vision:latest
-
 # Stable versions (InternVL2, LLaVA)
-docker run -it --gpus all \
-  -e PULL_IMAGES=stable \
-  -v /var/run/docker.sock:/var/run/docker.sock \
+docker pull ghcr.io/gwleee/spectravision-4.37:latest
+
+# Build base image first
+docker build -t spectravision-base:latest -f docker/base/Dockerfile .
+
+# Download/build all images
+./scripts/build_local_images.sh
+```
+
+## 🚀 Quick Start
+
+### 🎯 Method 1: Using DockerOrchestrator (Recommended)
+
+DockerOrchestrator is an **intelligent automatic container management system** that automatically selects and manages optimal transformer version containers for each model.
+
+#### 📋 Available Modes
+- **`--mode interactive`**: Interactive model/benchmark selection
+- **`--mode batch`**: Direct command-line specification and execution
+- **`--mode test`**: Test all container status and connections
+
+#### 🎮 Interactive Mode (Recommended)
+```bash
+# 1. Start interactive mode - select all options via GUI
+python3 docker/integrated/docker_main.py --mode interactive
+```
+
+**What you can do in interactive mode:**
+- 📦 View model lists grouped by container
+- 🎯 Select individual models or batch select by all/container/preset
+- 📊 Choose from 24 benchmarks (all, korean, basic options)
+- 🎮 Multi-GPU configuration and automatic distribution
+
+#### ⚡ Batch Mode (Advanced Users)
+```bash
+# 2. Batch mode - direct command-line specification
+python3 docker/integrated/docker_main.py --mode batch \
+  --models "SmolVLM-256M" "InternVL2-2B" "Qwen2.5-VL-3B" \
+  --benchmarks "MMBench" "TextVQA" "DocVQA" \
+  --gpu-ids 0
+
+# 3. Large model evaluation with multi-GPU
+python3 docker/integrated/docker_main.py --mode batch \
+  --models "Qwen2.5-VL-32B" "Qwen2.5-VL-72B" \
+  --benchmarks "MMBench" "MMMU" \
+  --gpu-ids 0 1 2 3
+```
+
+#### 🧪 System Test
+```bash
+# 4. Check entire system status
+python3 docker/integrated/docker_main.py --mode test
+```
+
+**Test contents:**
+- 🐳 Docker connection status check
+- 🎮 GPU detection and configuration check
+- 📦 All container image availability test
+- 🚀 Container start/stop functionality test
+- ⚙️ Basic operation check within each container
+
+### Method 2: Direct Individual Container Usage
+```bash
+# Run latest model container
+docker run --gpus all -it \
   -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/ghcr.io/gwleee/spectrabench-vision:latest
+  ghcr.io/gwleee/spectravision-4.49:latest
+
+# Run evaluation inside container
+cd /workspace/VLMEvalKit
+python run.py --model SmolVLM-Instruct --data MMBench_DEV_EN --mode all
+```
+
+### Method 3: Docker Compose Usage (For Developers)
+```bash
+# Start specific version container
+docker-compose -f docker/docker-compose.yml up -d transformers-4-49
+
+# Access container for work
+docker exec -it spectravision-transformers-4-49 /bin/bash
 ```
 
 ## ⚡ Multi-GPU Usage
 
 ```bash
-# Multi-GPU utilization
-docker run -it --gpus all \
-  -e NVIDIA_VISIBLE_DEVICES=0,1,2,3 \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/ghcr.io/gwleee/spectrabench-vision:latest \
-  python3 scripts/main.py --mode docker \
+# Multi-GPU usage with DockerOrchestrator
+python3 docker/integrated/docker_main.py --mode batch \
   --models "Qwen2.5-VL-32B" "Qwen2.5-VL-72B" \
-  --benchmarks "MMBench" --gpu-ids 0 1 2 3
+  --benchmarks "MMBench" "TextVQA" \
+  --gpu-ids 0 1 2 3
+
+# Specify GPUs for individual containers
+docker run --gpus "device=0,1" -it \
+  -e NVIDIA_VISIBLE_DEVICES=0,1 \
+  -v $(pwd)/outputs:/workspace/outputs \
+  ghcr.io/gwleee/spectravision-4.49:latest
 ```
 
 ## 🛠️ Advanced Configuration
 
-### Docker Compose Usage (For Developers)
+### 🏭 Production Docker Compose Usage
 ```bash
-# Start specific versions only
+# Production environment - Start all containers
+docker-compose -f docker/docker-compose.prod.yml --profile all up -d
+
+# Start specific profile only (latest models only)
 docker-compose -f docker/docker-compose.prod.yml --profile latest up -d
+
+# Multi-GPU configuration
+GPU_COUNT=4 NVIDIA_VISIBLE_DEVICES=0,1,2,3 \
+  docker-compose -f docker/docker-compose.prod.yml --profile all up -d
+
+# Scaling support (start 3 instances of transformers-4-37)
+docker-compose -f docker/docker-compose.prod.yml --profile stable up -d --scale transformers-4-37=3
+
+# Download all production images
+docker-compose -f docker/docker-compose.prod.yml pull
+```
+
+### 🔧 Development Docker Compose Usage
+```bash
+# Development environment - Start specific versions only
+docker-compose -f docker/docker-compose.yml up -d transformers-4-49
 
 # Direct container usage
 docker run --gpus all -it ghcr.io/gwleee/spectravision-4.49:latest
+```
+
+### 🛠️ Building from Base Image
+```bash
+# Build base image
+docker build -t spectravision-base:latest -f docker/base/Dockerfile .
+
+# Build specific transformer version (requires base image)
+docker build -t spectravision-4.49:latest -f docker/transformers-4.49/Dockerfile .
+
+# Build integrated system
+docker build -t spectrabench-vision:latest -f docker/integrated/Dockerfile .
 ```
 
 ## 🛠️ Troubleshooting
@@ -157,52 +226,65 @@ docker volume prune -f
 
 ## 🎉 System Verification
 
-### Success Test
+### System Test
 ```bash
-# 1. Basic system test
-docker run --rm --gpus all \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  ghcr.io/gwleee/spectrabench-vision:latest \
-  python3 scripts/main.py --mode test
+# 1. DockerOrchestrator system test
+python3 docker/integrated/docker_main.py --mode test
 
-# 2. GPU and Docker connection check
+# 2. Individual container basic functionality check
 docker run --rm --gpus all \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  ghcr.io/gwleee/spectrabench-vision:latest \
-  python3 -c "import torch; import docker; print(f'✅ CUDA: {torch.cuda.is_available()}'); print('✅ Docker: Connected'); print('🎯 SpectraBench-Vision ready!')"
+  ghcr.io/gwleee/spectravision-4.49:latest \
+  python -c "
+import torch
+print(f'CUDA available: {torch.cuda.is_available()}')
+print(f'GPU Count: {torch.cuda.device_count()}')
+print('SpectraVision container ready!')
+"
+
+# 3. Quick evaluation test (SmolVLM + MMBench)
+python3 docker/integrated/docker_main.py --mode batch \
+  --models "SmolVLM-256M" \
+  --benchmarks "MMBench" \
+  --gpu-ids 0
 ```
 
 ### Expected Results
 ```
-✅ CUDA: True
-✅ GPU Count: 4
-✅ Docker: Connected
-🎯 SpectraBench-Vision integrated system ready!
+SpectraBench-Vision Docker System Test
+==================================================
+Testing Docker connectivity...
+SUCCESS: Docker client initialized successfully
+GPU Configuration: 1 GPU(s) detected
 
-📦 Pulling transformer version images...
-✅ spectravision-4.49:latest ready
-🎯 30 models, 24 benchmarks, 720 evaluation combinations available!
+Testing 5 container images...
+
+Testing transformers_4_49...
+SUCCESS: Image available
+   Starting container...
+   SUCCESS: Container started
+   SUCCESS: Basic functionality test passed
+   SUCCESS: GPU test: CUDA available: True
+   SUCCESS: Container stopped
+
+SUCCESS: All system tests passed! System is ready for evaluation.
 ```
 
 ---
 
-## 🎊 Success! Complete Integrated System Ready
+## 🎊 Success! SpectraBench-Vision System Ready
 
-**🎯 Congratulations!** SpectraBench-Vision integrated Docker system has been successfully set up!
+**🎯 Congratulations!** SpectraBench-Vision Docker system has been successfully set up!
 
 ### ✨ What you can do now:
-- 🚀 **1-minute start**: Complete 30-model system with single command
-- 🤖 **Full automation**: Optimal container auto-selection and management
+- 🚀 **Automated Container Management**: DockerOrchestrator automatically selects optimal containers per model
+- 🤖 **30 Model Support**: Evaluate all models across 5 transformer versions
 - 📈 **Scalability**: Easy addition of new models/versions
 - 🔧 **Reproducibility**: Identical evaluation environment anywhere
 
 ### 🎯 Next Steps:
 ```bash
-# Start powerful VLM evaluation with integrated system!
-docker run -it --gpus all \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectrabench-vision:latest
+# Start powerful VLM evaluation with DockerOrchestrator!
+python3 docker/integrated/docker_main.py --mode interactive
 ```
 
 **Happy Evaluating! 🚀✨**

@@ -67,6 +67,10 @@ The Large-scale AI Research Center officially launched in March 2024, building u
 
 ### 🐳 Docker Integrated System Usage (Recommended)
 
+> 🏗️ **Complete Docker Architecture**: Base Image → Individual Transformer Version Containers → Integrated System → Production Environment
+> 
+> 📖 **Detailed Guide**: [Docker Usage Guide](DOCKER_USAGE_GUIDE_EN.md) | [Docker 사용 가이드 (KR)](DOCKER_USAGE_GUIDE.md)
+
 #### Interactive Mode
 ```bash
 # Run Docker container and enter interactive mode
