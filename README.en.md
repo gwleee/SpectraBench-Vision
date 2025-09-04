@@ -10,6 +10,12 @@
 
 **SpectraBench-Vision** is a **Docker-based integrated VLM evaluation system** developed by **KISTI Large-scale AI Research Center**.
 
+### 🏛️ Development Background
+
+**SpectraBench-Vision** developed by the **KISTI Large-scale AI Research Center AI Platform Team** provides model-benchmark combinations based on GPU resources along with comprehensive performance monitoring and analysis capabilities.
+
+The Large-scale AI Research Center officially launched in March 2024 and is based on KISTI's generative large language model 'KONI (KISTI Open Natural Intelligence)' released in December 2023. **The AI Platform Team is responsible for developing AI model and agent service technologies**, and SpectraBench-Vision demonstrates the research center's efforts to build sophisticated evaluation frameworks for the research community.
+
 ### 🤔 Why do we need this system?
 
 Vision-Language models require different `transformers` versions:

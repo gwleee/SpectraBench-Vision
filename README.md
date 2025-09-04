@@ -10,6 +10,12 @@
 
 **SpectraBench-Vision**은 **KISTI 초거대AI연구센터**에서 개발한 **Docker 기반 통합 VLM 평가 시스템**입니다.
 
+### 🏛️ 개발 배경
+
+**KISTI 초거대AI연구센터 AI플랫폼팀**에서 개발한 SpectraBench-Vision은 GPU 자원에 따른 모델-벤치마크 조합 제공과 종합적인 성능 모니터링 및 분석 기능을 제공합니다.
+
+초거대AI연구센터는 2024년 3월 공식 출범하였으며, 2023년 12월 공개된 KISTI의 생성형 대규모 언어모델 'KONI(KISTI Open Natural Intelligence)'를 기반으로 합니다. **AI 플랫폼팀은 AI 모델 및 에이전트 서비스 기술 개발을 담당**하며, SpectraBench-Vision은 연구 커뮤니티를 위한 정교한 평가 프레임워크 구축에 대한 연구 센터의 노력을 보여줍니다.
+
 ### 🤔 왜 이 시스템이 필요한가요?
 
 Vision-Language 모델들은 각기 다른 `transformers` 버전을 요구합니다:
