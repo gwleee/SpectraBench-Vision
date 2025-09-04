@@ -46,7 +46,7 @@ RUN pip install \
 
 # Set container identifier
 ENV CONTAINER_VERSION="transformers-4.37"
-ENV CONTAINER_MODELS="InternVL2-2B,llava_v1.5_7b,cogvlm-chat,XComposer2,mPLUG-Owl2"
+ENV CONTAINER_MODELS="InternVL2-2B,MiniCPM-V-2_6,llava_v1.5_7b,cogvlm-chat,InternVL2-8B,XComposer2,mPLUG-Owl2,llava_v1.5_13b"
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \

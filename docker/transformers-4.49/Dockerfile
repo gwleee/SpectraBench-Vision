@@ -25,7 +25,7 @@ RUN pip install --force-reinstall numpy==1.26.4
 
 # Set container identifier
 ENV CONTAINER_VERSION="transformers-4.49"
-ENV CONTAINER_MODELS="SmolVLM-Instruct,Qwen2.5-VL-3B-Instruct,Aria,pixtral"
+ENV CONTAINER_MODELS="SmolVLM-256M,SmolVLM-500M,SmolVLM,Qwen2.5-VL-3B-Instruct,Aria,Qwen2.5-VL-7B-Instruct,Pixtral-12B,Qwen2.5-VL-32B-Instruct,Qwen2.5-VL-72B-Instruct"
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \

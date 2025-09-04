@@ -26,7 +26,7 @@ RUN pip install --force-reinstall numpy==1.26.4
 
 # Set container identifier
 ENV CONTAINER_VERSION="transformers-4.51"
-ENV CONTAINER_MODELS="Phi-4-Vision,Latest-Experimental-Models"
+ENV CONTAINER_MODELS="Phi-4-Vision,Llama-4-Scout-17B-16E-Instruct"
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \

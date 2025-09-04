@@ -29,7 +29,7 @@ RUN pip install \
 
 # Set container identifier
 ENV CONTAINER_VERSION="transformers-4.33"
-ENV CONTAINER_MODELS="qwen_chat,visualglm,monkey,instructblip_13b,pandagpt_13b"
+ENV CONTAINER_MODELS="VisualGLM_6b,Qwen2-VL-2B-Instruct,qwen_chat,mPLUG-Owl2,monkey,XComposer2,idefics_9b_instruct,instructblip_13b,PandaGPT_13B"
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
