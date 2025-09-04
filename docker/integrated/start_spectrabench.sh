@@ -17,7 +17,9 @@ echo "✅ Docker daemon ready"
 # Log in to GitHub Container Registry if credentials provided
 if [ -n "$GITHUB_TOKEN" ]; then
     echo "🔐 Logging in to GitHub Container Registry..."
-    echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_USERNAME" --password-stdin
+    # Use default username if GITHUB_USERNAME not set
+    GITHUB_USER="${GITHUB_USERNAME:-gwleee}"
+    echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_USER" --password-stdin
 fi
 
 # Check GPU availability
@@ -48,9 +50,9 @@ fi
 echo "🎯 SpectraBench-Vision is ready!"
 echo ""
 echo "Usage Options:"
-echo "1. Interactive Mode: python3 scripts/main.py"
-echo "2. Docker Mode: python3 scripts/main.py --mode docker"
-echo "3. Test Mode: python3 scripts/main.py --mode test"
+echo "1. Interactive Mode: python3 scripts/docker_main.py --mode interactive"
+echo "2. Batch Mode: python3 scripts/docker_main.py --mode batch --models MODEL --benchmarks BENCHMARK"
+echo "3. Test Mode: python3 scripts/docker_main.py --mode test"
 echo ""
 
 # If no command specified, start interactive shell

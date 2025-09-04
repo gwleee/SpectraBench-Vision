@@ -409,16 +409,33 @@ class DockerOrchestrator:
         self.logger.info("Cleaning up Docker containers...")
         
         try:
+            # Stop all profiles to ensure all containers are cleaned up
             subprocess.run([
                 'docker-compose',
                 '-f', 'docker/docker-compose.yml',
+                '--profile', 'all',
                 'down'
             ], cwd=Path.cwd(), check=True)
             
             self.logger.info("All containers stopped successfully")
             
         except subprocess.CalledProcessError as e:
-            self.logger.error(f"Failed to cleanup containers: {e}")
+            self.logger.error(f"Failed to cleanup containers with docker-compose: {e}")
+            
+            # Fallback: try to stop containers individually
+            self.logger.info("Attempting individual container cleanup...")
+            try:
+                running_containers = self.docker_client.containers.list()
+                for container in running_containers:
+                    if container.name.startswith('spectravision-'):
+                        self.logger.info(f"Stopping container: {container.name}")
+                        container.stop()
+                        container.remove()
+                        
+                self.logger.info("Individual container cleanup completed")
+                        
+            except Exception as fallback_error:
+                self.logger.error(f"Fallback cleanup also failed: {fallback_error}")
         
         self.containers.clear()
     
