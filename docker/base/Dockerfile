@@ -33,73 +33,58 @@ RUN python -m pip install --upgrade pip setuptools wheel
 # Create workspace directory
 WORKDIR /workspace
 
-# Install common Python dependencies (version-agnostic)
+# Install common Python dependencies (version pinned for reproducibility)
 RUN pip install \
     torch==2.1.2 \
     torchvision==0.16.2 \
     numpy==1.26.4 \
-    pillow \
-    requests \
-    tqdm \
-    pandas \
-    matplotlib \
-    seaborn \
-    opencv-python \
-    accelerate \
-    bitsandbytes \
-    peft \
-    validators
+    pillow==10.0.1 \
+    requests==2.31.0 \
+    tqdm==4.66.1 \
+    pandas==2.1.4 \
+    matplotlib==3.8.2 \
+    seaborn==0.13.0 \
+    opencv-python==4.8.1.78 \
+    accelerate==0.25.0 \
+    bitsandbytes==0.41.3 \
+    peft==0.7.1 \
+    validators==0.22.0
 
 # Copy SpectraVision codebase
 COPY spectravision/ /workspace/spectravision/
 COPY configs/ /workspace/configs/
 COPY scripts/ /workspace/scripts/
+COPY patches/ /workspace/patches/
 
-# Copy VLMEvalKit (mounted as volume in dev, copied to image for prod)
-COPY VLMEvalKit/ /workspace/VLMEvalKit/
+# Note: VLMEvalKit will be copied by individual transformer version containers
+# This base image focuses on common dependencies only
 
-# Install VLMEvalKit required dependencies first
+# Install VLMEvalKit required dependencies (avoiding duplicates with common deps)
 RUN pip install \
-    python-dotenv \
-    rich \
-    tabulate \
-    tqdm \
-    PyYAML \
-    requests \
-    pandas \
-    matplotlib \
-    seaborn \
+    python-dotenv==1.0.0 \
+    rich==13.7.0 \
+    tabulate==0.9.0 \
+    PyYAML==6.0.1 \
     scikit-learn==1.2.2 \
-    scipy \
-    datasets \
-    huggingface-hub \
-    safetensors \
-    protobuf \
-    sentencepiece \
-    timm \
-    omegaconf \
-    nltk \
-    imageio \
-    openpyxl \
-    portalocker \
-    tiktoken \
-    timeout-decorator \
-    xlsxwriter \
-    openai \
-    json-repair \
-    ipdb \
-    sty \
-    qwen-vl-utils
+    scipy==1.11.4 \
+    datasets==2.15.0 \
+    huggingface-hub==0.19.4 \
+    safetensors==0.4.1 \
+    timm==0.9.12 \
+    omegaconf==2.3.0 \
+    nltk==3.8.1 \
+    imageio==2.33.1 \
+    openpyxl==3.1.2 \
+    portalocker==2.8.2 \
+    timeout-decorator==0.5.0 \
+    xlsxwriter==3.1.9 \
+    openai==1.6.1 \
+    json-repair==0.7.0 \
+    ipdb==0.13.13 \
+    sty==1.0.6 \
+    qwen-vl-utils==0.0.3
 
-# Install VLMEvalKit after all dependencies are ready
-WORKDIR /workspace/VLMEvalKit
-RUN pip install -e .
-
-# Remove conflicting packages that VLMEvalKit auto-installed
-RUN pip uninstall -y google-genai
-
-# Fix NumPy compatibility issues (downgrade to 1.x)
-RUN pip install --force-reinstall numpy==1.26.4
+# VLMEvalKit installation will be handled by individual transformer version containers
 
 # Create output directories
 WORKDIR /workspace

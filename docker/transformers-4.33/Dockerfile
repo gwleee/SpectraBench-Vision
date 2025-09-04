@@ -2,34 +2,27 @@
 # Supports legacy models: Qwen, VisualGLM, early mPLUG-Owl2, etc.
 FROM spectravision-base:latest
 
-# Install transformers 4.33.0 and compatible dependencies
-RUN pip install \
-    transformers==4.33.0 \
-    tokenizers==0.13.3 \
-    timm==0.6.13 \
-    sentencepiece==0.1.99 \
-    protobuf==3.20.3
+# Copy version-specific VLMEvalKit (with appropriate patches already applied)
+COPY VLMEvalKit-4.33/ /workspace/VLMEvalKit/
 
-# Install model-specific dependencies
-RUN pip install \
-    einops \
-    xformers
+# Copy and install requirements
+COPY requirements.txt /tmp/requirements.txt  
+RUN pip install -r /tmp/requirements.txt
 
-# Fix NumPy compatibility issues (ensure 1.x after xformers install)
+# Install VLMEvalKit with transformers 4.33 compatibility
+WORKDIR /workspace/VLMEvalKit
+RUN pip install -e .
+WORKDIR /workspace
+
+# Install xformers separately (may fail on some GPU architectures)
+RUN pip install xformers==0.0.22 || echo "⚠️ xformers installation failed, continuing without it"
+
+# Fix NumPy compatibility issues (ensure 1.x after package installs)
 RUN pip install --force-reinstall numpy==1.26.4
-
-# Qwen-VL specific dependencies
-RUN pip install \
-    tiktoken \
-    charset-normalizer
-
-# VisualGLM specific dependencies
-RUN pip install \
-    icetk
 
 # Set container identifier
 ENV CONTAINER_VERSION="transformers-4.33"
-ENV CONTAINER_MODELS="VisualGLM_6b,Qwen2-VL-2B-Instruct,qwen_chat,mPLUG-Owl2,monkey,XComposer2,idefics_9b_instruct,instructblip_13b,PandaGPT_13B"
+ENV CONTAINER_MODELS="VisualGLM_6b,qwen_chat,mPLUG-Owl2,monkey,XComposer2,idefics_9b_instruct,instructblip_13b,PandaGPT_13B"
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \

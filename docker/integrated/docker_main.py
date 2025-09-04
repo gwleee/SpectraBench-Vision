@@ -33,17 +33,17 @@ def main():
     orchestrator = DockerOrchestrator()
     
     if args.mode == "test":
-        print("🧪 Running system tests...")
+        print("Running system tests...")
         orchestrator.test_system()
     elif args.mode == "interactive":
-        print("🎮 Starting interactive mode...")
+        print("Starting interactive mode...")
         orchestrator.interactive_mode()
     elif args.mode == "batch":
         if not args.models or not args.benchmarks:
-            print("❌ Batch mode requires --models and --benchmarks")
+            print("Error: Batch mode requires --models and --benchmarks")
             sys.exit(1)
         
-        print(f"🚀 Running batch evaluation:")
+        print(f"Running batch evaluation:")
         print(f"   Models: {args.models}")
         print(f"   Benchmarks: {args.benchmarks}")
         
@@ -53,7 +53,7 @@ def main():
             gpu_ids=args.gpu_ids
         )
         
-        print(f"✅ Completed {len(results)} evaluations")
+        print(f"Completed {len(results)} evaluations")
 
 if __name__ == "__main__":
     main()

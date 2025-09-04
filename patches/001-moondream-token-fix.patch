@@ -1,0 +1,29 @@
+--- a/vlmeval/vlm/moondream.py
++++ b/vlmeval/vlm/moondream.py
+@@ -1,4 +1,5 @@
+ import torch
++import os
+ import re
+ from PIL import Image
+ from abc import abstractproperty
+@@ -115,14 +116,18 @@ class Moondream2(BaseModel):
+ 
+         assert osp.exists(model_path) or splitlen(model_path) == 2
+ 
++        # Get HuggingFace token from environment
++        token = os.getenv('HUGGING_FACE_HUB_TOKEN') or os.getenv('HF_TOKEN')
++        token_kwargs = {'token': token} if token else {}
++
+         self.model = AutoModelForCausalLM.from_pretrained(
+             model_path,
+             trust_remote_code=True,
+             torch_dtype=torch.float16,
+             device_map={"": "cuda"},
+             revision=revision,
++            **token_kwargs,
+         )
+ 
+-        self.tokenizer = AutoTokenizer.from_pretrained(model_path)
++        self.tokenizer = AutoTokenizer.from_pretrained(model_path, **token_kwargs)
+ 
+         default_kwargs = dict(max_new_tokens=512)

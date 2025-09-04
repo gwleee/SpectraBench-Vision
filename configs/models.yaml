@@ -1,5 +1,6 @@
 # SpectraVision Docker Multi-Version Model Configuration
 # Separates models by transformer version requirements to avoid dependency conflicts
+# Note: Models marked with 'token_required: true' need Hugging Face API token in .env file
 
 # Current single-environment configuration (keep as reference)
 transformers_4_37:
@@ -10,10 +11,14 @@ transformers_4_37:
     - name: "InternVL2-2B"
       vlm_id: "InternVL2-2B"
       memory_gb: 8
+      token_required: true
+      note: "Gated model - requires Hugging Face API token"
       
     - name: "MiniCPM-V-2_6"
       vlm_id: "MiniCPM-V-2_6"
       memory_gb: 12
+      token_required: true
+      note: "Gated model - requires Hugging Face API token"
       
     # Medium models (4-10B)
     - name: "LLaVA-1.5-7B"
@@ -27,14 +32,16 @@ transformers_4_37:
     - name: "InternVL2-8B"
       vlm_id: "InternVL2-8B"
       memory_gb: 30
+      token_required: true
+      note: "Gated model - requires Hugging Face API token"
       
-    - name: "InternLM-XComposer2-VL"
-      vlm_id: "XComposer2"
-      memory_gb: 26
+    - name: "ShareGPT4V-7B"
+      vlm_id: "sharegpt4v_7b"
+      memory_gb: 25
       
-    - name: "mPLUG-Owl2"
-      vlm_id: "mPLUG-Owl2"
-      memory_gb: 26
+    - name: "MMAlaya2"
+      vlm_id: "MMAlaya2"
+      memory_gb: 30
       
     # Large models (>10B)
     - name: "LLaVA-1.5-13B"
@@ -51,14 +58,14 @@ transformers_4_33:
       vlm_id: "VisualGLM_6b"
       memory_gb: 18
       
-    - name: "Qwen2-VL-2B"
-      vlm_id: "Qwen2-VL-2B-Instruct"
-      memory_gb: 8
+    # Qwen2-VL-2B moved to transformers_4_49 for proper compatibility
       
     # Medium models (7-9B)
     - name: "Qwen-VL-Chat"
       vlm_id: "qwen_chat"
       memory_gb: 25
+      token_required: true
+      note: "Gated model - requires Hugging Face API token"
       
     - name: "mPLUG-Owl2-7B"
       vlm_id: "mPLUG-Owl2"
@@ -94,10 +101,14 @@ transformers_4_43:
     - name: "Phi-3.5-Vision"
       vlm_id: "Phi-3.5-Vision"
       memory_gb: 18
+      token_required: true
+      note: "Gated model - requires Hugging Face API token"
       
     - name: "Moondream2"
       vlm_id: "Moondream2"
       memory_gb: 8
+      token_required: true
+      note: "Gated model - requires Hugging Face API token"
 
 # Latest generation models
 transformers_4_49:
@@ -108,19 +119,33 @@ transformers_4_49:
     - name: "SmolVLM-256M"
       vlm_id: "SmolVLM-256M"
       memory_gb: 3
+      token_required: true
+      note: "Gated model - requires Hugging Face API token"
       
     - name: "SmolVLM-500M"
       vlm_id: "SmolVLM-500M"
       memory_gb: 4
+      token_required: true
+      note: "Gated model - requires Hugging Face API token"
       
     - name: "SmolVLM-1.7B"
       vlm_id: "SmolVLM"
       memory_gb: 8
+      token_required: true
+      note: "Gated model - requires Hugging Face API token"
       
-    # Small models
+    # Small models (including relocated Qwen2-VL-2B)
+    - name: "Qwen2-VL-2B"
+      vlm_id: "Qwen2-VL-2B-Instruct"
+      memory_gb: 8
+      token_required: true
+      note: "Gated model - requires Hugging Face API token (relocated from 4.33 for compatibility)"
+      
     - name: "Qwen2.5-VL-3B"
       vlm_id: "Qwen2.5-VL-3B-Instruct"
       memory_gb: 12
+      token_required: true
+      note: "Gated model - requires Hugging Face API token"
       
     - name: "Aria-3.9B"
       vlm_id: "Aria"
@@ -130,10 +155,14 @@ transformers_4_49:
     - name: "Qwen2.5-VL-7B"
       vlm_id: "Qwen2.5-VL-7B-Instruct"
       memory_gb: 30
+      token_required: true
+      note: "Gated model - requires Hugging Face API token"
       
     - name: "Pixtral-12B"
       vlm_id: "Pixtral-12B"
       memory_gb: 40
+      token_required: true
+      note: "Gated model - requires Hugging Face API token"
       
     # Large models (multi-GPU recommended)
     - name: "Qwen2.5-VL-32B"
@@ -141,12 +170,16 @@ transformers_4_49:
       memory_gb: 140
       multi_gpu_recommended: true
       min_gpu_count: 2
+      token_required: true
+      note: "Gated model - requires Hugging Face API token"
       
     - name: "Qwen2.5-VL-72B"
       vlm_id: "Qwen2.5-VL-72B-Instruct"
       memory_gb: 300
       multi_gpu_required: true
       min_gpu_count: 4
+      token_required: true
+      note: "Gated model - requires Hugging Face API token"
 
 # Cutting-edge models
 transformers_4_51:
@@ -157,6 +190,8 @@ transformers_4_51:
     - name: "Phi-4-Vision"
       vlm_id: "Phi-4-Vision"
       memory_gb: 45
+      token_required: true
+      note: "Gated model - requires Hugging Face API token"
       
     # Ultra-large MoE models (multi-GPU required)
     - name: "Llama-4-Scout"
@@ -164,6 +199,8 @@ transformers_4_51:
       memory_gb: 200
       multi_gpu_required: true
       min_gpu_count: 4
+      token_required: true
+      note: "Gated model - requires Hugging Face API token"
       
     # Note: Some experimental ultra-large models removed due to VLMEvalKit compatibility
     # These models can be added back when VLMEvalKit adds support:

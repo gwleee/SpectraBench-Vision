@@ -1,0 +1,42 @@
+--- a/vlmeval/vlm/smolvlm.py
++++ b/vlmeval/vlm/smolvlm.py
+@@ -1,4 +1,5 @@
+ import torch
++import os
+ import os.path as osp
+ import warnings
+ from .base import BaseModel
+@@ -18,9 +19,14 @@ class SmolVLM(BaseModel):
+ 
+         assert osp.exists(model_path) or splitlen(model_path) == 2
+ 
+-        self.processor = AutoProcessor.from_pretrained(model_path)
++        # Get HuggingFace token from environment
++        token = os.getenv('HUGGING_FACE_HUB_TOKEN') or os.getenv('HF_TOKEN')
++        token_kwargs = {'token': token} if token else {}
++
++        self.processor = AutoProcessor.from_pretrained(model_path, **token_kwargs)
+         self.model = Idefics3ForConditionalGeneration.from_pretrained(
+-            model_path, torch_dtype=torch.float32, device_map="cuda"
++            model_path, torch_dtype=torch.float32, device_map="cuda",
++            **token_kwargs,
+         )
+         kwargs_default = {"max_new_tokens": 2048, "use_cache": True}
+         kwargs_default.update(kwargs)
+@@ -370,7 +376,11 @@ class SmolVLM2(BaseModel):
+         else:
+             raise ValueError(f"Unknown model {model_path}, cannot determine resolution")
+ 
+-        self.processor = AutoProcessor.from_pretrained(model_path)
++        # Get HuggingFace token from environment
++        token = os.getenv('HUGGING_FACE_HUB_TOKEN') or os.getenv('HF_TOKEN')
++        token_kwargs = {'token': token} if token else {}
++
++        self.processor = AutoProcessor.from_pretrained(model_path, **token_kwargs)
+         self.model = AutoModelForImageTextToText.from_pretrained(
+             model_path,
+             torch_dtype=torch.float32,
++            **token_kwargs,
+         ).to("cuda")
+ 
+         kwargs_default = {"max_new_tokens": 2048, "do_sample": False, "use_cache": True}

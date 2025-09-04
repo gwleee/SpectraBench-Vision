@@ -1,0 +1,20 @@
+# SpectraVision Container for transformers==4.33.0
+# Supports legacy models: Qwen, VisualGLM, early mPLUG-Owl2, etc.
+
+# Core transformers and compatible dependencies
+transformers==4.33.0
+tokenizers==0.13.3
+timm==0.6.13
+sentencepiece==0.1.99
+protobuf==3.20.3
+
+# Model-specific dependencies
+einops==0.7.0
+xformers==0.0.22
+
+# Qwen-VL specific dependencies  
+tiktoken==0.5.2
+charset-normalizer==3.3.2
+
+# VisualGLM specific dependencies
+icetk==0.0.7

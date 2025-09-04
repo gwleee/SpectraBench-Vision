@@ -2,24 +2,17 @@
 # Supports cutting-edge models: Latest updates and experimental features
 FROM spectravision-base:latest
 
-# Install latest transformers and compatible dependencies
-RUN pip install \
-    transformers==4.51.0 \
-    tokenizers==0.21.4 \
-    timm==1.0.11 \
-    sentencepiece==0.2.0 \
-    protobuf==5.28.3
+# Copy version-specific VLMEvalKit (with Phi-4-Vision and Llama-4-Scout patches applied)
+COPY VLMEvalKit-4.51/ /workspace/VLMEvalKit/
 
-# Install essential dependencies for latest models
-RUN pip install \
-    einops \
-    tiktoken \
-    accelerate
+# Copy and install requirements
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt
 
-# Additional utilities for cutting-edge models
-RUN pip install \
-    diffusers \
-    optimum
+# Install VLMEvalKit with transformers 4.51 compatibility
+WORKDIR /workspace/VLMEvalKit
+RUN pip install -e .
+WORKDIR /workspace
 
 # Fix NumPy compatibility issues (ensure 1.x compatibility)
 RUN pip install --force-reinstall numpy==1.26.4

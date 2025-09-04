@@ -2,23 +2,20 @@
 # Supports mid-range models: Phi-3.5-Vision, updated InternVL2, etc.
 FROM spectravision-base:latest
 
-# Install transformers 4.43.0 and compatible dependencies
-RUN pip install \
-    transformers==4.43.0 \
-    tokenizers==0.19.1 \
-    timm==0.9.12 \
-    sentencepiece==0.1.99 \
-    protobuf==4.25.1
+# Copy version-specific VLMEvalKit (with Moondream2 and Phi-3.5-Vision patches applied)
+COPY VLMEvalKit-4.43/ /workspace/VLMEvalKit/
 
-# Install essential model dependencies
-RUN pip install \
-    einops \
-    tiktoken
+# Copy and install requirements
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt
 
-# Phi-3.5-Vision specific dependencies
-RUN pip install \
-    flash-attn \
-    || echo "flash-attn installation failed, continuing without it"
+# Install VLMEvalKit with transformers 4.43 compatibility
+WORKDIR /workspace/VLMEvalKit
+RUN pip install -e .
+WORKDIR /workspace
+
+# Phi-3.5-Vision specific dependencies (optional)
+RUN pip install flash-attn==2.5.0 || echo "⚠️ flash-attn installation failed, continuing without it"
 
 # Fix NumPy compatibility issues (ensure 1.x after package installs)
 RUN pip install --force-reinstall numpy==1.26.4

@@ -1121,7 +1121,7 @@ def build_production_containers():
         import subprocess
         
         # Build base image first
-        print("📦 Building base image...")
+        print("Building base image...")
         cmd = [
             'docker', 'build',
             '-t', 'spectravision-base:latest',
@@ -1133,7 +1133,7 @@ def build_production_containers():
         
         # Build each container
         for container in containers:
-            print(f"📦 Building {container}...")
+            print(f"Building {container}...")
             cmd = [
                 'docker-compose',
                 '-f', 'docker/docker-compose.yml',
@@ -1198,7 +1198,7 @@ def run_container_specific_test(evaluator):
 
 def run_model_specific_test(evaluator):
     """Run evaluation on specific models"""
-    print("\n🤖 Model-Specific Test")
+    print("\nModel-Specific Test")
     print("Popular models:")
     print("1. InternVL2-2B (transformers 4.37)")
     print("2. SmolVLM-1.7B (transformers 4.49)")
@@ -1245,7 +1245,7 @@ def show_evaluation_plan(evaluator):
         version = items[0]['transformer_version']
         models = set(item['model_name'] for item in items)
         benchmarks = set(item['benchmark_name'] for item in items)
-        print(f"\n📦 {container_name} (v{version}):")
+        print(f"\n{container_name} (v{version}):")
         print(f"   Models: {len(models)}")
         print(f"   Benchmarks: {len(benchmarks)}")
         print(f"   Total evaluations: {len(items)}")
@@ -1281,7 +1281,7 @@ def print_multi_version_results(results):
         total = stats.get('total_evaluations', 0)
         models_tested = len(stats.get('models_tested', []))
         
-        print(f"  📦 {container_name} (v{version}):")
+        print(f"  {container_name} (v{version}):")
         print(f"    Success Rate: {success_rate:.1f}%")
         print(f"    Evaluations: {successful}/{total}")
         print(f"    Models Tested: {models_tested}")

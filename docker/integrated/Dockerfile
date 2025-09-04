@@ -36,6 +36,10 @@ RUN python3 -m pip install --upgrade pip setuptools wheel
 COPY . /workspace
 WORKDIR /workspace
 
+# Note: Integrated system uses individual transformer version containers
+# Each container has its own version-specific VLMEvalKit with appropriate patches
+# This orchestrator container only manages Docker-in-Docker functionality
+
 # Install Python dependencies for orchestrator
 RUN pip3 install \
     pyyaml \

@@ -34,6 +34,13 @@ services:
       - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0}
     shm_size: ${SHM_SIZE_LEGACY:-8gb}
     profiles: ["legacy", "all"]
+    networks:
+      - spectravision
+    healthcheck:
+      test: ["CMD", "python", "-c", "import transformers; print(f'Transformers {transformers.__version__} ready!')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # Current stable models container (transformers 4.37.2)
   transformers-4-37:
@@ -44,6 +51,13 @@ services:
       - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0,1}
     shm_size: ${SHM_SIZE_STABLE:-16gb}
     profiles: ["stable", "all"]
+    networks:
+      - spectravision
+    healthcheck:
+      test: ["CMD", "python", "-c", "import transformers; print(f'Transformers {transformers.__version__} ready!')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # Mid-range modern models container (transformers 4.43.0)
   transformers-4-43:
@@ -54,6 +68,13 @@ services:
       - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0,1,2}
     shm_size: ${SHM_SIZE_MODERN:-8gb}
     profiles: ["modern", "all"]
+    networks:
+      - spectravision
+    healthcheck:
+      test: ["CMD", "python", "-c", "import transformers; print(f'Transformers {transformers.__version__} ready!')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # Latest models container (transformers 4.49.0)
   transformers-4-49:
@@ -64,6 +85,13 @@ services:
       - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0,1,2,3}
     shm_size: ${SHM_SIZE_LATEST:-16gb}
     profiles: ["latest", "all"]
+    networks:
+      - spectravision
+    healthcheck:
+      test: ["CMD", "python", "-c", "import transformers; print(f'Transformers {transformers.__version__} ready!')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # Cutting-edge models container (transformers 4.51.0)
   transformers-4-51:
@@ -74,6 +102,13 @@ services:
       - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-all}
     shm_size: ${SHM_SIZE_CUTTING_EDGE:-32gb}
     profiles: ["cutting-edge", "all"]
+    networks:
+      - spectravision
+    healthcheck:
+      test: ["CMD", "python", "-c", "import transformers; print(f'Transformers {transformers.__version__} ready!')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 # Named volumes for shared data - persist across container restarts
 volumes:
@@ -91,6 +126,9 @@ networks:
 
 # Usage examples:
 # ===============
+
+# Pull all images (recommended first step):
+#   docker-compose -f docker/docker-compose.prod.yml pull
 
 # Single GPU (default):
 #   docker-compose -f docker/docker-compose.prod.yml --profile stable up -d
@@ -110,14 +148,20 @@ networks:
 # Scaling support (start 3 instances of transformers-4-37):
 #   docker-compose -f docker/docker-compose.prod.yml --profile stable up -d --scale transformers-4-37=3
 
-# Pull all images:
-#   docker-compose -f docker/docker-compose.prod.yml pull
-
 # Start all containers:
 #   docker-compose -f docker/docker-compose.prod.yml --profile all up -d
+
+# System health verification:
+#   docker-compose -f docker/docker-compose.prod.yml --profile all up -d && sleep 30 && docker-compose -f docker/docker-compose.prod.yml ps
 
 # Monitor logs:
 #   docker-compose -f docker/docker-compose.prod.yml logs -f
 
+# Check health status:
+#   docker-compose -f docker/docker-compose.prod.yml ps
+
 # Enter a running container (replace service_name_1 with actual container name):
 #   docker exec -it $(docker-compose -f docker/docker-compose.prod.yml ps -q transformers-4-37 | head -1) /bin/bash
+
+# Health check individual containers:
+#   docker-compose -f docker/docker-compose.prod.yml exec transformers-4-49 python -c "import transformers; print(f'{transformers.__version__} OK')"

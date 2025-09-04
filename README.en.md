@@ -2,78 +2,65 @@
 
 > **English**: README.en.md | **한국어**: [README.md](README.md)
 
-**Complete integrated system for evaluating 30 VLM models with a single download**
+**Break free from dependency hell! Complete integrated system for evaluating 30 VLM models with a single download**
 
 ---
 
-## 📋 Overview
+## 🎯 Core Value
 
-SpectraBench-Vision is a **Docker-in-Docker based integrated VLM evaluation system** developed by **KISTI Large-scale AI Research Center**. It's designed to help researchers easily evaluate 30 cutting-edge Vision-Language models without complex environment setup.
+**SpectraBench-Vision** is a **Docker-based integrated VLM evaluation system** developed by **KISTI Large-scale AI Research Center**.
 
-## ✨ Key Features
+### 🤔 Why do we need this system?
 
-- 🚀 **1-minute setup**: Instant access to entire system with single Docker command
-- 🤖 **Full automation**: Automatic selection of optimal transformer version containers per model
-- 📦 **Complete reproducibility**: Guaranteed identical evaluation environment anywhere  
-- 🎯 **30 model support**: From SmolVLM to Qwen2.5-VL-72B, all latest models included
-- 📊 **24 benchmarks**: Support for all standard benchmarks including MMBench, TextVQA, DocVQA
-- 🔧 **GPU optimization**: Automatic optimization from single GPU to multi-GPU clusters
+Vision-Language models require different `transformers` versions:
+- **Qwen-VL** → transformers 4.33.0  
+- **LLaVA** → transformers 4.37.2
+- **SmolVLM** → transformers 4.49.0
+- **Phi-4-Vision** → transformers 4.51.0
 
-## 🚀 Usage
+**Problems with traditional approaches:**
+- ❌ Need to reinstall environment for each model
+- ❌ Dependency conflicts causing errors  
+- ❌ Non-reproducible evaluation environments
+- ❌ Complex setup and management
 
-> [Docker Usage Guide (EN)](DOCKER_USAGE_GUIDE_EN.md) | [Docker 사용 가이드](DOCKER_USAGE_GUIDE.md)
+**SpectraBench-Vision Solution:**
+- ✅ **All models with single command**
+- ✅ **Automatic dependency management** - Auto-select optimal environment per model
+- ✅ **Complete reproducibility** - Identical results anywhere
+- ✅ **30 models × 24 benchmarks = 720 combinations**
 
-## 🏛️ Development Background
+## 🚀 How It Works
 
-**SpectraBench-Vision** was developed by the **AI Platform Team at KISTI Large-scale AI Research Center**, providing intelligent model-benchmark combinations based on available GPU resources and comprehensive performance monitoring and analysis capabilities.
+```mermaid
+graph TD
+    A[🔥 User requests model] --> B{Which model?}
+    B -->|SmolVLM| C[spectravision-4.49 container runs]
+    B -->|LLaVA| D[spectravision-4.37 container runs] 
+    B -->|Qwen-VL| E[spectravision-4.33 container runs]
+    C --> F[✅ Return evaluation results]
+    D --> F
+    E --> F
+```
 
-The Large-scale AI Research Center officially launched in March 2024, building upon KISTI's generative large language model 'KONI (KISTI Open Natural Intelligence)' released in December 2023. **The AI Platform Team is responsible for developing AI model and agent service technologies**, and SpectraBench-Vision demonstrates their commitment to building sophisticated evaluation frameworks for the research community.
+**What users run**: `spectrabench-vision:latest` (integrated orchestrator)  
+**What happens internally**: Automatically runs appropriate transformer version container per model
 
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![CUDA Required](https://img.shields.io/badge/CUDA-Required-green.svg)](https://developer.nvidia.com/cuda-downloads)
+---
 
-## 📊 Supported Models and Benchmarks
+## ⚡ Quick Start
 
-### 🤖 Supported Models (30)
-
-| Transformer Version | Key Models | Memory Range | Purpose |
-|---------------------|------------|--------------|---------|
-| **4.33.0** | Qwen-VL, VisualGLM | 8GB - 48GB | Legacy models |
-| **4.37.2** | InternVL2, LLaVA | 8GB - 45GB | Stable models |
-| **4.43.0** | Phi-3.5-Vision | 8GB - 18GB | Mid-range models |
-| **4.49.0** | SmolVLM, Qwen2.5-VL | 3GB - 300GB | Latest models |
-| **4.51.0** | Phi-4-Vision | 45GB - 200GB | Experimental models |
-
-**Popular Models:**
-- **SmolVLM**: 256M, 500M, 1.7B (ultra-lightweight, 3-8GB memory)
-- **Qwen2.5-VL**: 3B, 7B, 32B, 72B (latest generation, 12GB-300GB memory)  
-- **InternVL2**: 2B, 8B (high-performance, 8GB-30GB memory)
-- **LLaVA**: 7B, 13B (stable, 25GB-45GB memory)
-
-### 📊 Supported Benchmarks (24)
-
-| Category | Key Benchmarks | Description |
-|----------|----------------|-------------|
-| **Basic VQA** | MMBench, TextVQA, GQA | Multimodal reasoning, text understanding, compositional reasoning |
-| **Document Understanding** | DocVQA, ChartQA, InfoVQA | Document QA, chart/graph understanding |
-| **Science/Professional** | ScienceQA, AI2D, MMMU | Scientific problem solving, diagram understanding |
-| **Advanced Evaluation** | HallusionBench, MMStar, RealWorldQA | Hallucination detection, real-world reasoning |
-| **Korean** | K-MMBench, K-SEED, Korean-OCR | Korean multimodal evaluation |
-
-**Total evaluation combinations: 720** (30 models × 24 benchmarks)
-
-## 🔧 Additional Usage
-
-### 🐳 Docker Integrated System Usage (Recommended)
-
-> 🏗️ **Complete Docker Architecture**: Base Image → Individual Transformer Version Containers → Integrated System → Production Environment
-> 
-> 📖 **Detailed Guide**: [Docker Usage Guide](DOCKER_USAGE_GUIDE_EN.md) | [Docker 사용 가이드 (KR)](DOCKER_USAGE_GUIDE.md)
-
-#### Interactive Mode
+### 1️⃣ **Token Setup** (30 seconds)
 ```bash
-# Run Docker container and enter interactive mode
+# Create .env file and add HF token
+cp .env.template .env
+nano .env  # HUGGING_FACE_HUB_TOKEN=hf_your_token_here
+```
+> 💡 [Generate Hugging Face Token](https://huggingface.co/settings/tokens) (Read permission)
+
+### 2️⃣ **Run Instantly** (1 minute)
+```bash
+# 🎮 Interactive mode with all 30 models
 docker run -it --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/outputs:/workspace/outputs \
@@ -81,9 +68,25 @@ docker run -it --gpus all \
   python3 scripts/docker_main.py --mode interactive
 ```
 
-#### Multi-Model Comparison
+**✅ Done!** Now you can select and evaluate any model.
+
+---
+
+## 📖 Usage Scenarios
+
+### 🎮 Interactive Mode (Recommended)
 ```bash
-# Performance comparison across multiple models
+docker run -it --gpus all \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v $(pwd)/outputs:/workspace/outputs \
+  ghcr.io/gwleee/spectrabench-vision:latest \
+  python3 scripts/docker_main.py --mode interactive
+```
+**After execution**: Select models and benchmarks from menu, automatically runs in appropriate environment.
+
+### ⚡ Batch Evaluation (Performance Comparison)
+```bash
+# Compare performance across multiple models
 docker run --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/outputs:/workspace/outputs \
@@ -93,45 +96,118 @@ docker run --gpus all \
   --benchmarks "MMBench" "TextVQA"
 ```
 
-### Memory/GPU Optimization
-
+### 🧪 System Test (Installation Check)
 ```bash
-# Use only latest models (memory saving)
-docker run -it --gpus all -e PULL_IMAGES=minimal \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  ghcr.io/gwleee/spectrabench-vision:latest
-
-# Multi-GPU utilization
-docker run -it --gpus all -e NVIDIA_VISIBLE_DEVICES=0,1,2,3 \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  ghcr.io/gwleee/spectrabench-vision:latest
-```
-
-### System Testing
-```bash
-# Installation verification and GPU testing
 docker run --rm --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/gwleee/spectrabench-vision:latest \
   python3 scripts/docker_main.py --mode test
 ```
 
-### 💻 Local Installation Usage (Development/Research)
-
+### 🎛️ GPU Optimization
 ```bash
-# Direct execution in local environment (limited to installed transformer version)
-python scripts/main.py --models "InternVL2-2B" --benchmarks "MMBench"
-python scripts/main.py --mode interactive  # Execution mode selection menu
-python scripts/main.py --mode test         # Quick compatibility test
+# Use specific GPUs
+docker run -it --gpus all -e NVIDIA_VISIBLE_DEVICES=0,1 \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  ghcr.io/gwleee/spectrabench-vision:latest
 
-# Direct execution with specific modes
-python scripts/main.py --mode single      # Single environment evaluation (transformers 4.37.2)
-python scripts/main.py --mode docker      # Docker multi-version evaluation (if Docker support available)
+# Memory saving (latest models only)
+docker run -it --gpus all -e PULL_IMAGES=minimal \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  ghcr.io/gwleee/spectrabench-vision:latest
 ```
 
-### Individual Container Direct Usage (Advanced)
+---
+
+## 🤖 Supported Models (30)
+
+| Transformer Version | Representative Models | Count | Memory Range |
+|-----------------|---------|--------|------------|
+| **4.33.0** | Qwen-VL, VisualGLM | 8 | 8GB - 48GB |
+| **4.37.2** | InternVL2, LLaVA, ShareGPT4V | 8 | 8GB - 45GB |
+| **4.43.0** | Phi-3.5-Vision, Moondream2 | 2 | 8GB - 18GB |
+| **4.49.0** | SmolVLM, Qwen2.5-VL, Pixtral | 10 | 3GB - 300GB |
+| **4.51.0** | Phi-4-Vision, Llama-4-Scout | 2 | 45GB - 200GB |
+
+**🔥 Popular Models:**
+- **SmolVLM**: 256M, 500M, 1.7B (Ultra-lightweight)
+- **Qwen2.5-VL**: 3B, 7B, 32B, 72B (Latest generation)  
+- **InternVL2**: 2B, 8B (High performance)
+- **LLaVA**: 7B, 13B (Stable)
+
+## 📊 Supported Benchmarks (24)
+
+**Total 720 evaluation combinations** (30 models × 24 benchmarks)
+
+| Category | Key Benchmarks |
+|------|-------------|
+| **Basic VQA** | MMBench, TextVQA, GQA |
+| **Document Understanding** | DocVQA, ChartQA, InfoVQA |
+| **Science/Professional** | ScienceQA, AI2D, MMMU |
+| **Advanced Evaluation** | HallusionBench, MMStar |
+| **Korean** | K-MMBench, K-SEED |
+
+---
+
+## 🔍 Troubleshooting
+
+### Common Issues
+
+**❌ "HF_TOKEN is required" Error**
 ```bash
-# Direct use of specific transformer version (for development/debugging)
+# Solution: Add token to .env file
+cp .env.template .env
+echo "HUGGING_FACE_HUB_TOKEN=hf_your_token_here" >> .env
+```
+
+**❌ GPU Memory Insufficient**
+```bash
+# Solution: Use smaller models or specify GPUs
+docker run -e NVIDIA_VISIBLE_DEVICES=0 ...  # Use only GPU 0
+```
+
+**❌ Docker Image Download Failure**
+```bash
+# Solution: Check network and manual pull
+docker pull ghcr.io/gwleee/spectrabench-vision:latest
+```
+
+---
+
+## 📊 Output Results
+
+Evaluation results are saved in `outputs/` directory with timestamps:
+
+```
+outputs/
+├── logs/                    # Execution logs
+├── reports/                 # Performance analysis reports
+├── availability_tests/      # Compatibility test results
+└── [timestamp]/            # Full evaluation results
+    ├── [model]/[benchmark]/  # VLMEvalKit outputs
+    └── performance_monitor.json  # Resource usage
+```
+
+---
+
+<details>
+<summary>🔧 Advanced Usage (For Developers)</summary>
+
+## Local Installation (Development)
+
+```bash
+# 1. Setup version-specific VLMEvalKit directories (one-time setup)
+./scripts/setup_vlmevalkit_versions.sh
+
+# 2. Direct execution in development environment (limited)
+python scripts/main.py --models "InternVL2-2B" --benchmarks "MMBench"
+python scripts/main.py --mode interactive
+```
+
+## Direct Container Usage
+
+```bash
+# Use specific transformer version directly
 docker run --gpus all -it ghcr.io/gwleee/spectravision-4.49:latest
 
 # Direct VLMEvalKit usage
@@ -139,164 +215,102 @@ cd /workspace/VLMEvalKit
 python run.py --model SmolVLM-Instruct --data MMBench_DEV_EN
 ```
 
-## 📁 Project Structure
+## VLMEvalKit Version Management
+
+**Automatic generation of version-specific VLMEvalKit directories:**
+- `VLMEvalKit-4.33/` ~ `VLMEvalKit-4.51/` directories are not included in Git
+- Automatically generated during Docker build or local execution
+- Version-appropriate patches are automatically applied
+
+```bash
+# Manual generation of version directories (if needed)
+./scripts/setup_vlmevalkit_versions.sh
+
+# Regenerate specific version only
+rm -rf VLMEvalKit-4.49
+./scripts/setup_vlmevalkit_versions.sh
+```
+
+## Adding New Models
+
+1. Confirm model support in VLMEvalKit
+2. Add to appropriate transformer version in `configs/models.yaml`:
+
+```yaml
+transformers_4_49:
+  models:
+    - name: "NewModel-7B"
+      vlm_id: "exact_vlmevalkit_id"
+      memory_gb: 28
+```
+
+</details>
+
+<details>
+<summary>📁 Project Structure</summary>
 
 ```
 SpectraBench-Vision/
-├── .env.template              # Environment variables template
-├── LICENSE                    # License file
-├── README.md                  # Project documentation (Korean)
-├── README.en.md               # Project documentation (English)
-├── DOCKER_USAGE_GUIDE.md      # Docker usage guide (Korean)
-├── DOCKER_USAGE_GUIDE_EN.md   # Docker usage guide (English)
-├── requirements.txt           # Python dependencies
-├── quick_start.sh             # One-command setup script
-│
-├── .github/                   # GitHub Actions workflows
-│   └── workflows/
-│       └── build-and-push-docker.yml  # Docker auto build and push
-│
 ├── configs/                   # Configuration files
-│   ├── hardware.yaml          # GPU memory limits and detection
-│   ├── models.yaml            # Model definitions (by transformer version)
-│   └── benchmarks.yaml        # Unified benchmark list (24 benchmarks)
+│   ├── models.yaml           # Model definitions (by transformer version)
+│   ├── benchmarks.yaml       # Benchmark list (24 benchmarks)
+│   └── hardware.yaml         # GPU memory limits
 │
-├── scripts/                   # Execution and build scripts
-│   ├── main.py                # Local evaluation main entry point
-│   ├── setup_dependencies.py  # Automated dependency setup
-│   ├── build_local_images.sh  # Local Docker image build
+├── docker/                   # Docker infrastructure
+│   ├── base/                 # Common base image
+│   ├── integrated/           # Integrated system (spectrabench-vision:latest)
+│   ├── transformers-4.33/    # 4.33.0 container + requirements.txt
+│   ├── transformers-4.37/    # 4.37.2 container + requirements.txt  
+│   ├── transformers-4.43/    # 4.43.0 container + requirements.txt
+│   ├── transformers-4.49/    # 4.49.0 container + requirements.txt
+│   ├── transformers-4.51/    # 4.51.0 container + requirements.txt
+│   └── docker-compose.prod.yml # Production orchestration
+│
+├── spectravision/            # Core evaluation system
+│   ├── docker_orchestrator.py # Automatic Docker container management
+│   ├── config.py            # Configuration management and hardware detection
+│   ├── evaluator.py         # Sequential evaluation engine
+│   ├── monitor.py           # Performance monitoring and resource tracking
+│   └── utils.py             # Logging and utility functions
+│
+├── analysis/                 # Performance analysis tools (development)
+│   ├── analyzer.py          # Performance analysis engine
+│   └── visualizer.py        # Result visualization
+│
+├── scripts/                  # Execution and build scripts
+│   ├── main.py              # Local evaluation main entry point
+│   ├── setup_dependencies.py # Automated dependency setup
+│   ├── setup_vlmevalkit_versions.sh # VLMEvalKit version directory generator
+│   ├── build_local_images.sh # Local Docker image build
 │   ├── build_production_images.sh # Production image build
-│   ├── build_and_push_images.sh   # Image build and push
-│   └── push_to_registry.sh    # Docker registry push
+│   └── apply_patches.sh     # Patch application script
 │
-├── docker/                    # Docker infrastructure
-│   ├── docker-compose.yml     # Development container orchestration
-│   ├── docker-compose.prod.yml # Production container orchestration
-│   ├── base/
-│   │   └── Dockerfile         # Base image
-│   ├── integrated/            # Integrated system Docker-in-Docker
-│   │   ├── Dockerfile         # Integrated system image
-│   │   ├── docker_main.py     # Integrated system main script
-│   │   └── start_spectrabench.sh # Integrated system startup script
-│   ├── transformers-4.33/     # Transformer 4.33.0 container
-│   │   └── Dockerfile
-│   ├── transformers-4.37/     # Transformer 4.37.2 container
-│   │   └── Dockerfile
-│   ├── transformers-4.43/     # Transformer 4.43.0 container
-│   │   └── Dockerfile
-│   ├── transformers-4.49/     # Transformer 4.49.0 container
-│   │   └── Dockerfile
-│   └── transformers-4.51/     # Transformer 4.51.0 container
-│       └── Dockerfile
+├── patches/                  # VLMEvalKit token authentication patches (10 patches)
+│   ├── 001-moondream-token-fix.patch
+│   ├── 002-smolvlm-token-fix.patch
+│   └── ... (other model-specific patches)
 │
-├── spectravision/             # Core evaluation system
-│   ├── config.py              # Configuration management and hardware detection
-│   ├── docker_orchestrator.py # Docker container automatic management
-│   ├── env_manager.py         # Environment variable management
-│   ├── evaluator.py           # Sequential evaluation engine
-│   ├── monitor.py             # Performance monitoring and resource tracking
-│   ├── multi_version_evaluator.py # Multi-version orchestration
-│   └── utils.py               # Logging and utility functions
-│
-├── analysis/                  # Performance analysis tools
-│   ├── analyzer.py            # Performance analysis engine
-│   └── visualizer.py          # Results visualization
-│
-├── VLMEvalKit/               # VLMEvalKit submodule (auto-downloaded)
-└── outputs/                  # Results, logs, and reports (locally generated)
+├── VLMEvalKit/              # Base VLMEvalKit (upstream)
+├── VLMEvalKit-4.33/         # Transformer 4.33 dedicated (auto-generated)
+├── VLMEvalKit-4.37/         # Transformer 4.37 dedicated (auto-generated)  
+├── VLMEvalKit-4.43/         # Transformer 4.43 dedicated (auto-generated)
+├── VLMEvalKit-4.49/         # Transformer 4.49 dedicated (auto-generated)
+├── VLMEvalKit-4.51/         # Transformer 4.51 dedicated (auto-generated)
+└── outputs/                 # Results, logs and reports
 ```
 
-## 🛠️ Configuration
+</details>
 
-### Environment Configuration
-
-**Personal API Keys**: Copy `.env.template` to `.env` and add your keys:
-```bash
-cp .env.template .env
-nano .env  # Add your HF_TOKEN and other keys
-```
-
-**GPU Configuration**: Set which GPU(s) to use in `.env`:
-```bash
-CUDA_VISIBLE_DEVICES=0,1  # Use first two GPUs
-```
-
-See `.env.template` file for detailed environment configuration.
-
-### Adding New Models
-
-1. Check if the model is supported in VLMEvalKit
-2. Add to appropriate hardware tier in `configs/models.yaml`:
-
-```yaml
-# Under appropriate hardware section (e.g., a6000_models)
-- name: "New-Model-7B"
-  vlm_id: "exact_vlmevalkit_id"  # Must match VLMEvalKit
-  memory_gb: 28
-```
-
-### Adding New Benchmarks
-
-1. Verify benchmark exists in VLMEvalKit
-2. Add to the unified benchmark list in `configs/benchmarks.yaml`:
-
-```yaml
-benchmarks:
-  - name: "NewBench"
-    vlm_name: "NewBench_DEV"  # Must match VLMEvalKit dataset name
-    samples: 100
-    purpose: "Description of benchmark purpose"
-```
-
-## 🔍 Troubleshooting
-
-### Common Issues
-
-**"HF_TOKEN is required" or "You are trying to access a gated repo"**
-- Configure your personal HF token in `.env` file
-- Get your token from https://huggingface.co/settings/tokens
-- Add `HF_TOKEN=your_token` to your `.env` file
-
-**"No module named 'llava'"**
-```bash
-python scripts/setup_dependencies.py  # Re-run setup
-```
-
-**".env file not found" warning**
-```bash
-cp .env.template .env  # Create from template
-nano .env              # Add your API keys
-```
-
-**GPU Memory Errors**
-- Check available GPU memory with `nvidia-smi`
-- Use smaller models or reduce batch size
-- Enable memory cleanup with `--enable-cleanup`
-
-### Getting Help
-
-1. **Environment Setup**: Use `.env.template` to configure API keys
-2. **Commands**: Run `python scripts/main.py --help  # For local installation
-python scripts/docker_main.py --help  # For Docker integrated system` for command options
-3. **Quick Start**: Use `./quick_start.sh` for automated setup
-
-## 📊 Results
-
-Results are saved to `outputs/` with timestamps:
-- **Availability tests**: Quick compatibility checks
-- **Full evaluations**: Complete benchmark results
-- **Performance reports**: Resource utilization analysis
-- **Logs**: Detailed execution logs
+---
 
 ## 📄 License
 
-This project is licensed under the Apache License 2.0 - see the LICENSE file for details.
+This project is licensed under the Apache License 2.0.
 
 ## 🙏 Acknowledgments
 
 - Built on top of [VLMEvalKit](https://github.com/open-compass/VLMEvalKit)
 - Supports models from Hugging Face, LLaVA, and other frameworks
-- Developed for hardware-aware multimodal evaluation
 
 ## 🏛️ Citation
 

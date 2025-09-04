@@ -135,7 +135,7 @@ class MultiVersionEvaluator:
         
         self.logger.info(f"Starting full multi-version evaluation")
         self.logger.info(f"   Total evaluations: {len(evaluation_plan)}")
-        self.logger.info(f"   🐳 Max concurrent containers: {max_concurrent_containers}")
+        self.logger.info(f"   Max concurrent containers: {max_concurrent_containers}")
         self.logger.info(f"   GPU allocation: {gpu_allocation}")
         
         # Group evaluations by container for sequential processing
@@ -150,8 +150,8 @@ class MultiVersionEvaluator:
         gpu_id = 0
         for container_name, container_evaluations in by_container.items():
             
-            self.logger.info(f"\n🐳 Processing container: {container_name}")
-            self.logger.info(f"   📦 Evaluations in this container: {len(container_evaluations)}")
+            self.logger.info(f"\nProcessing container: {container_name}")
+            self.logger.info(f"   Evaluations in this container: {len(container_evaluations)}")
             
             # Initialize container results
             self.results['containers'][container_name] = {
@@ -351,7 +351,7 @@ class MultiVersionEvaluator:
                 
                 f.write("Results by Container:\n")
                 for container_name, stats in self.results['containers'].items():
-                    f.write(f"\n  📦 {container_name} (v{stats['transformer_version']}):\n")
+                    f.write(f"\n  {container_name} (v{stats['transformer_version']}):\n")
                     f.write(f"    Evaluations: {stats['total_evaluations']}\n")
                     f.write(f"    Success: {stats['successful_evaluations']}\n")
                     f.write(f"    Failed: {stats['failed_evaluations']}\n")

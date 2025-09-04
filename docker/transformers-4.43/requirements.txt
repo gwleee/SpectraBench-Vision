@@ -1,0 +1,16 @@
+# SpectraVision Container for transformers==4.43.0
+# Supports mid-range models: Phi-3.5-Vision, updated InternVL2, etc.
+
+# Core transformers and compatible dependencies
+transformers==4.43.0
+tokenizers==0.19.1
+timm==0.9.12
+sentencepiece==0.1.99
+protobuf==4.25.1
+
+# Essential model dependencies
+einops==0.7.0
+tiktoken==0.5.2
+
+# Phi-3.5-Vision specific dependencies (optional)
+# flash-attn==2.5.0  # Uncomment if GPU supports it
