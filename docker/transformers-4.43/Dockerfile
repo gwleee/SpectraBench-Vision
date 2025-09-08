@@ -6,7 +6,7 @@ FROM spectravision-base:latest
 COPY VLMEvalKit-4.43/ /workspace/VLMEvalKit/
 
 # Copy and install requirements
-COPY requirements.txt /tmp/requirements.txt
+COPY docker/transformers-4.43/requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
 
 # Install VLMEvalKit with transformers 4.43 compatibility

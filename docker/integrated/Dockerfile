@@ -47,7 +47,9 @@ RUN pip3 install \
     requests \
     psutil \
     nvidia-ml-py \
-    tqdm
+    tqdm \
+    pandas \
+    tabulate
 
 # Copy Docker Compose files for container management  
 COPY docker/docker-compose.prod.yml /workspace/docker-compose.prod.yml
@@ -59,6 +61,14 @@ COPY docker/integrated/docker_main.py /workspace/scripts/docker_main.py
 
 RUN chmod +x /workspace/start_spectrabench.sh && \
     chmod +x /workspace/scripts/docker_main.py
+
+# Create a non-root user for file operations
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+RUN groupadd -g $GROUP_ID appuser && \
+    useradd -m -u $USER_ID -g appuser appuser && \
+    mkdir -p /workspace/outputs && \
+    chown -R appuser:appuser /workspace
 
 # Set environment variables
 ENV PYTHONPATH=/workspace
@@ -73,6 +83,6 @@ EXPOSE 2376
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD docker info > /dev/null 2>&1 || exit 1
 
-# Default startup
+# Default startup (keep as root for Docker-in-Docker)
 ENTRYPOINT ["/workspace/start_spectrabench.sh"]
 CMD []

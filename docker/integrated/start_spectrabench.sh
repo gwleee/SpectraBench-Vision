@@ -48,6 +48,17 @@ elif [ "$PULL_IMAGES" != "none" ]; then
 fi
 
 echo "🎯 SpectraBench-Vision is ready!"
+
+# Set up proper file permissions for outputs
+if [ -d "/workspace/outputs" ]; then
+    # Get host user ID from environment or default to 1000
+    HOST_UID=${HOST_UID:-1000}
+    HOST_GID=${HOST_GID:-1000}
+    
+    echo "📁 Setting up output directory permissions for UID:GID $HOST_UID:$HOST_GID"
+    chown -R $HOST_UID:$HOST_GID /workspace/outputs 2>/dev/null || true
+fi
+
 echo ""
 echo "Usage Options:"
 echo "1. Interactive Mode: python3 scripts/docker_main.py --mode interactive"

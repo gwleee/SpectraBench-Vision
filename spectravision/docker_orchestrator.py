@@ -11,8 +11,10 @@ import docker
 import logging
 import subprocess
 import time
+import json
 from typing import Dict, List, Optional, Tuple
 from pathlib import Path
+from datetime import datetime
 
 from .config import ConfigManager
 from .utils import setup_logger
@@ -26,6 +28,14 @@ class DockerOrchestrator:
         self.docker_client = None
         self.containers = {}
         self.container_configs = {}
+        
+        # Initialize evaluation session
+        self.session_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.session_output_dir = f"outputs/{self.session_timestamp}"
+        
+        # Get host user ID for proper file permissions
+        self.host_uid = os.environ.get('HOST_UID', '1000')
+        self.host_gid = os.environ.get('HOST_GID', '1000')
         
         # Detect GPU configuration
         self.gpu_count = gpu_count or self._detect_gpu_count()
@@ -158,7 +168,8 @@ class DockerOrchestrator:
             return False
     
     def find_container_for_model(self, model_name: str) -> Optional[str]:
-        """Find which container supports the given model"""
+        """Find which container supports the given model with flexible matching"""
+        # First pass: exact matches
         for container_name, config in self.container_configs.items():
             if container_name in ['hardware_tiers', 'deployment_strategy']:
                 continue
@@ -167,6 +178,29 @@ class DockerOrchestrator:
                 for model in config['models']:
                     if model['name'] == model_name or model['vlm_id'] == model_name:
                         return container_name
+        
+        # Second pass: partial/fuzzy matches for common aliases
+        model_aliases = {
+            'SmolVLM': 'SmolVLM',  # SmolVLM-1.7B has vlm_id "SmolVLM"
+            'InternVL2-2B': 'InternVL2-2B',
+            'LLaVA-1.5-7B': 'llava_v1.5_7b',
+            'CogVLM-7B': 'cogvlm-chat',
+            'Qwen-VL-Chat': 'qwen_chat',
+            'VisualGLM-6B': 'VisualGLM_6b'
+        }
+        
+        # Check if input model name has a known alias
+        if model_name in model_aliases:
+            target_vlm_id = model_aliases[model_name]
+            for container_name, config in self.container_configs.items():
+                if container_name in ['hardware_tiers', 'deployment_strategy']:
+                    continue
+                    
+                if 'models' in config:
+                    for model in config['models']:
+                        if model['vlm_id'] == target_vlm_id:
+                            self.logger.info(f"Found model {model_name} -> {target_vlm_id} in {container_name}")
+                            return container_name
         
         self.logger.warning(f"No container found for model: {model_name}")
         return None
@@ -253,50 +287,68 @@ class DockerOrchestrator:
         service_name = container_name.replace('_', '-')
         
         try:
-            # Start using docker-compose
-            env = os.environ.copy()
-            env['NVIDIA_VISIBLE_DEVICES'] = str(gpu_id)
+            # Get image name mapping
+            image_name = f"spectravision-{container_name.split('_')[1]}.{container_name.split('_')[2]}:latest"
             
-            subprocess.run([
-                'docker-compose',
-                '-f', 'docker/docker-compose.yml',
-                'up', '-d', service_name
-            ], cwd=Path.cwd(), check=True, env=env)
+            # Configure GPU access
+            device_requests = [
+                docker.types.DeviceRequest(
+                    device_ids=[str(gpu_id)], 
+                    capabilities=[['gpu']]
+                )
+            ] if gpu_id is not None else []
             
-            self.logger.info(f"Started container {container_name} on GPU {gpu_id}")
+            # Container configuration with long-running command
+            container_config = {
+                'image': image_name,
+                'name': f"spectravision-{container_name}-{gpu_id}",
+                'command': ['tail', '-f', '/dev/null'],  # Keep container running
+                'detach': True,
+                'runtime': 'nvidia',
+                'environment': {
+                    'NVIDIA_VISIBLE_DEVICES': str(gpu_id),
+                    'CUDA_VISIBLE_DEVICES': str(gpu_id),
+                    'PYTHONPATH': '/workspace:/workspace/VLMEvalKit'
+                },
+                'volumes': {
+                    '/workspace/outputs': {'bind': '/workspace/outputs', 'mode': 'rw'},
+                    '/workspace/data': {'bind': '/workspace/data', 'mode': 'rw'},
+                },
+                'working_dir': '/workspace',
+                'device_requests': device_requests,
+                'shm_size': '16G'  # Shared memory for large models
+            }
             
-            # Get container ID
-            result = subprocess.run([
-                'docker', 'ps', '--filter', f'name=spectravision-{service_name}',
-                '--format', '{{.ID}}'
-            ], capture_output=True, text=True, check=True)
+            # Start container
+            container = self.docker_client.containers.run(**container_config)
+            container_id = container.id
             
-            container_id = result.stdout.strip()
+            self.logger.info(f"Started container {container_name} on GPU {gpu_id} (ID: {container_id[:12]})")
             self.containers[container_name] = container_id
             
             return container_id
             
-        except subprocess.CalledProcessError as e:
+        except Exception as e:
             self.logger.error(f"Failed to start container {container_name}: {e}")
             raise
     
     def stop_container(self, container_name: str):
-        """Stop a specific container"""
-        service_name = container_name.replace('_', '-')
-        
+        """Stop a specific container using Docker Python API"""
         try:
-            subprocess.run([
-                'docker-compose',
-                '-f', 'docker/docker-compose.yml',
-                'stop', service_name
-            ], cwd=Path.cwd(), check=True)
-            
-            self.logger.info(f"Stopped container {container_name}")
-            
             if container_name in self.containers:
-                del self.containers[container_name]
+                container_id = self.containers[container_name]
                 
-        except subprocess.CalledProcessError as e:
+                # Get container object and stop it
+                container = self.docker_client.containers.get(container_id)
+                container.stop(timeout=10)
+                container.remove()
+                
+                self.logger.info(f"Stopped container {container_name} (ID: {container_id[:12]})")
+                del self.containers[container_name]
+            else:
+                self.logger.warning(f"Container {container_name} not found in active containers")
+                
+        except Exception as e:
             self.logger.error(f"Failed to stop container {container_name}: {e}")
             raise
     
@@ -319,12 +371,31 @@ class DockerOrchestrator:
         
         container_id = self.containers[container_name]
         
-        # Find model configuration
+        # Find model configuration with flexible matching
         model_config = None
         for model in self.container_configs[container_name]['models']:
-            if model['name'] == model_name:
+            if model['name'] == model_name or model['vlm_id'] == model_name:
                 model_config = model
                 break
+        
+        # If not found directly, try alias mapping
+        if not model_config:
+            model_aliases = {
+                'SmolVLM': 'SmolVLM',
+                'InternVL2-2B': 'InternVL2-2B',
+                'LLaVA-1.5-7B': 'llava_v1.5_7b',
+                'CogVLM-7B': 'cogvlm-chat',
+                'Qwen-VL-Chat': 'qwen_chat',
+                'VisualGLM-6B': 'VisualGLM_6b'
+            }
+            
+            if model_name in model_aliases:
+                target_vlm_id = model_aliases[model_name]
+                for model in self.container_configs[container_name]['models']:
+                    if model['vlm_id'] == target_vlm_id:
+                        model_config = model
+                        self.logger.info(f"Found model {model_name} -> {target_vlm_id} in {container_name}")
+                        break
         
         if not model_config:
             raise ValueError(f"Model {model_name} not found in container {container_name}")
@@ -360,6 +431,40 @@ class DockerOrchestrator:
             
             # Parse results
             if exec_result.exit_code == 0:
+                # Copy results to timestamp-based directory structure
+                try:
+                    container_obj = self.docker_client.containers.get(container_id)
+                    
+                    # Create timestamp-based directory structure
+                    result_dir = f"/workspace/{self.session_output_dir}/{model_name}"
+                    mkdir_cmd = ['sh', '-c', f'mkdir -p {result_dir}']
+                    container_obj.exec_run(mkdir_cmd, workdir='/workspace')
+                    
+                    # Copy VLMEvalKit results to structured directory
+                    copy_cmd = ['sh', '-c', f'cp -r /root/LMUData/* {result_dir}/ 2>/dev/null || true']
+                    copy_result = container_obj.exec_run(copy_cmd, workdir='/workspace')
+                    
+                    # Generate individual model-benchmark summary
+                    summarize_cmd = ['python', '/workspace/VLMEvalKit/scripts/summarize.py', '--model', vlm_id, '--data', benchmark_name]
+                    summary_result = container_obj.exec_run(summarize_cmd, workdir='/workspace')
+                    
+                    if summary_result.exit_code == 0:
+                        # Save individual summary
+                        individual_summary_path = f"{result_dir}/{model_name}_{benchmark_name}_summary.csv"
+                        copy_summary_cmd = ['sh', '-c', f'cp summ.csv {individual_summary_path} 2>/dev/null || true']
+                        container_obj.exec_run(copy_summary_cmd, workdir='/workspace')
+                        self.logger.info(f"Generated individual summary: {individual_summary_path}")
+                    else:
+                        self.logger.warning(f"Failed to generate individual summary: {summary_result.output.decode('utf-8')}")
+                    
+                    self.logger.info(f"Results saved to structured directory: {result_dir}")
+                    
+                    # Fix file permissions for host access
+                    self._fix_output_permissions(result_dir)
+                        
+                except Exception as e:
+                    self.logger.warning(f"Error processing results: {e}")
+                
                 self.logger.info(f"Evaluation completed successfully for {model_name}")
                 return {
                     'status': 'success',
@@ -409,33 +514,29 @@ class DockerOrchestrator:
         self.logger.info("Cleaning up Docker containers...")
         
         try:
-            # Stop all profiles to ensure all containers are cleaned up
-            subprocess.run([
-                'docker-compose',
-                '-f', 'docker/docker-compose.yml',
-                '--profile', 'all',
-                'down'
-            ], cwd=Path.cwd(), check=True)
+            # Stop containers tracked by this orchestrator
+            for container_name in list(self.containers.keys()):
+                try:
+                    self.stop_container(container_name)
+                except Exception as e:
+                    self.logger.warning(f"Failed to stop tracked container {container_name}: {e}")
             
-            self.logger.info("All containers stopped successfully")
-            
-        except subprocess.CalledProcessError as e:
-            self.logger.error(f"Failed to cleanup containers with docker-compose: {e}")
-            
-            # Fallback: try to stop containers individually
-            self.logger.info("Attempting individual container cleanup...")
-            try:
-                running_containers = self.docker_client.containers.list()
-                for container in running_containers:
-                    if container.name.startswith('spectravision-'):
-                        self.logger.info(f"Stopping container: {container.name}")
-                        container.stop()
+            # Stop any remaining SpectraVision containers
+            running_containers = self.docker_client.containers.list()
+            for container in running_containers:
+                if 'spectravision' in container.name:
+                    try:
+                        self.logger.info(f"Stopping untracked container: {container.name}")
+                        container.stop(timeout=10)
                         container.remove()
+                    except Exception as e:
+                        self.logger.warning(f"Failed to stop container {container.name}: {e}")
+            
+            self.logger.info("Container cleanup completed")
                         
-                self.logger.info("Individual container cleanup completed")
-                        
-            except Exception as fallback_error:
-                self.logger.error(f"Fallback cleanup also failed: {fallback_error}")
+        except Exception as e:
+            self.logger.error(f"Container cleanup failed: {e}")
+            raise
         
         self.containers.clear()
     
@@ -466,9 +567,43 @@ class DockerOrchestrator:
         
         return status
     
+    def _get_all_model_names(self) -> List[str]:
+        """Get all available model names from all containers"""
+        all_models = []
+        for container_name, config in self.container_configs.items():
+            if container_name in ['hardware_tiers', 'deployment_strategy']:
+                continue
+            if 'models' in config:
+                for model in config['models']:
+                    # Use vlm_id as primary identifier (matches VLMEvalKit)
+                    all_models.append(model['vlm_id'])
+        return all_models
+    
+    def _get_all_benchmark_names(self) -> List[str]:
+        """Get all available benchmark names"""
+        # Standard VLMEvalKit benchmarks
+        return [
+            "MMBench_DEV_EN", "MMBench_TEST_EN", "MMBench_DEV_CN", "MMBench_TEST_CN",
+            "CCBench", "MMStar", "RealWorldQA", "MLLMGuard_DS", "BLINK",
+            "TextVQA_VAL", "ChartQA_VAL", "GQA_VAL", "VizWiz_VAL",
+            "DocVQA_VAL", "InfoVQA_VAL", "OCRBench", "AI2D_TEST",
+            "MathVista_MINI", "HallusionBench", "LLaVABench", "MMVet",
+            "SEED_IMG", "Pope", "ScienceQA_VAL", "MMT-Bench_VAL", "Q-Bench_VAL"
+        ]
+    
     def run_batch_evaluation(self, models: List[str], benchmarks: List[str], 
                            gpu_ids: List[int] = [0]) -> List[Dict]:
         """Run batch evaluation of multiple models and benchmarks"""
+        
+        # Handle "all" parameters
+        if models == ["all"] or (len(models) == 1 and models[0] == "all"):
+            models = self._get_all_model_names()
+            self.logger.info(f"Expanded 'all' to {len(models)} models: {models[:5]}{'...' if len(models) > 5 else ''}")
+        
+        if benchmarks == ["all"] or (len(benchmarks) == 1 and benchmarks[0] == "all"):
+            benchmarks = self._get_all_benchmark_names()
+            self.logger.info(f"Expanded 'all' to {len(benchmarks)} benchmarks: {benchmarks[:5]}{'...' if len(benchmarks) > 5 else ''}")
+        
         self.logger.info(f"Starting batch evaluation: {len(models)} models × {len(benchmarks)} benchmarks")
         
         results = []
@@ -527,9 +662,212 @@ class DockerOrchestrator:
             self.logger.warning("Batch evaluation interrupted by user")
         except Exception as e:
             self.logger.error(f"Batch evaluation failed: {e}")
+        
+        # Generate comprehensive summary after all evaluations
+        try:
+            self.logger.info("Generating comprehensive evaluation summary...")
+            self.generate_final_summary(results)
+        except Exception as e:
+            self.logger.warning(f"Failed to generate final summary: {e}")
             
         self.logger.info(f"Batch evaluation completed: {len(results)} results")
         return results
+    
+    def generate_final_summary(self, results: List[Dict]):
+        """Generate comprehensive final report with detailed analysis"""
+        try:
+            import pandas as pd
+            
+            # Extract successful evaluations
+            successful_results = [r for r in results if r.get('status') == 'success']
+            failed_results = [r for r in results if r.get('status') == 'error']
+            
+            if not successful_results and not failed_results:
+                self.logger.warning("No evaluation results to summarize")
+                return
+            
+            # Create comprehensive report directory
+            report_dir = f"{self.session_output_dir}/reports"
+            os.makedirs(report_dir, exist_ok=True)
+            
+            # 1. Create evaluation summary DataFrame
+            summary_data = []
+            model_benchmark_map = {}
+            
+            for result in successful_results:
+                model = result.get('model', '')
+                benchmark = result.get('benchmark', '')
+                container = result.get('container', 'unknown')
+                
+                if model and benchmark:
+                    if model not in model_benchmark_map:
+                        model_benchmark_map[model] = {'benchmarks': [], 'container': container}
+                    model_benchmark_map[model]['benchmarks'].append(benchmark)
+                    
+                    summary_data.append({
+                        'Model': model,
+                        'Benchmark': benchmark,
+                        'Container': container,
+                        'Status': 'Success',
+                        'Session': self.session_timestamp
+                    })
+            
+            # Add failed evaluations
+            for result in failed_results:
+                summary_data.append({
+                    'Model': result.get('model', 'unknown'),
+                    'Benchmark': result.get('benchmark', 'unknown'),
+                    'Container': result.get('container', 'unknown'),
+                    'Status': f"Error: {result.get('error', 'Unknown error')}",
+                    'Session': self.session_timestamp
+                })
+            
+            # 2. Save detailed evaluation log
+            detailed_df = pd.DataFrame(summary_data)
+            detailed_path = f"{report_dir}/detailed_evaluation_log.csv"
+            detailed_df.to_csv(detailed_path, index=False)
+            
+            # 3. Create model-wise summary
+            model_summary = []
+            for model, info in model_benchmark_map.items():
+                model_summary.append({
+                    'Model': model,
+                    'Container': info['container'],
+                    'Successful_Benchmarks': len(info['benchmarks']),
+                    'Benchmark_List': ', '.join(info['benchmarks']),
+                    'Session_Timestamp': self.session_timestamp
+                })
+            
+            model_df = pd.DataFrame(model_summary)
+            model_summary_path = f"{report_dir}/model_summary.csv"
+            model_df.to_csv(model_summary_path, index=False)
+            
+            # 4. Create comprehensive report metadata
+            report_metadata = {
+                'session_timestamp': self.session_timestamp,
+                'total_evaluations': len(results),
+                'successful_evaluations': len(successful_results),
+                'failed_evaluations': len(failed_results),
+                'unique_models': len(model_benchmark_map),
+                'total_model_benchmark_pairs': len([b for info in model_benchmark_map.values() for b in info['benchmarks']]),
+                'gpu_configuration': {
+                    'gpu_count': self.gpu_count,
+                    'cuda_visible_devices': self.gpu_config.get('CUDA_VISIBLE_DEVICES', 'unknown')
+                },
+                'container_usage': list(set([info['container'] for info in model_benchmark_map.values()])),
+                'output_directory': self.session_output_dir
+            }
+            
+            metadata_path = f"{report_dir}/evaluation_metadata.json"
+            with open(metadata_path, 'w') as f:
+                json.dump(report_metadata, f, indent=2)
+            
+            # 5. Generate final report
+            self._generate_final_report_file(report_dir, report_metadata, model_df, detailed_df)
+            
+            # 6. Fix permissions for all generated files
+            self._fix_output_permissions(self.session_output_dir)
+            
+            # Log success
+            self.logger.info(f"📊 Comprehensive evaluation report generated:")
+            self.logger.info(f"   📁 Report Directory: {report_dir}")
+            self.logger.info(f"   📝 Model Summary: {model_summary_path}")
+            self.logger.info(f"   📋 Detailed Log: {detailed_path}")
+            self.logger.info(f"   🔧 Metadata: {metadata_path}")
+            self.logger.info(f"✅ Session {self.session_timestamp}: {len(successful_results)}/{len(results)} evaluations successful")
+            
+            # Print summary table
+            print("\n" + "="*100)
+            print(f"🎯 SPECTRAVISION EVALUATION REPORT - SESSION {self.session_timestamp}")
+            print("="*100)
+            if not model_df.empty:
+                print("📊 MODEL PERFORMANCE SUMMARY:")
+                print(model_df.to_string(index=False))
+                print("\n📋 EVALUATION DETAILS:")
+                print(f"   Total Evaluations: {len(results)}")
+                print(f"   Successful: {len(successful_results)} ✅")
+                print(f"   Failed: {len(failed_results)} ❌")
+                print(f"   Unique Models: {len(model_benchmark_map)}")
+                print(f"   GPU Configuration: {self.gpu_count} GPU(s)")
+            print(f"\n📁 Results saved to: {self.session_output_dir}")
+            print("="*100)
+            
+        except Exception as e:
+            self.logger.error(f"Failed to generate final summary: {e}")
+            import traceback
+            self.logger.error(traceback.format_exc())
+    
+    def _generate_final_report_file(self, report_dir: str, metadata: dict, model_df: pd.DataFrame, detailed_df: pd.DataFrame):
+        """Generate a human-readable final report file"""
+        try:
+            report_path = f"{report_dir}/EVALUATION_REPORT.md"
+            
+            with open(report_path, 'w') as f:
+                f.write(f"# SpectraVision Evaluation Report\n\n")
+                f.write(f"**Session:** {metadata['session_timestamp']}\n")
+                f.write(f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+                
+                f.write(f"## Summary\n\n")
+                f.write(f"- **Total Evaluations:** {metadata['total_evaluations']}\n")
+                f.write(f"- **Successful:** {metadata['successful_evaluations']} ✅\n")
+                f.write(f"- **Failed:** {metadata['failed_evaluations']} ❌\n")
+                f.write(f"- **Success Rate:** {metadata['successful_evaluations']/metadata['total_evaluations']*100:.1f}%\n")
+                f.write(f"- **Unique Models:** {metadata['unique_models']}\n")
+                f.write(f"- **GPU Count:** {metadata['gpu_configuration']['gpu_count']}\n\n")
+                
+                f.write(f"## Model Performance\n\n")
+                if not model_df.empty:
+                    f.write(model_df.to_markdown(index=False))
+                f.write(f"\n\n")
+                
+                f.write(f"## Container Usage\n\n")
+                for container in metadata['container_usage']:
+                    f.write(f"- `{container}`\n")
+                f.write(f"\n")
+                
+                f.write(f"## Output Structure\n\n")
+                f.write(f"```\n")
+                f.write(f"{metadata['output_directory']}/\n")
+                f.write(f"├── reports/\n")
+                f.write(f"│   ├── EVALUATION_REPORT.md\n")
+                f.write(f"│   ├── model_summary.csv\n")
+                f.write(f"│   ├── detailed_evaluation_log.csv\n")
+                f.write(f"│   └── evaluation_metadata.json\n")
+                for model in model_df['Model'].unique():
+                    f.write(f"├── {model}/\n")
+                    f.write(f"│   └── [VLMEvalKit results]\n")
+                f.write(f"```\n\n")
+                
+                f.write(f"## System Information\n\n")
+                f.write(f"- **Session Timestamp:** {metadata['session_timestamp']}\n")
+                f.write(f"- **Output Directory:** `{metadata['output_directory']}`\n")
+                f.write(f"- **CUDA Visible Devices:** {metadata['gpu_configuration']['cuda_visible_devices']}\n")
+            
+            self.logger.info(f"📄 Final report saved: {report_path}")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to generate final report file: {e}")
+    
+    def _fix_output_permissions(self, output_path: str):
+        """Fix file permissions for host user access"""
+        try:
+            # Change ownership to host user
+            chown_cmd = f"chown -R {self.host_uid}:{self.host_gid} {output_path}"
+            os.system(chown_cmd)
+            self.logger.debug(f"Fixed permissions for {output_path} to {self.host_uid}:{self.host_gid}")
+        except Exception as e:
+            self.logger.warning(f"Failed to fix permissions for {output_path}: {e}")
+    
+    def get_session_info(self) -> dict:
+        """Get current session information"""
+        return {
+            'timestamp': self.session_timestamp,
+            'output_dir': self.session_output_dir,
+            'gpu_count': self.gpu_count,
+            'gpu_config': self.gpu_config,
+            'host_uid': self.host_uid,
+            'host_gid': self.host_gid
+        }
     
     def interactive_mode(self):
         """Interactive mode for model and benchmark selection"""

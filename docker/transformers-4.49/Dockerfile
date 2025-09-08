@@ -2,19 +2,11 @@
 # Supports latest models: SmolVLM, Qwen2.5-VL, Pixtral, etc.
 FROM spectravision-base:latest
 
-# Copy base VLMEvalKit and patches for runtime setup
-COPY VLMEvalKit/ /workspace/VLMEvalKit-base/
-COPY patches/ /workspace/patches/
-COPY scripts/apply_patches.sh /workspace/
-
-# Setup version-specific VLMEvalKit with patches
-RUN cp -r /workspace/VLMEvalKit-base /workspace/VLMEvalKit && \
-    cd /workspace/VLMEvalKit && \
-    PATCHES_DIR=/workspace/patches /workspace/apply_patches.sh && \
-    rm -rf /workspace/VLMEvalKit-base /workspace/patches /workspace/apply_patches.sh
+# Copy version-specific VLMEvalKit (already patched)
+COPY VLMEvalKit-4.49/ /workspace/VLMEvalKit/
 
 # Copy and install requirements
-COPY requirements.txt /tmp/requirements.txt
+COPY docker/transformers-4.49/requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
 
 # Install VLMEvalKit with transformers 4.49 compatibility
