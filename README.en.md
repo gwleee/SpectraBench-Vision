@@ -66,7 +66,7 @@ nano .env  # HUGGING_FACE_HUB_TOKEN=hf_your_token_here
 ```
 > 💡 [Generate Hugging Face Token](https://huggingface.co/settings/tokens) (Read permission)
 
-### 2️⃣ **Run Instantly** (1 minute)
+### 2️⃣ **Run Instantly**
 ```bash
 # 🎮 Interactive mode with all 30 models
 docker run -it --gpus all \
@@ -76,7 +76,52 @@ docker run -it --gpus all \
   python3 scripts/docker_main.py --mode interactive
 ```
 
-**✅ Done!** Now you can select and evaluate any model.
+**📋 What happens automatically on first run:**
+
+1. **🔄 Integrated Orchestrator Download** (first run only)
+   - `spectrabench-vision:latest` image auto-download
+   - Docker-in-Docker environment setup complete
+
+2. **🎯 Interactive Menu Launch**
+   ```
+   ════════ SpectraBench-Vision Interactive Mode ════════
+   
+   🤖 Model Selection (Choose from 30 models):
+   [1] SmolVLM-256M (3GB)     [2] SmolVLM-500M (4GB)
+   [3] InternVL2-2B (8GB)     [4] LLaVA-1.5-7B (15GB)
+   [5] Qwen2.5-VL-7B (28GB)   [6] More options...
+   
+   Select (1-30): 
+   ```
+
+3. **📊 Benchmark Selection (Choose from 24)**
+   ```
+   📋 Benchmark Selection:
+   [1] MMBench (Basic VQA)    [2] TextVQA (Text Reading)
+   [3] DocVQA (Document)      [4] ChartQA (Chart Analysis)
+   [5] All benchmarks         [6] More options...
+   ```
+
+4. **⚡ Automatic Environment Setup** (after model selection)
+   ```
+   🔍 Preparing environment for SmolVLM model...
+   📥 Downloading spectravision-4.49:latest... [████████████] 100%
+   🔧 Applying VLMEvalKit patches automatically...
+   ✅ transformers==4.49.0 environment ready!
+   ```
+
+5. **🚀 Evaluation Execution**
+   - Automatic execution of selected model-benchmark combinations
+   - Real-time progress display
+   - Results auto-saved: `outputs/[timestamp]/[model]/[benchmark]/`
+
+**💡 Useful Tips:**
+- Download time varies based on network conditions
+- Start with smaller models if GPU memory is limited
+- Press `Ctrl+C` to interrupt evaluation, results are auto-saved
+- Check results in the `outputs/` directory
+
+**✅ Done!** Now follow the menus to evaluate with your desired models.
 
 ---
 
