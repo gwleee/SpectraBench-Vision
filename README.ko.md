@@ -41,9 +41,9 @@ Vision-Language 모델들은 각기 다른 `transformers` 버전을 요구합니
 ```mermaid
 graph TD
     A[🔥 사용자가 모델 요청] --> B{어떤 모델?}
-    B -->|SmolVLM| C[spectravision-4.49 컨테이너 실행]
-    B -->|LLaVA| D[spectravision-4.37 컨테이너 실행] 
-    B -->|Qwen-VL| E[spectravision-4.33 컨테이너 실행]
+    B -->|SmolVLM| C[ghcr.io/gwleee/spectravision:4.49 컨테이너 실행]
+    B -->|LLaVA| D[ghcr.io/gwleee/spectravision:4.37 컨테이너 실행] 
+    B -->|Qwen-VL| E[ghcr.io/gwleee/spectravision:4.33 컨테이너 실행]
     C --> F[✅ 평가 결과 반환]
     D --> F
     E --> F
@@ -105,7 +105,7 @@ docker run -it --gpus all \
 4. **⚡ 자동 환경 구성** (모델 선택 후)
    ```
    🔍 SmolVLM 모델을 위한 환경 준비중...
-   📥 spectravision-4.49:latest 다운로드 중... [████████████] 100%
+   📥 ghcr.io/gwleee/spectravision:4.49 다운로드 중... [████████████] 100%
    🔧 최적화된 VLMEvalKit 환경 시작 중...
       ✅ 모든 모델이 자동 토큰 인증과 함께 준비됨
    ✅ transformers==4.49.0 환경 준비 완료!
@@ -273,7 +273,7 @@ python scripts/main.py --mode interactive
 
 ```bash
 # 특정 transformer 버전 직접 사용
-docker run --gpus all -it ghcr.io/gwleee/spectravision-4.49:latest
+docker run --gpus all -it ghcr.io/gwleee/spectravision:4.49
 
 # VLMEvalKit 직접 사용
 cd /workspace/VLMEvalKit

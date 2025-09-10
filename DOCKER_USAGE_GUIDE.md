@@ -34,7 +34,7 @@ nano .env  # HUGGING_FACE_HUB_TOKEN=hf_your_token_here
 docker run -it --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectrabench-vision:latest \
+  ghcr.io/gwleee/spectravision:latest \
   python3 scripts/docker_main.py --mode interactive
 ```
 
@@ -52,7 +52,7 @@ docker run -it --gpus all \
 docker run --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectrabench-vision:latest \
+  ghcr.io/gwleee/spectravision:latest \
   python3 scripts/docker_main.py --mode batch \
   --models "SmolVLM" "InternVL2-2B" \
   --benchmarks "MMBench" "TextVQA"
@@ -65,7 +65,7 @@ docker run --gpus all \
 # 모든 컨테이너 상태 및 GPU 연결 테스트
 docker run --rm --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  ghcr.io/gwleee/spectrabench-vision:latest \
+  ghcr.io/gwleee/spectravision:latest \
   python3 scripts/docker_main.py --mode test
 ```
 
@@ -89,7 +89,7 @@ SpectraBench-Vision System Test
 docker run --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectrabench-vision:latest \
+  ghcr.io/gwleee/spectravision:latest \
   python3 scripts/docker_main.py --mode batch \
   --models "Qwen2.5-VL-32B" "Qwen2.5-VL-72B" \
   --benchmarks "MMBench" "MMMU" \
@@ -153,7 +153,7 @@ graph TD
 **가장 빠르고 쉬운 방법:**
 ```bash
 # 통합 시스템 이미지만 받으면 됨 (다른 이미지들은 자동 다운로드)
-docker pull ghcr.io/gwleee/spectrabench-vision:latest
+docker pull ghcr.io/gwleee/spectravision:latest
 
 # 또는 모든 이미지 미리 다운로드 (선택사항)
 docker pull ghcr.io/gwleee/spectravision-4.33:latest
@@ -212,7 +212,7 @@ curl -I https://ghcr.io
 docker login ghcr.io
 
 # 수동 재시도
-docker pull ghcr.io/gwleee/spectrabench-vision:latest
+docker pull ghcr.io/gwleee/spectravision:latest
 ```
 
 ### ❌ "메모리 부족"
@@ -321,7 +321,7 @@ transformers_4_49:
 docker run -it --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectrabench-vision:latest \
+  ghcr.io/gwleee/spectravision:latest \
   python3 scripts/docker_main.py --mode interactive
 ```
 

@@ -34,7 +34,7 @@ nano .env  # HUGGING_FACE_HUB_TOKEN=hf_your_token_here
 docker run -it --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectrabench-vision:latest \
+  ghcr.io/gwleee/spectravision:latest \
   python3 scripts/docker_main.py --mode interactive
 ```
 
@@ -52,7 +52,7 @@ docker run -it --gpus all \
 docker run --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectrabench-vision:latest \
+  ghcr.io/gwleee/spectravision:latest \
   python3 scripts/docker_main.py --mode batch \
   --models "SmolVLM" "InternVL2-2B" \
   --benchmarks "MMBench" "TextVQA"
@@ -65,7 +65,7 @@ docker run --gpus all \
 # Test all container states and GPU connectivity
 docker run --rm --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  ghcr.io/gwleee/spectrabench-vision:latest \
+  ghcr.io/gwleee/spectravision:latest \
   python3 scripts/docker_main.py --mode test
 ```
 
@@ -89,7 +89,7 @@ SpectraBench-Vision System Test
 docker run --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectrabench-vision:latest \
+  ghcr.io/gwleee/spectravision:latest \
   python3 scripts/docker_main.py --mode batch \
   --models "Qwen2.5-VL-32B" "Qwen2.5-VL-72B" \
   --benchmarks "MMBench" "MMMU" \
@@ -153,7 +153,7 @@ graph TD
 **Fastest and easiest approach:**
 ```bash
 # Only need the integrated system image (others auto-download)
-docker pull ghcr.io/gwleee/spectrabench-vision:latest
+docker pull ghcr.io/gwleee/spectravision:latest
 
 # Or pre-download all images (optional)
 docker pull ghcr.io/gwleee/spectravision-4.33:latest
@@ -212,7 +212,7 @@ curl -I https://ghcr.io
 docker login ghcr.io
 
 # Manual retry
-docker pull ghcr.io/gwleee/spectrabench-vision:latest
+docker pull ghcr.io/gwleee/spectravision:latest
 ```
 
 ### ❌ "Out of Memory"
@@ -321,7 +321,7 @@ transformers_4_49:
 docker run -it --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectrabench-vision:latest \
+  ghcr.io/gwleee/spectravision:latest \
   python3 scripts/docker_main.py --mode interactive
 ```
 
