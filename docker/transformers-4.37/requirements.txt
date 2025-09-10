@@ -6,7 +6,7 @@ transformers==4.37.2
 tokenizers==0.15.1
 timm==0.6.13
 sentencepiece==0.1.99
-protobuf==3.20.3
+protobuf==3.18.3
 
 # LLaVA required dependencies
 einops==0.6.1

@@ -5,14 +5,14 @@ FROM spectravision-base:latest
 # Copy version-specific VLMEvalKit (with Moondream2 and Phi-3.5-Vision patches applied)
 COPY VLMEvalKit-4.43/ /workspace/VLMEvalKit/
 
-# Copy and install requirements
-COPY docker/transformers-4.43/requirements.txt /tmp/requirements.txt
-RUN pip install -r /tmp/requirements.txt
-
 # Install VLMEvalKit with transformers 4.43 compatibility
 WORKDIR /workspace/VLMEvalKit
-RUN pip install -e .
+RUN pip install -e . --no-deps
 WORKDIR /workspace
+
+# Copy and install requirements (AFTER VLMEvalKit to override versions)
+COPY docker/transformers-4.43/requirements.txt /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt --force-reinstall
 
 # Phi-3.5-Vision specific dependencies (optional)
 RUN pip install flash-attn==2.5.0 || echo "⚠️ flash-attn installation failed, continuing without it"

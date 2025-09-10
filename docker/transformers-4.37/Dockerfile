@@ -5,14 +5,14 @@ FROM spectravision-base:latest
 # Copy version-specific VLMEvalKit (with MiniCPM-V and InternVL2 patches applied)
 COPY VLMEvalKit-4.37/ /workspace/VLMEvalKit/
 
-# Copy and install requirements
-COPY requirements.txt /tmp/requirements.txt
-RUN pip install -r /tmp/requirements.txt
-
-# Install VLMEvalKit with transformers 4.37 compatibility
+# Install VLMEvalKit with transformers 4.37 compatibility  
 WORKDIR /workspace/VLMEvalKit
-RUN pip install -e .
+RUN pip install -e . --no-deps
 WORKDIR /workspace
+
+# Copy and install requirements (AFTER VLMEvalKit to override versions)
+COPY docker/transformers-4.37/requirements.txt /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt --force-reinstall
 
 # Install LLaVA (pinned to stable commit for reproducibility)
 RUN pip install --no-deps git+https://github.com/haotian-liu/LLaVA.git@890a5d1bf46b31610d151779602e67f061c57fd0

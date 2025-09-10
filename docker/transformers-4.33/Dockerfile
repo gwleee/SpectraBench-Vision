@@ -5,14 +5,14 @@ FROM spectravision-base:latest
 # Copy version-specific VLMEvalKit (with appropriate patches already applied)
 COPY VLMEvalKit-4.33/ /workspace/VLMEvalKit/
 
-# Copy and install requirements
-COPY requirements.txt /tmp/requirements.txt  
-RUN pip install -r /tmp/requirements.txt
-
 # Install VLMEvalKit with transformers 4.33 compatibility
 WORKDIR /workspace/VLMEvalKit
-RUN pip install -e .
+RUN pip install -e . --no-deps
 WORKDIR /workspace
+
+# Copy and install requirements (AFTER VLMEvalKit to override versions)
+COPY docker/transformers-4.33/requirements.txt /tmp/requirements.txt  
+RUN pip install -r /tmp/requirements.txt --force-reinstall
 
 # Install xformers separately (may fail on some GPU architectures)
 RUN pip install xformers==0.0.22 || echo "⚠️ xformers installation failed, continuing without it"

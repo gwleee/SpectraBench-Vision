@@ -5,14 +5,14 @@ FROM spectravision-base:latest
 # Copy version-specific VLMEvalKit (already patched)
 COPY VLMEvalKit-4.49/ /workspace/VLMEvalKit/
 
-# Copy and install requirements
-COPY docker/transformers-4.49/requirements.txt /tmp/requirements.txt
-RUN pip install -r /tmp/requirements.txt
-
 # Install VLMEvalKit with transformers 4.49 compatibility
 WORKDIR /workspace/VLMEvalKit
-RUN pip install -e .
+RUN pip install -e . --no-deps
 WORKDIR /workspace
+
+# Copy and install requirements (AFTER VLMEvalKit to override versions)
+COPY docker/transformers-4.49/requirements.txt /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt --force-reinstall
 
 # Fix NumPy compatibility issues (ensure 1.x compatibility)
 RUN pip install --force-reinstall numpy==1.26.4
