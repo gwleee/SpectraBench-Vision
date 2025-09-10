@@ -367,3 +367,19 @@ class ConfigManager:
         print(f"Output Directory: {self.output_dir}")
         print(f"Config Directory: {self.config_dir}")
         print("="*72)
+
+
+# Convenience functions for backward compatibility
+def load_config(hardware_type: str = "auto", output_dir: str = "outputs") -> Dict[str, Any]:
+    """
+    Convenience function to load configuration
+    
+    Args:
+        hardware_type: Hardware configuration type or 'auto' for detection
+        output_dir: Output directory for results and logs
+        
+    Returns:
+        Complete configuration dictionary
+    """
+    config_manager = ConfigManager(hardware_type=hardware_type, output_dir=output_dir)
+    return config_manager.load_config()

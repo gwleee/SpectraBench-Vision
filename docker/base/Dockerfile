@@ -1,6 +1,6 @@
 # SpectraVision Base Docker Image
 # Contains common dependencies and SpectraVision codebase
-FROM nvidia/cuda:11.8.0-runtime-ubuntu22.04
+FROM nvidia/cuda:12.1.1-runtime-ubuntu22.04
 
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive

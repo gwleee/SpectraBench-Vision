@@ -106,9 +106,26 @@ docker run -it --gpus all \
    ```
    🔍 Preparing environment for SmolVLM model...
    📥 Downloading spectravision-4.49:latest... [████████████] 100%
-   🔧 Applying VLMEvalKit patches automatically...
+   🔧 Starting optimized VLMEvalKit environment...
+      ✅ All models ready with automatic token authentication
    ✅ transformers==4.49.0 environment ready!
    ```
+
+   **💡 Note for Users:**
+   - **Just works out of the box**: All 30 models automatically handle HuggingFace token authentication
+   - **No setup required**: Your `.env` token is automatically recognized by all models
+   - **Zero configuration**: Pre-optimized environment means instant model access
+
+   <details>
+   <summary><strong>🔧 Technical Details (for developers)</strong></summary>
+
+   **About VLMEvalKit Patches:**
+   - **Pre-applied during build**: 10+ authentication patches applied when Docker images are built
+   - **Automatic token handling**: Patches enable models to read `HUGGING_FACE_HUB_TOKEN` from `.env`
+   - **Models included**: SmolVLM, Qwen2.5-VL, Phi-4-Vision, InternVL2, and more
+   - **Zero runtime overhead**: No patching delays during evaluations
+   - **Why needed**: VLMEvalKit upstream doesn't handle token authentication properly
+   </details>
 
 5. **🚀 Evaluation Execution**
    - Automatic execution of selected model-benchmark combinations
