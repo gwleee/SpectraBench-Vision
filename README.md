@@ -41,9 +41,9 @@ Vision-Language models require different `transformers` versions:
 ```mermaid
 graph TD
     A[🔥 User requests model] --> B{Which model?}
-    B -->|SmolVLM| C[spectravision-4.49 container runs]
-    B -->|LLaVA| D[spectravision-4.37 container runs] 
-    B -->|Qwen-VL| E[spectravision-4.33 container runs]
+    B -->|SmolVLM| C[ghcr.io/gwleee/spectravision:4.49 container runs]
+    B -->|LLaVA| D[ghcr.io/gwleee/spectravision:4.37 container runs] 
+    B -->|Qwen-VL| E[ghcr.io/gwleee/spectravision:4.33 container runs]
     C --> F[✅ Return evaluation results]
     D --> F
     E --> F
@@ -72,7 +72,7 @@ nano .env  # HUGGING_FACE_HUB_TOKEN=hf_your_token_here
 docker run -it --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectrabench-vision:latest \
+  ghcr.io/gwleee/spectravision:latest \
   python3 scripts/docker_main.py --mode interactive
 ```
 
@@ -149,7 +149,7 @@ docker run -it --gpus all \
 docker run -it --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectrabench-vision:latest \
+  ghcr.io/gwleee/spectravision:latest \
   python3 scripts/docker_main.py --mode interactive
 ```
 **After execution**: Select models and benchmarks from menu, automatically runs in appropriate environment.
@@ -160,7 +160,7 @@ docker run -it --gpus all \
 docker run --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectrabench-vision:latest \
+  ghcr.io/gwleee/spectravision:latest \
   python3 scripts/docker_main.py --mode batch \
   --models "SmolVLM" "InternVL2-8B" "Qwen2.5-VL-3B" \
   --benchmarks "MMBench" "TextVQA"
@@ -170,7 +170,7 @@ docker run --gpus all \
 ```bash
 docker run --rm --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  ghcr.io/gwleee/spectrabench-vision:latest \
+  ghcr.io/gwleee/spectravision:latest \
   python3 scripts/docker_main.py --mode test
 ```
 
@@ -179,12 +179,12 @@ docker run --rm --gpus all \
 # Use specific GPUs
 docker run -it --gpus all -e NVIDIA_VISIBLE_DEVICES=0,1 \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  ghcr.io/gwleee/spectrabench-vision:latest
+  ghcr.io/gwleee/spectravision:latest
 
 # Memory saving (latest models only)
 docker run -it --gpus all -e PULL_IMAGES=minimal \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  ghcr.io/gwleee/spectrabench-vision:latest
+  ghcr.io/gwleee/spectravision:latest
 ```
 
 ---
@@ -239,7 +239,7 @@ docker run -e NVIDIA_VISIBLE_DEVICES=0 ...  # Use only GPU 0
 **❌ Docker Image Download Failure**
 ```bash
 # Solution: Check network and manual pull
-docker pull ghcr.io/gwleee/spectrabench-vision:latest
+docker pull ghcr.io/gwleee/spectravision:latest
 ```
 
 ---

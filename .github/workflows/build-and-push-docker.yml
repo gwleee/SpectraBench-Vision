@@ -16,7 +16,41 @@ env:
   IMAGE_NAME: spectravision
 
 jobs:
-  build-and-push:
+  build-base:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build and push base image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: ./docker/base/Dockerfile
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:base
+        labels: |
+          org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          org.opencontainers.image.description=SpectraVision Base Image
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  build-transformer-versions:
+    needs: build-base
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -37,45 +71,58 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Extract metadata
-      id: meta
-      uses: docker/metadata-action@v4
-      with:
-        images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}-${{ matrix.version }}
-        tags: |
-          type=ref,event=branch
-          type=ref,event=pr
-          type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}
-          type=raw,value=latest,enable={{is_default_branch}}
-
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
-    - name: Build base image (for version 4.37 only)
-      if: matrix.version == '4.37'
-      uses: docker/build-push-action@v4
-      with:
-        context: .
-        file: ./docker/base/Dockerfile
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}-base:latest
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-
-    - name: Build and push Docker image
+    - name: Build and push transformer version
       uses: docker/build-push-action@v4
       with:
         context: .
         file: ./docker/transformers-${{ matrix.version }}/Dockerfile
         push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
+        tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ matrix.version }}
+        labels: |
+          org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          org.opencontainers.image.description=SpectraVision Transformers ${{ matrix.version }} Image
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  build-integrated:
+    needs: build-transformer-versions
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build and push integrated system
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: ./docker/integrated/Dockerfile
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
+        labels: |
+          org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          org.opencontainers.image.description=SpectraVision Integrated System - Docker-in-Docker Orchestrator
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
   update-compose:
-    needs: build-and-push
+    needs: build-integrated
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     
@@ -105,17 +152,21 @@ jobs:
         cp .env.template .env
         # .env 파일에 HF_TOKEN 추가
 
-        # 3. 미리 빌드된 이미지 다운로드
-        docker-compose -f docker/docker-compose.prod.yml pull
+        # 3. 통합 시스템 실행 (권장)
+        docker run -it --gpus all \\
+          -v /var/run/docker.sock:/var/run/docker.sock \\
+          -v \$(pwd)/outputs:/workspace/outputs \\
+          ghcr.io/gwleee/spectravision:latest
 
-        # 4. 실행
-        python scripts/main.py
-        # → "2. Multi-Version Docker" 선택
+        # 또는 개별 컨테이너 사용
+        docker run --gpus all -it \\
+          -v \$(pwd)/outputs:/workspace/outputs \\
+          ghcr.io/gwleee/spectravision:4.49
         \`\`\`
 
         ## 사용 가능한 이미지
 
-        총 **29개 모델**, **24개 벤치마크**, **696개 평가** 가능!
+        총 **30개 모델**, **24개 벤치마크**, **720개 평가** 가능!
         EOF
 
     - name: Commit and push changes
