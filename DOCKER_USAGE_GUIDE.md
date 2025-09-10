@@ -76,8 +76,8 @@ SpectraBench-Vision System Test
 ✓ Docker connectivity OK
 ✓ GPU detected: 1 GPU(s) available
 ✓ Testing 5 container images...
-✓ spectravision-4.49: OK (SmolVLM, Qwen2.5-VL ready)
-✓ spectravision-4.37: OK (InternVL2, LLaVA ready)
+✓ ghcr.io/gwleee/spectravision:4.49: OK (SmolVLM, Qwen2.5-VL ready)
+✓ ghcr.io/gwleee/spectravision:4.37: OK (InternVL2, LLaVA ready)
 ✓ All systems ready for evaluation!
 ```
 
@@ -102,7 +102,7 @@ docker run --gpus all \
 
 | 기능 | 설명 | 사용자 혜택 |
 |------|------|------------|
-| **컨테이너 자동 선택** | SmolVLM → spectravision-4.49 자동 선택 | 버전 관리 걱정 없음 |
+| **컨테이너 자동 선택** | SmolVLM → ghcr.io/gwleee/spectravision:4.49 자동 선택 | 버전 관리 걱정 없음 |
 | **이미지 자동 다운로드** | 필요한 이미지 자동으로 Registry에서 pull | 수동 관리 불필요 |
 | **GPU 자동 할당** | 가용 GPU 감지하여 최적 분배 | 리소스 효율성 최대화 |
 | **결과 자동 통합** | 모든 평가 결과를 `outputs/`에 정리 | 결과 관리 간편 |
@@ -113,7 +113,7 @@ docker run --gpus all \
 
 DockerOrchestrator 자동 처리:
 1. 🔍 모델 분석: SmolVLM → 4.49 필요, InternVL2-2B → 4.37 필요
-2. 📦 이미지 확인: spectravision-4.49 ✓, spectravision-4.37 ✗ (다운로드 시작)
+2. 📦 이미지 확인: ghcr.io/gwleee/spectravision:4.49 ✓, ghcr.io/gwleee/spectravision:4.37 ✗ (다운로드 시작)
 3. 🚀 컨테이너 실행: GPU 0에서 SmolVLM, GPU 1에서 InternVL2-2B
 4. 📊 결과 수집: outputs/timestamp/에 통합 저장
 ```
@@ -126,9 +126,9 @@ DockerOrchestrator 자동 처리:
 graph TD
     A[사용자 명령] --> B[DockerOrchestrator]
     B --> C{모델별 환경 분석}
-    C -->|SmolVLM| D[spectravision-4.49]
-    C -->|LLaVA| E[spectravision-4.37] 
-    C -->|Qwen-VL| F[spectravision-4.33]
+    C -->|SmolVLM| D[ghcr.io/gwleee/spectravision:4.49]
+    C -->|LLaVA| E[ghcr.io/gwleee/spectravision:4.37] 
+    C -->|Qwen-VL| F[ghcr.io/gwleee/spectravision:4.33]
     D --> G[평가 결과]
     E --> G
     F --> G
@@ -138,11 +138,11 @@ graph TD
 
 | 컨테이너 | Transformers | 지원 모델 | 메모리 범위 |
 |----------|-------------|-----------|------------|
-| **spectravision-4.33** | 4.33.0 | Qwen-VL, VisualGLM | 8GB-48GB |
-| **spectravision-4.37** | 4.37.2 | InternVL2, LLaVA, ShareGPT4V | 8GB-45GB |
-| **spectravision-4.43** | 4.43.0 | Phi-3.5-Vision, Moondream2 | 8GB-18GB |
-| **spectravision-4.49** | 4.49.0 | SmolVLM, Qwen2.5-VL, Pixtral | 3GB-300GB |
-| **spectravision-4.51** | 4.51.0 | Phi-4-Vision, Llama-4-Scout | 45GB-200GB |
+| **ghcr.io/gwleee/spectravision:4.33** | 4.33.0 | Qwen-VL, VisualGLM | 8GB-48GB |
+| **ghcr.io/gwleee/spectravision:4.37** | 4.37.2 | InternVL2, LLaVA, ShareGPT4V | 8GB-45GB |
+| **ghcr.io/gwleee/spectravision:4.43** | 4.43.0 | Phi-3.5-Vision, Moondream2 | 8GB-18GB |
+| **ghcr.io/gwleee/spectravision:4.49** | 4.49.0 | SmolVLM, Qwen2.5-VL, Pixtral | 3GB-300GB |
+| **ghcr.io/gwleee/spectravision:4.51** | 4.51.0 | Phi-4-Vision, Llama-4-Scout | 45GB-200GB |
 
 ---
 
@@ -156,11 +156,11 @@ graph TD
 docker pull ghcr.io/gwleee/spectravision:latest
 
 # 또는 모든 이미지 미리 다운로드 (선택사항)
-docker pull ghcr.io/gwleee/spectravision-4.33:latest
-docker pull ghcr.io/gwleee/spectravision-4.37:latest
-docker pull ghcr.io/gwleee/spectravision-4.43:latest
-docker pull ghcr.io/gwleee/spectravision-4.49:latest
-docker pull ghcr.io/gwleee/spectravision-4.51:latest
+docker pull ghcr.io/gwleee/spectravision:4.33
+docker pull ghcr.io/gwleee/spectravision:4.37
+docker pull ghcr.io/gwleee/spectravision:4.43
+docker pull ghcr.io/gwleee/spectravision:4.49
+docker pull ghcr.io/gwleee/spectravision:4.51
 ```
 
 ### 방법 B: 로컬에서 직접 빌드 (개발자용)
@@ -172,7 +172,7 @@ docker pull ghcr.io/gwleee/spectravision-4.51:latest
 
 # 또는 개별 빌드
 docker build -t spectravision-base:latest -f docker/base/Dockerfile .
-docker build -t spectravision-4.49:latest -f docker/transformers-4.49/Dockerfile .
+docker build -t ghcr.io/gwleee/spectravision:4.49 -f docker/transformers-4.49/Dockerfile .
 docker build -t spectrabench-vision:latest -f docker/integrated/Dockerfile .
 ```
 
@@ -281,7 +281,7 @@ docker-compose -f docker/docker-compose.prod.yml --profile stable up -d --scale 
 # 특정 컨테이너에서 직접 평가 실행
 docker run --gpus all -it \
   -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectravision-4.49:latest
+  ghcr.io/gwleee/spectravision:4.49
 
 # 컨테이너 내부에서
 cd /workspace/VLMEvalKit

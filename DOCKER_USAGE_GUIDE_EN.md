@@ -76,8 +76,8 @@ SpectraBench-Vision System Test
 ✓ Docker connectivity OK
 ✓ GPU detected: 1 GPU(s) available
 ✓ Testing 5 container images...
-✓ spectravision-4.49: OK (SmolVLM, Qwen2.5-VL ready)
-✓ spectravision-4.37: OK (InternVL2, LLaVA ready)
+✓ ghcr.io/gwleee/spectravision:4.49: OK (SmolVLM, Qwen2.5-VL ready)
+✓ ghcr.io/gwleee/spectravision:4.37: OK (InternVL2, LLaVA ready)
 ✓ All systems ready for evaluation!
 ```
 
@@ -102,7 +102,7 @@ docker run --gpus all \
 
 | Feature | Description | User Benefit |
 |---------|-------------|--------------|
-| **Auto Container Selection** | SmolVLM → spectravision-4.49 auto-selected | No version management worries |
+| **Auto Container Selection** | SmolVLM → ghcr.io/gwleee/spectravision:4.49 auto-selected | No version management worries |
 | **Auto Image Download** | Automatically pulls needed images from Registry | No manual management required |
 | **Auto GPU Allocation** | Detects available GPUs and optimally distributes | Maximum resource efficiency |
 | **Auto Result Integration** | Consolidates all evaluation results in `outputs/` | Easy result management |
@@ -113,7 +113,7 @@ User command: --models "SmolVLM" "InternVL2-2B"
 
 DockerOrchestrator automatic processing:
 1. 🔍 Model analysis: SmolVLM → needs 4.49, InternVL2-2B → needs 4.37
-2. 📦 Image check: spectravision-4.49 ✓, spectravision-4.37 ✗ (download starts)
+2. 📦 Image check: ghcr.io/gwleee/spectravision:4.49 ✓, ghcr.io/gwleee/spectravision:4.37 ✗ (download starts)
 3. 🚀 Container execution: SmolVLM on GPU 0, InternVL2-2B on GPU 1
 4. 📊 Result collection: Consolidated storage in outputs/timestamp/
 ```
@@ -126,9 +126,9 @@ DockerOrchestrator automatic processing:
 graph TD
     A[User Command] --> B[DockerOrchestrator]
     B --> C{Model Environment Analysis}
-    C -->|SmolVLM| D[spectravision-4.49]
-    C -->|LLaVA| E[spectravision-4.37] 
-    C -->|Qwen-VL| F[spectravision-4.33]
+    C -->|SmolVLM| D[ghcr.io/gwleee/spectravision:4.49]
+    C -->|LLaVA| E[ghcr.io/gwleee/spectravision:4.37] 
+    C -->|Qwen-VL| F[ghcr.io/gwleee/spectravision:4.33]
     D --> G[Evaluation Results]
     E --> G
     F --> G
@@ -138,11 +138,11 @@ graph TD
 
 | Container | Transformers | Supported Models | Memory Range |
 |-----------|-------------|------------------|--------------|
-| **spectravision-4.33** | 4.33.0 | Qwen-VL, VisualGLM | 8GB-48GB |
-| **spectravision-4.37** | 4.37.2 | InternVL2, LLaVA, ShareGPT4V | 8GB-45GB |
-| **spectravision-4.43** | 4.43.0 | Phi-3.5-Vision, Moondream2 | 8GB-18GB |
-| **spectravision-4.49** | 4.49.0 | SmolVLM, Qwen2.5-VL, Pixtral | 3GB-300GB |
-| **spectravision-4.51** | 4.51.0 | Phi-4-Vision, Llama-4-Scout | 45GB-200GB |
+| **ghcr.io/gwleee/spectravision:4.33** | 4.33.0 | Qwen-VL, VisualGLM | 8GB-48GB |
+| **ghcr.io/gwleee/spectravision:4.37** | 4.37.2 | InternVL2, LLaVA, ShareGPT4V | 8GB-45GB |
+| **ghcr.io/gwleee/spectravision:4.43** | 4.43.0 | Phi-3.5-Vision, Moondream2 | 8GB-18GB |
+| **ghcr.io/gwleee/spectravision:4.49** | 4.49.0 | SmolVLM, Qwen2.5-VL, Pixtral | 3GB-300GB |
+| **ghcr.io/gwleee/spectravision:4.51** | 4.51.0 | Phi-4-Vision, Llama-4-Scout | 45GB-200GB |
 
 ---
 
@@ -156,11 +156,11 @@ graph TD
 docker pull ghcr.io/gwleee/spectravision:latest
 
 # Or pre-download all images (optional)
-docker pull ghcr.io/gwleee/spectravision-4.33:latest
-docker pull ghcr.io/gwleee/spectravision-4.37:latest
-docker pull ghcr.io/gwleee/spectravision-4.43:latest
-docker pull ghcr.io/gwleee/spectravision-4.49:latest
-docker pull ghcr.io/gwleee/spectravision-4.51:latest
+docker pull ghcr.io/gwleee/spectravision:4.33
+docker pull ghcr.io/gwleee/spectravision:4.37
+docker pull ghcr.io/gwleee/spectravision:4.43
+docker pull ghcr.io/gwleee/spectravision:4.49
+docker pull ghcr.io/gwleee/spectravision:4.51
 ```
 
 ### Method B: Local Build (Developer Use)
@@ -172,7 +172,7 @@ docker pull ghcr.io/gwleee/spectravision-4.51:latest
 
 # Or individual builds
 docker build -t spectravision-base:latest -f docker/base/Dockerfile .
-docker build -t spectravision-4.49:latest -f docker/transformers-4.49/Dockerfile .
+docker build -t ghcr.io/gwleee/spectravision:4.49 -f docker/transformers-4.49/Dockerfile .
 docker build -t spectrabench-vision:latest -f docker/integrated/Dockerfile .
 ```
 
@@ -281,7 +281,7 @@ docker-compose -f docker/docker-compose.prod.yml --profile stable up -d --scale 
 # Run evaluation directly in specific container
 docker run --gpus all -it \
   -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectravision-4.49:latest
+  ghcr.io/gwleee/spectravision:4.49
 
 # Inside container
 cd /workspace/VLMEvalKit

@@ -49,7 +49,7 @@ graph TD
     E --> F
 ```
 
-**사용자가 실행하는 것**: `spectrabench-vision:latest` (통합 오케스트레이터)  
+**사용자가 실행하는 것**: `ghcr.io/gwleee/spectravision:latest` (통합 오케스트레이터)  
 **내부적으로 일어나는 일**: 모델에 맞는 transformer 버전 컨테이너 자동 실행
 
 > 📖 **자세한 사용법**: [Docker 사용 가이드 (한국어)](DOCKER_USAGE_GUIDE.md) | [Docker Usage Guide (EN)](DOCKER_USAGE_GUIDE_EN.md)
@@ -72,14 +72,14 @@ nano .env  # HUGGING_FACE_HUB_TOKEN=hf_your_token_here
 docker run -it --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectrabench-vision:latest \
+  ghcr.io/gwleee/spectravision:latest \
   python3 scripts/docker_main.py --mode interactive
 ```
 
 **📋 첫 실행시 자동으로 진행되는 작업들:**
 
 1. **🔄 통합 오케스트레이터 다운로드** (첫 실행시, ~2분)
-   - `spectrabench-vision:latest` 이미지 자동 다운로드
+   - `ghcr.io/gwleee/spectravision:latest` 이미지 자동 다운로드
    - Docker-in-Docker 환경 설정 완료
 
 2. **🎯 대화형 메뉴 시작**
@@ -149,7 +149,7 @@ docker run -it --gpus all \
 docker run -it --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectrabench-vision:latest \
+  ghcr.io/gwleee/spectravision:latest \
   python3 scripts/docker_main.py --mode interactive
 ```
 **실행 후**: 메뉴에서 모델과 벤치마크를 선택하면 자동으로 적절한 환경에서 실행됩니다.
@@ -160,7 +160,7 @@ docker run -it --gpus all \
 docker run --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/outputs:/workspace/outputs \
-  ghcr.io/gwleee/spectrabench-vision:latest \
+  ghcr.io/gwleee/spectravision:latest \
   python3 scripts/docker_main.py --mode batch \
   --models "SmolVLM" "InternVL2-8B" "Qwen2.5-VL-3B" \
   --benchmarks "MMBench" "TextVQA"
@@ -170,7 +170,7 @@ docker run --gpus all \
 ```bash
 docker run --rm --gpus all \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  ghcr.io/gwleee/spectrabench-vision:latest \
+  ghcr.io/gwleee/spectravision:latest \
   python3 scripts/docker_main.py --mode test
 ```
 
@@ -179,12 +179,12 @@ docker run --rm --gpus all \
 # 특정 GPU 사용
 docker run -it --gpus all -e NVIDIA_VISIBLE_DEVICES=0,1 \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  ghcr.io/gwleee/spectrabench-vision:latest
+  ghcr.io/gwleee/spectravision:latest
 
 # 메모리 절약 (최신 모델만)
 docker run -it --gpus all -e PULL_IMAGES=minimal \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  ghcr.io/gwleee/spectrabench-vision:latest
+  ghcr.io/gwleee/spectravision:latest
 ```
 
 ---
@@ -234,7 +234,7 @@ docker run -e NVIDIA_VISIBLE_DEVICES=0 ...  # GPU 0만 사용
 **❌ Docker 이미지 다운로드 실패**
 ```bash
 # 해결: 네트워크 확인 및 수동 pull
-docker pull ghcr.io/gwleee/spectrabench-vision:latest
+docker pull ghcr.io/gwleee/spectravision:latest
 ```
 
 ---
@@ -323,7 +323,7 @@ SpectraBench-Vision/
 │
 ├── docker/                   # Docker 인프라
 │   ├── base/                 # 공통 베이스 이미지
-│   ├── integrated/           # 통합 시스템 (spectrabench-vision:latest)
+│   ├── integrated/           # 통합 시스템 (ghcr.io/gwleee/spectravision:latest)
 │   ├── transformers-4.33/    # 4.33.0 컨테이너 + requirements.txt
 │   ├── transformers-4.37/    # 4.37.2 컨테이너 + requirements.txt  
 │   ├── transformers-4.43/    # 4.43.0 컨테이너 + requirements.txt
@@ -381,7 +381,7 @@ SpectraBench-Vision/
 ## 🏛️ 인용
 
 ```bibtex
-@software{spectrabench-vision2025,
+@software{ghcr.io/gwleee/spectravision:latest2025,
   title={SpectraBench-Vision},
   author={KISTI Large-scale AI Research Center},
   year={2025},

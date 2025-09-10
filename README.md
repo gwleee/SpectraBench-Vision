@@ -49,7 +49,7 @@ graph TD
     E --> F
 ```
 
-**What users run**: `spectrabench-vision:latest` (integrated orchestrator)  
+**What users run**: `ghcr.io/gwleee/spectravision:latest` (integrated orchestrator)  
 **What happens internally**: Automatically runs appropriate transformer version container per model
 
 > 📖 **Detailed Usage**: [Docker Usage Guide (EN)](DOCKER_USAGE_GUIDE_EN.md) | [Docker 사용 가이드 (한국어)](DOCKER_USAGE_GUIDE.md)
@@ -79,7 +79,7 @@ docker run -it --gpus all \
 **📋 What happens automatically on first run:**
 
 1. **🔄 Integrated Orchestrator Download** (first run only)
-   - `spectrabench-vision:latest` image auto-download
+   - `ghcr.io/gwleee/spectravision:latest` image auto-download
    - Docker-in-Docker environment setup complete
 
 2. **🎯 Interactive Menu Launch**
@@ -105,7 +105,7 @@ docker run -it --gpus all \
 4. **⚡ Automatic Environment Setup** (after model selection)
    ```
    🔍 Preparing environment for SmolVLM model...
-   📥 Downloading spectravision-4.49:latest... [████████████] 100%
+   📥 Downloading ghcr.io/gwleee/spectravision:4.49... [████████████] 100%
    🔧 Starting optimized VLMEvalKit environment...
       ✅ All models ready with automatic token authentication
    ✅ transformers==4.49.0 environment ready!
@@ -278,7 +278,7 @@ python scripts/main.py --mode interactive
 
 ```bash
 # Use specific transformer version directly
-docker run --gpus all -it ghcr.io/gwleee/spectravision-4.49:latest
+docker run --gpus all -it ghcr.io/gwleee/spectravision:4.49
 
 # Direct VLMEvalKit usage
 cd /workspace/VLMEvalKit
@@ -328,7 +328,7 @@ SpectraBench-Vision/
 │
 ├── docker/                   # Docker infrastructure
 │   ├── base/                 # Common base image
-│   ├── integrated/           # Integrated system (spectrabench-vision:latest)
+│   ├── integrated/           # Integrated system (ghcr.io/gwleee/spectravision:latest)
 │   ├── transformers-4.33/    # 4.33.0 container + requirements.txt
 │   ├── transformers-4.37/    # 4.37.2 container + requirements.txt  
 │   ├── transformers-4.43/    # 4.43.0 container + requirements.txt
