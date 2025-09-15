@@ -16,3 +16,13 @@ accelerate>=0.26.0
 # Additional utilities
 diffusers==0.25.0
 optimum==1.16.1
+
+# Additional VLMEvalKit model dependencies
+# For InstructBLIP
+
+# For VisualGLM
+sat
+
+# General VLMEvalKit dependencies
+decord
+pycocotools

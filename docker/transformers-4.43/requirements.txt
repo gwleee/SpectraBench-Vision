@@ -14,3 +14,13 @@ tiktoken==0.5.2
 
 # Phi-3.5-Vision specific dependencies (optional)
 # flash-attn==2.5.0  # Uncomment if GPU supports it
+
+# Additional VLMEvalKit model dependencies
+# For InstructBLIP
+
+# For VisualGLM
+sat
+
+# General VLMEvalKit dependencies
+decord
+pycocotools

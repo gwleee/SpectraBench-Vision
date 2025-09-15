@@ -15,6 +15,7 @@ x-common-config: &common-config
   environment:
     - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0}
     - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
+    - HUGGING_FACE_HUB_TOKEN=${HF_TOKEN}
     - PYTHONPATH=/workspace:/workspace/VLMEvalKit
   volumes:
     # Note: VLMEvalKit directory mounted per container version for compatibility

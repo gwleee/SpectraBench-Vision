@@ -18,3 +18,13 @@ charset-normalizer==3.3.2
 
 # VisualGLM specific dependencies
 icetk==0.0.7
+
+# Additional VLMEvalKit model dependencies
+# For InstructBLIP
+
+# For VisualGLM  
+# sat  # Disabled due to Python 3.10+ compatibility issue
+
+# General VLMEvalKit dependencies
+decord
+pycocotools

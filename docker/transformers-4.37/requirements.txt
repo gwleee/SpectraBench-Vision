@@ -22,3 +22,12 @@ httpx==0.24.0
 icetk==0.0.7
 decord==0.6.0
 opencv-python==4.8.1.78
+
+# Additional VLMEvalKit model dependencies
+# For InstructBLIP
+
+# For VisualGLM
+# sat  # Disabled due to Python 3.10+ compatibility issue
+
+# General VLMEvalKit dependencies
+pycocotools
