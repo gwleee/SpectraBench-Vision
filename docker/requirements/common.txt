@@ -1,0 +1,49 @@
+# SpectraVision Common Dependencies
+# Core VLMEvalKit and evaluation dependencies
+
+# Core ML frameworks
+accelerate>=0.20.0
+torch>=2.0.0
+torchvision
+torchaudio
+
+# Vision processing
+pillow>=9.0.0
+opencv-python
+imageio
+einops
+
+# NLP and Tokenization
+tiktoken
+sentencepiece
+protobuf
+
+# Model loading and inference
+huggingface_hub>=0.15.0
+datasets
+evaluate
+
+# Utilities
+numpy
+pandas
+scipy
+scikit-learn
+matplotlib
+seaborn
+tqdm
+pyyaml
+requests
+
+# API and evaluation specific
+openai
+anthropic
+google-generativeai
+
+# Development and monitoring
+psutil
+gpustat
+pynvml
+
+# File and data handling
+openpyxl
+xlsxwriter

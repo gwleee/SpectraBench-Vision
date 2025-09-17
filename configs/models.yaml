@@ -53,10 +53,11 @@ transformers_4_33:
   description: "Legacy models requiring transformers 4.33.0 - Qwen and older models"
   version: "4.33.0"
   models:
-    # Small models (≤6B)
-    - name: "VisualGLM-6B"
-      vlm_id: "VisualGLM_6b"
-      memory_gb: 18
+    # Small models (≤7B)
+    - name: "InstructBLIP-7B"
+      vlm_id: "instructblip_7b"
+      memory_gb: 25
+      note: "Replaced VisualGLM-6B to avoid sat package dependency issues"
       
     # Qwen2-VL-2B moved to transformers_4_49 for proper compatibility
       

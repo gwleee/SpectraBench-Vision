@@ -21,6 +21,7 @@
 Vision-Language 모델들은 각기 다른 `transformers` 버전을 요구합니다:
 - **Qwen-VL** → transformers 4.33.0  
 - **LLaVA** → transformers 4.37.2
+- **Phi-3.5-Vision** → transformers 4.43.0
 - **SmolVLM** → transformers 4.49.0
 - **Phi-4-Vision** → transformers 4.51.0
 
@@ -36,7 +37,7 @@ Vision-Language 모델들은 각기 다른 `transformers` 버전을 요구합니
 - ✅ **완전한 재현성** - 어디서든 동일한 결과
 - ✅ **30개 모델 × 24개 벤치마크 = 720개 조합**
 
-## 🚀 동작 원리
+## 🚀 동작 원리 예시
 
 ```mermaid
 graph TD
@@ -193,11 +194,13 @@ docker run -it --gpus all -e PULL_IMAGES=minimal \
 
 | Transformer 버전 | 대표 모델 | 모델 수 | 메모리 범위 |
 |-----------------|---------|--------|------------|
-| **4.33.0** | Qwen-VL, VisualGLM | 8개 | 8GB - 48GB |
+| **4.33.0** | Qwen-VL, InstructBLIP | 8개 | 8GB - 48GB |
 | **4.37.2** | InternVL2, LLaVA, ShareGPT4V | 8개 | 8GB - 45GB |
 | **4.43.0** | Phi-3.5-Vision, Moondream2 | 2개 | 8GB - 18GB |
 | **4.49.0** | SmolVLM, Qwen2.5-VL, Pixtral | 10개 | 3GB - 300GB |
 | **4.51.0** | Phi-4-Vision, Llama-4-Scout | 2개 | 45GB - 200GB |
+
+> 💡 **모델 업데이트 안내**: Python 3.10+에서 빌드 불안정성을 야기하던 `sat` 패키지 의존성 문제를 해결하기 위해 VisualGLM-6B를 InstructBLIP-7B로 대체했습니다. 두 모델 모두 동일한 `transformers 4.33.0` 환경에서 실행됩니다.
 
 
 ## 📊 지원 벤치마크 (24개)

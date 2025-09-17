@@ -6,12 +6,9 @@ FROM nvidia/cuda:12.1.1-runtime-ubuntu22.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-dev \
-    python3-pip \
-    python3-venv \
+# Install system dependencies first including CUDA development tools
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
     git \
     wget \
     curl \
@@ -24,31 +21,54 @@ RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
     && rm -rf /var/lib/apt/lists/*
 
-# Set Python aliases
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
+# Add NVIDIA CUDA repository and install CUDA development tools for flash-attn compilation
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.0-1_all.deb \
+    && dpkg -i cuda-keyring_1.0-1_all.deb \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    cuda-nvcc-12-1 \
+    cuda-cudart-dev-12-1 \
+    cuda-nvml-dev-12-1 \
+    libcudnn8-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm cuda-keyring_1.0-1_all.deb
 
-# Upgrade pip
-RUN python -m pip install --upgrade pip setuptools wheel
+# Set CUDA environment variables for compilation
+ENV CUDA_HOME=/usr/local/cuda-12.1
+ENV PATH=${CUDA_HOME}/bin:${PATH}
+ENV LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
+
+# Install Python 3.9 from deadsnakes PPA with proper error handling
+RUN add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    python3.9 \
+    python3.9-dev \
+    python3.9-venv \
+    python3.9-distutils \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set Python aliases to make python3.9 the default
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
+
+# Install pip for Python 3.9 using ensurepip (more stable)
+RUN python3.9 -m ensurepip --upgrade \
+    || (curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
+    && python3.9 get-pip.py --no-cache-dir \
+    && rm get-pip.py)
+
+# Upgrade pip with explicit version constraints
+RUN python3.9 -m pip install --no-cache-dir --upgrade \
+    "pip>=23.0" \
+    "setuptools>=65.0" \
+    "wheel>=0.38"
 
 # Create workspace directory
 WORKDIR /workspace
 
-# Install common Python dependencies (version pinned for reproducibility)
-RUN pip install \
-    torch==2.1.2 \
-    torchvision==0.16.2 \
-    numpy==1.26.4 \
-    pillow==10.0.1 \
-    requests==2.31.0 \
-    tqdm==4.66.1 \
-    pandas==2.1.4 \
-    matplotlib==3.8.2 \
-    seaborn==0.13.0 \
-    opencv-python==4.8.1.78 \
-    accelerate==0.25.0 \
-    bitsandbytes==0.41.3 \
-    peft==0.7.1 \
-    validators==0.22.0
+# Base image only contains system-level dependencies
+# Python packages will be installed by individual transformer containers
 
 # Copy SpectraVision codebase
 COPY spectravision/ /workspace/spectravision/
@@ -59,30 +79,7 @@ COPY patches/ /workspace/patches/
 # Note: VLMEvalKit will be copied by individual transformer version containers
 # This base image focuses on common dependencies only
 
-# Install VLMEvalKit required dependencies (avoiding duplicates with common deps)
-RUN pip install \
-    python-dotenv==1.0.0 \
-    rich==13.7.0 \
-    tabulate==0.9.0 \
-    PyYAML==6.0.1 \
-    scikit-learn==1.2.2 \
-    scipy==1.11.4 \
-    datasets==2.15.0 \
-    huggingface-hub==0.19.4 \
-    safetensors==0.4.1 \
-    timm==0.9.12 \
-    omegaconf==2.3.0 \
-    nltk==3.8.1 \
-    imageio==2.33.1 \
-    openpyxl==3.1.2 \
-    portalocker==2.8.2 \
-    timeout-decorator==0.5.0 \
-    xlsxwriter==3.1.9 \
-    openai==1.6.1 \
-    json-repair==0.7.0 \
-    ipdb==0.13.13 \
-    sty==1.0.6 \
-    qwen-vl-utils==0.0.3
+# VLMEvalKit and all Python dependencies will be installed by transformer containers
 
 # VLMEvalKit installation will be handled by individual transformer version containers
 

@@ -1,0 +1,13 @@
+# Transformers 4.33 specific dependencies
+# For Qwen-VL, InstructBLIP models
+
+transformers==4.33.0
+tokenizers==0.13.3
+
+# sat package for deep learning primitives (Python 3.9 compatible)
+SwissArmyTransformer
+
+# Model-specific dependencies
+qwen-vl-utils
+bitsandbytes
+flash-attn

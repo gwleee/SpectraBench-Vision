@@ -2,6 +2,9 @@
 """
 SpectraVision Main Entry Point
 Hardware-aware multimodal model evaluation system
+- 단일 환경에서 평가 실행
+- interactive/non-interactive 모드 지원
+- availability testing 기능 포함
 """
 
 import argparse

@@ -1,6 +1,9 @@
 #!/bin/bash
 # setup_vlmevalkit_versions.sh - Create version-specific VLMEvalKit directories with patches
 
+# VLMEvalKit-4.33, VLMEvalKit-4.37 등 버전별 디렉토리 생성
+# 패치 자동 적용 포함
+
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

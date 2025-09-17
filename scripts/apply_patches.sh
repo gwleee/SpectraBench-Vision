@@ -1,5 +1,8 @@
 #!/bin/bash
 # apply_patches.sh - Automatically apply VLMEvalKit token fixes
+# VLMEvalKit 토큰 인증 패치 적용
+# Docker 빌드 중 자동 실행됨
+# 10개 모델별 패치 관리
 
 set -e
 
@@ -34,7 +37,7 @@ PATCHES_APPLIED=0
 for patch_file in "$PATCHES_DIR"/*.patch; do
     if [ -f "$patch_file" ]; then
         patch_name=$(basename "$patch_file")
-        echo "📝 Applying patch: $patch_name"
+        echo "Applying patch: $patch_name"
         
         # Try to apply patch (check if it can be applied first)
         if git apply --check "$patch_file" 2>/dev/null; then

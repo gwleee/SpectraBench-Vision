@@ -1,0 +1,13 @@
+# Transformers 4.37 specific dependencies
+# For InternVL2, LLaVA, ShareGPT4V models
+
+transformers==4.37.2
+tokenizers==0.15.2
+
+# Model-specific dependencies
+timm
+xformers
+bitsandbytes
+flash-attn
+
+# InternVL2 uses standard transformers + dependencies above - no extra package needed

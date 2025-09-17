@@ -193,11 +193,13 @@ docker run -it --gpus all -e PULL_IMAGES=minimal \
 
 | Transformer Version | Representative Models | Count | Memory Range |
 |-----------------|---------|--------|------------|
-| **4.33.0** | Qwen-VL, VisualGLM | 8 | 8GB - 48GB |
+| **4.33.0** | Qwen-VL, InstructBLIP | 8 | 8GB - 48GB |
 | **4.37.2** | InternVL2, LLaVA, ShareGPT4V | 8 | 8GB - 45GB |
 | **4.43.0** | Phi-3.5-Vision, Moondream2 | 2 | 8GB - 18GB |
 | **4.49.0** | SmolVLM, Qwen2.5-VL, Pixtral | 10 | 3GB - 300GB |
 | **4.51.0** | Phi-4-Vision, Llama-4-Scout | 2 | 45GB - 200GB |
+
+> 💡 **Model Update Note**: VisualGLM-6B was replaced with InstructBLIP-7B to resolve `sat` package dependency issues that caused build instability with Python 3.10+. Both models run in the same `transformers 4.33.0` environment.
 
 **🔥 Popular Models:**
 - **SmolVLM**: 256M, 500M, 1.7B (Ultra-lightweight)

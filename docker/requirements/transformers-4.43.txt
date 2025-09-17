@@ -1,0 +1,14 @@
+# Transformers 4.43 specific dependencies  
+# For Phi-3.5-Vision, Moondream2 models
+
+transformers==4.43.0
+tokenizers==0.19.1
+
+# Model-specific dependencies
+timm
+xformers
+bitsandbytes
+flash-attn
+
+# For Phi-3.5-Vision
+optimum
