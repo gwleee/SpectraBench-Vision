@@ -80,14 +80,14 @@ run_eval_451.sh
 /tmp/
 *.tmp
 
-# Development/Old Documentation (not for git upload)
+# Git configuration
+.gitignore
+
+# Documentation - exclude all .md files except README.md and DOCKER_USAGE_GUIDE.md
+*.md
+!README.md
+!DOCKER_USAGE_GUIDE.md
 *.md.old
-CLAUDE.md
-CRITICAL_FIXES.md
-QUICKSTART_TEST_MODE.md
-REBOOT_RECOVERY.md
-TESTING_HISTORY.md
-DOCKER_USAGE_GUIDE_EN.md
 docs/
 
 # Development/Test Scripts (not needed for production docker images)

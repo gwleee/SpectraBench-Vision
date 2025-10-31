@@ -1,4 +1,4 @@
-# SpectraBench-Vision
+# SpectraBench-Vision (Alpha version)
 
 **KISTI 초거대AI연구센터**에서 개발한 Docker 기반 VLM 평가 시스템
 
