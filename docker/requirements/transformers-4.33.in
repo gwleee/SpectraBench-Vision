@@ -1,0 +1,39 @@
+# Transformers 4.33 base dependencies
+transformers==4.33.2
+tokenizers==0.13.3
+
+# Core ML packages
+torch>=2.0.0
+torchvision
+numpy>=1.24.0,<2.0  # Pin to 1.x for binary compatibility with compiled extensions
+pillow
+
+# Vision-Language model dependencies
+SwissArmyTransformer
+qwen-vl-utils
+transformers-stream-generator
+bitsandbytes
+flash-attn
+xformers
+deepspeed
+timm
+accelerate
+peft
+sentencepiece
+protobuf
+
+# Model-specific dependencies (identified by automated testing)
+salesforce-lavis  # Required by InstructBLIP models
+wandb             # Required by VisualGLM
+# Note: mplug-owl2 needs to be installed from source (GitHub)
+
+# VLMEvalKit essential dependencies
+# Note: pandas/matplotlib versions inherited from base-requirements.in
+# to ensure numpy<2.0 compatibility
+pandas>=2.0.0,<2.3.0  # Pin to avoid NumPy 2.x requirement
+matplotlib>=3.6.0,<3.9.0  # Pin to avoid NumPy 2.x requirement
+seaborn>=0.12.0,<0.13.0  # Pin for stability
+requests
+tqdm
+scipy
+scikit-learn

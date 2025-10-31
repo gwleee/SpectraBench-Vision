@@ -1,0 +1,70 @@
+# SpectraVision Requirements
+# Core dependencies with unified transformer version for compatibility
+
+# PyTorch and related
+torch==2.1.2
+torchvision==0.16.2
+numpy==1.26.4
+
+# Transformers ecosystem (unified version for all models)
+transformers==4.37.2
+tokenizers==0.15.1
+accelerate==0.21.0
+sentencepiece==0.1.99
+
+# Computer Vision
+timm==0.6.13
+Pillow>=10.0.0
+
+# Hugging Face
+huggingface-hub>=0.19.3
+datasets>=2.0.0
+safetensors>=0.4.1
+
+# Scientific computing
+scipy>=1.9.0
+scikit-learn==1.2.2
+pandas>=1.5.0
+
+# Configuration and I/O
+PyYAML>=6.0
+click>=8.0.0
+tqdm>=4.65.0
+
+# System monitoring
+psutil>=5.9.0
+
+# Visualization and analysis
+matplotlib>=3.6.0
+seaborn>=0.12.0
+
+# Development tools (optional)
+pytest>=7.0.0
+black>=22.0.0
+flake8>=5.0.0
+
+# VLMEvalKit additional dependencies
+python-dotenv
+einops
+google-genai
+gradio
+imageio
+ipdb
+json-repair
+nltk
+omegaconf
+openai
+openpyxl
+portalocker
+qwen-vl-utils
+rich
+sty
+tabulate
+tiktoken
+timeout-decorator
+xlsxwriter
+
+# Note: The following packages are installed by setup script:
+# - VLMEvalKit (from git+https://github.com/open-compass/VLMEvalKit.git)
+# - LLaVA (from git+https://github.com/haotian-liu/LLaVA.git)
+# - Yi repository (cloned for Yi-VL support)

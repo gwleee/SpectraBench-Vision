@@ -1,0 +1,32 @@
+--- a/VLMEvalKit/vlmeval/vlm/llama4.py
++++ b/VLMEvalKit/vlmeval/vlm/llama4.py
+@@ -1,4 +1,5 @@
+ import torch
++import os
+ from PIL import Image
+ from .base import BaseModel
+ from ..smp import *
+@@ -20,6 +21,10 @@ class llama4(BaseModel):
+         except Exception as e:
+             logging.critical('Please install transformers>=4.51.0 before using llama4.')
+             raise e
++        
++        # Get HuggingFace token from environment
++        token = os.getenv('HUGGING_FACE_HUB_TOKEN') or os.getenv('HF_TOKEN')
++        token_kwargs = {'token': token} if token else {}
+         self.generate_kwargs = dict(
+             max_new_tokens=kwargs.get('max_new_tokens', 4096),
+             top_p=kwargs.get('top_p', 0.001),
+@@ -82,10 +87,11 @@ class llama4(BaseModel):
+             self.model = Llama4ForConditionalGeneration.from_pretrained(
+                 model_path,
+                 attn_implementation="flash_attention_2",
+                 device_map="auto",
+                 torch_dtype=torch.bfloat16,
++                **token_kwargs
+             )
+ 
+         self.device = 'cuda'
+-        self.processor = AutoProcessor.from_pretrained(model_path)
++        self.processor = AutoProcessor.from_pretrained(model_path, **token_kwargs)
+         self.model_name = model_path

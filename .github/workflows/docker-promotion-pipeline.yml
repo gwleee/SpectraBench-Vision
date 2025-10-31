@@ -1,0 +1,420 @@
+name: Docker Image Promotion Pipeline
+
+on:
+  # Trigger on pushes to candidate images
+  push:
+    branches:
+      - main
+      - master
+      - 'release/**'
+    paths:
+      - 'docker/**'
+      - 'scripts/**'
+      - '.github/workflows/**'
+
+  # Manual trigger for promotions
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Promotion mode'
+        required: true
+        default: 'batch'
+        type: choice
+        options:
+          - batch
+          - force
+          - list
+          - schedule
+      candidate_tag:
+        description: 'Specific candidate tag to promote (optional)'
+        required: false
+        type: string
+      skip_tests:
+        description: 'Skip smoke tests and mini-benchmarks'
+        required: false
+        default: false
+        type: boolean
+
+  # Scheduled promotions (daily at 2 AM UTC)
+  schedule:
+    - cron: '0 2 * * *'
+
+  # Registry package events (when new candidate images are pushed)
+  registry_package:
+    types: [published]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  PYTHON_VERSION: 3.11
+
+jobs:
+  # Job 1: Detect candidate images and prepare promotion matrix
+  detect-candidates:
+    runs-on: ubuntu-latest
+    outputs:
+      candidates: ${{ steps.scan.outputs.candidates }}
+      has_candidates: ${{ steps.scan.outputs.has_candidates }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install docker requests pyyaml
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Scan for candidate images
+        id: scan
+        run: |
+          python3 scripts/automated_promotion.py --mode list --json > candidates.json
+
+          # Check if we have any eligible candidates
+          ELIGIBLE_COUNT=$(cat candidates.json | jq -r '.eligible_candidates // 0')
+          echo "has_candidates=$([[ $ELIGIBLE_COUNT -gt 0 ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+
+          # Extract candidates for matrix
+          if [[ $ELIGIBLE_COUNT -gt 0 ]]; then
+            CANDIDATES=$(cat candidates.json | jq -c '.eligible')
+            echo "candidates=$CANDIDATES" >> $GITHUB_OUTPUT
+          else
+            echo "candidates=[]" >> $GITHUB_OUTPUT
+          fi
+
+          echo "Found $ELIGIBLE_COUNT eligible candidates for promotion"
+
+  # Job 2: Run promotion pipeline for each candidate
+  promote-candidates:
+    needs: detect-candidates
+    if: needs.detect-candidates.outputs.has_candidates == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        candidate: ${{ fromJson(needs.detect-candidates.outputs.candidates) }}
+      fail-fast: false
+      max-parallel: 2  # Limit concurrent promotions to avoid resource conflicts
+
+    env:
+      HF_TOKEN: ${{ secrets.HUGGING_FACE_HUB_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker.io jq
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install docker pyyaml psutil nvidia-ml-py3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up GPU environment (if available)
+        run: |
+          # Check if NVIDIA GPUs are available
+          if command -v nvidia-smi &> /dev/null; then
+            echo "CUDA_VISIBLE_DEVICES=0" >> $GITHUB_ENV
+            echo "GPU_AVAILABLE=true" >> $GITHUB_ENV
+            nvidia-smi
+          else
+            echo "GPU_AVAILABLE=false" >> $GITHUB_ENV
+            echo "⚠️ No NVIDIA GPU detected, promotion tests will be skipped"
+          fi
+
+      - name: Run promotion pipeline
+        id: promote
+        run: |
+          CANDIDATE_TAG="${{ matrix.candidate.tag }}"
+          echo "Promoting candidate: $CANDIDATE_TAG"
+
+          # Create output directory
+          mkdir -p outputs/promotion_logs
+
+          # Determine if we should skip tests based on GPU availability or manual input
+          SKIP_TESTS="false"
+          if [[ "${{ env.GPU_AVAILABLE }}" != "true" ]] || [[ "${{ github.event.inputs.skip_tests }}" == "true" ]]; then
+            SKIP_TESTS="true"
+            echo "⚠️ Skipping GPU tests (GPU unavailable or manually disabled)"
+          fi
+
+          # Run promotion pipeline with JSON output
+          if python3 scripts/promote_docker_image.py \
+            "$CANDIDATE_TAG" \
+            $([ "$SKIP_TESTS" == "true" ] && echo "--skip-tests") \
+            --json > "outputs/promotion_logs/${CANDIDATE_TAG//\//_}-$(date +%Y%m%d_%H%M%S).json"; then
+
+            echo "promotion_status=success" >> $GITHUB_OUTPUT
+            echo "✅ Successfully promoted $CANDIDATE_TAG"
+
+            # Extract stable tag from results
+            STABLE_TAG=$(cat "outputs/promotion_logs/${CANDIDATE_TAG//\//_}-$(date +%Y%m%d_%H%M%S).json" | jq -r '.stable_tag // "unknown"')
+            echo "stable_tag=$STABLE_TAG" >> $GITHUB_OUTPUT
+
+          else
+            echo "promotion_status=failed" >> $GITHUB_OUTPUT
+            echo "❌ Failed to promote $CANDIDATE_TAG"
+            exit 1
+          fi
+
+      - name: Upload promotion logs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: promotion-logs-${{ matrix.candidate.version }}-${{ github.run_number }}
+          path: outputs/promotion_logs/
+          retention-days: 30
+
+      - name: Update promotion status
+        if: steps.promote.outputs.promotion_status == 'success'
+        run: |
+          echo "📊 Promotion Summary:"
+          echo "Candidate: ${{ matrix.candidate.tag }}"
+          echo "Stable: ${{ steps.promote.outputs.stable_tag }}"
+          echo "Version: ${{ matrix.candidate.version }}"
+          echo "Age: ${{ matrix.candidate.age_hours }} hours"
+
+  # Job 3: Batch promotion (alternative to matrix-based promotion)
+  batch-promotion:
+    if: |
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.mode == 'batch' ||
+      github.event.inputs.mode == 'force'
+    runs-on: ubuntu-latest
+
+    env:
+      HF_TOKEN: ${{ secrets.HUGGING_FACE_HUB_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker.io jq
+          python -m pip install --upgrade pip
+          pip install docker pyyaml psutil nvidia-ml-py3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run batch promotion
+        run: |
+          mkdir -p outputs/batch_promotion
+
+          # Determine promotion mode
+          FORCE_FLAG=""
+          if [[ "${{ github.event.inputs.mode }}" == "force" ]]; then
+            FORCE_FLAG="--force"
+            echo "🔥 Running FORCED batch promotion (bypassing age rules)"
+          fi
+
+          # Run batch promotion
+          python3 scripts/automated_promotion.py \
+            --mode batch \
+            $FORCE_FLAG \
+            --json > outputs/batch_promotion/batch_result_$(date +%Y%m%d_%H%M%S).json
+
+          # Show summary
+          RESULT_FILE=$(ls outputs/batch_promotion/batch_result_*.json | tail -1)
+          SUCCESSFUL=$(cat $RESULT_FILE | jq -r '.successful_promotions // 0')
+          FAILED=$(cat $RESULT_FILE | jq -r '.failed_promotions // 0')
+          TOTAL=$(cat $RESULT_FILE | jq -r '.eligible_candidates // 0')
+
+          echo "📊 Batch Promotion Summary:"
+          echo "Total eligible: $TOTAL"
+          echo "Successful: $SUCCESSFUL"
+          echo "Failed: $FAILED"
+
+          if [[ $FAILED -gt 0 ]]; then
+            echo "❌ Some promotions failed"
+            cat $RESULT_FILE | jq -r '.errors[]?' || echo "No detailed error information available"
+            exit 1
+          fi
+
+      - name: Upload batch results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: batch-promotion-results-${{ github.run_number }}
+          path: outputs/batch_promotion/
+          retention-days: 30
+
+  # Job 4: Send notifications
+  notify:
+    needs: [detect-candidates, promote-candidates, batch-promotion]
+    if: always() && (needs.promote-candidates.result != 'skipped' || needs.batch-promotion.result != 'skipped')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare notification
+        id: prepare
+        run: |
+          # Collect results from previous jobs
+          PROMOTE_RESULT="${{ needs.promote-candidates.result }}"
+          BATCH_RESULT="${{ needs.batch-promotion.result }}"
+
+          # Determine overall status
+          if [[ "$PROMOTE_RESULT" == "success" || "$BATCH_RESULT" == "success" ]]; then
+            STATUS="✅ SUCCESS"
+            COLOR="good"
+          elif [[ "$PROMOTE_RESULT" == "failure" || "$BATCH_RESULT" == "failure" ]]; then
+            STATUS="❌ FAILURE"
+            COLOR="danger"
+          else
+            STATUS="⚠️ PARTIAL"
+            COLOR="warning"
+          fi
+
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "color=$COLOR" >> $GITHUB_OUTPUT
+
+      - name: Send Slack notification
+        if: vars.SLACK_WEBHOOK_URL
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              "text": "Docker Image Promotion Pipeline",
+              "attachments": [
+                {
+                  "color": "${{ steps.prepare.outputs.color }}",
+                  "fields": [
+                    {
+                      "title": "Status",
+                      "value": "${{ steps.prepare.outputs.status }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Repository",
+                      "value": "${{ github.repository }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Trigger",
+                      "value": "${{ github.event_name }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Workflow Run",
+                      "value": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details>",
+                      "short": true
+                    }
+                  ],
+                  "footer": "GitHub Actions",
+                  "ts": ${{ github.event.head_commit.timestamp && github.event.head_commit.timestamp || 'null' }}
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ vars.SLACK_WEBHOOK_URL }}
+
+      - name: Create GitHub issue on failure
+        if: failure() && github.event_name != 'workflow_dispatch'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `🚨 Docker Promotion Pipeline Failed - Run #${{ github.run_number }}`;
+            const body = `
+            ## Promotion Pipeline Failure Report
+
+            **Run ID**: ${{ github.run_id }}
+            **Trigger**: ${{ github.event_name }}
+            **Timestamp**: ${{ github.event.head_commit.timestamp }}
+
+            ### Details
+            - **Repository**: ${{ github.repository }}
+            - **Branch**: ${{ github.ref_name }}
+            - **Actor**: ${{ github.actor }}
+
+            ### Actions Taken
+            - [ ] Review promotion logs
+            - [ ] Check candidate image validity
+            - [ ] Verify GPU availability for testing
+            - [ ] Review promotion rules configuration
+
+            ### Logs and Artifacts
+            [View workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+            **Auto-generated by GitHub Actions**
+            `;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['automation', 'docker', 'promotion-pipeline', 'failure']
+            });
+
+  # Job 5: Cleanup old promotion artifacts
+  cleanup:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+
+    steps:
+      - name: Cleanup old artifacts
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - 7); // 7 days ago
+
+            const artifacts = await github.rest.actions.listArtifactsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+
+            for (const artifact of artifacts.data.artifacts) {
+              if (artifact.name.includes('promotion-logs-') || artifact.name.includes('batch-promotion-')) {
+                const artifactDate = new Date(artifact.created_at);
+                if (artifactDate < cutoffDate) {
+                  console.log(`Deleting old artifact: ${artifact.name} (${artifact.created_at})`);
+                  await github.rest.actions.deleteArtifact({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    artifact_id: artifact.id
+                  });
+                }
+              }
+            }

@@ -1,0 +1,183 @@
+# CUDA/Torch/Compiled Extensions Compatibility Matrix
+# Ensures version compatibility across CUDA runtime, PyTorch, and compiled extensions
+
+cuda_runtime:
+  version: "12.1"
+  base_image: "nvidia/cuda:12.1-devel-ubuntu22.04"
+  description: "CUDA 12.1 runtime for all containers"
+
+torch_versions:
+  # Torch 2.0.x - Legacy (Transformers 4.33)
+  "2.0":
+    torch_version: ">=2.0.0,<2.1.0"
+    cuda_version: "cu121"
+    wheel_index: "https://download.pytorch.org/whl/cu121"
+    compatible_with: ["4.33"]
+    notes: "Legacy VLM models support"
+
+  # Torch 2.1.x - Stable (Transformers 4.37, 4.43, 4.49)
+  "2.1":
+    torch_version: ">=2.1.0,<2.2.0"
+    cuda_version: "cu121"
+    wheel_index: "https://download.pytorch.org/whl/cu121"
+    compatible_with: ["4.37", "4.43", "4.49"]
+    notes: "Primary stable version for most models"
+
+  # Torch 2.2.x+ - Latest (Transformers 4.51)
+  "2.2":
+    torch_version: ">=2.2.0"
+    cuda_version: "cu121"
+    wheel_index: "https://download.pytorch.org/whl/cu121"
+    compatible_with: ["4.51"]
+    notes: "Latest features and optimizations"
+
+compiled_extensions:
+  # Flash Attention - Version-specific requirements
+  flash-attn:
+    "4.33":
+      version: ">=2.0.0,<2.4.0"
+      required: true
+      build_from_source: false
+      notes: "Flash Attention 2.x compatible with older models"
+    "4.37":
+      version: ">=2.0.0,<2.4.0"
+      required: true
+      build_from_source: false
+      notes: "Flash Attention 2.x for stable models"
+    "4.43":
+      version: ">=2.0.0,<2.5.0"
+      required: true
+      build_from_source: false
+      notes: "Flash Attention 2.x for modern models"
+    "4.49":
+      version: ">=2.4.2,<3.0.0"
+      required: true
+      build_from_source: false
+      notes: "Flash Attention 2.4.2+ for latest generation"
+    "4.51":
+      version: ">=2.5.0"
+      required: true
+      build_from_source: false
+      notes: "Latest Flash Attention for cutting-edge models"
+
+  # DeepSpeed - Universal across versions
+  deepspeed:
+    "4.33":
+      version: ">=0.10.0"
+      required: true
+      cuda_required: true
+      notes: "Training and inference optimization"
+    "4.37":
+      version: ">=0.10.0"
+      required: true
+      cuda_required: true
+      notes: "Training and inference optimization"
+    "4.43":
+      version: ">=0.10.0"
+      required: true
+      cuda_required: true
+      notes: "Training and inference optimization"
+    "4.49":
+      version: ">=0.12.0"
+      required: true
+      cuda_required: true
+      notes: "Updated DeepSpeed for latest models"
+    "4.51":
+      version: ">=0.14.0"
+      required: true
+      cuda_required: true
+      notes: "Latest DeepSpeed with new optimizations"
+
+  # XFormers - Memory-efficient attention
+  xformers:
+    all_versions:
+      version: ">=0.0.20"
+      required: true
+      cuda_required: true
+      notes: "Memory-efficient attention for all models"
+
+  # Optimum + ONNX Runtime - Only for 4.51
+  optimum:
+    "4.51":
+      version: ">=1.17.0"
+      extras: ["onnxruntime-gpu"]
+      required: false
+      cuda_required: true
+      notes: "ONNX Runtime optimization for Phi-4, Pixtral"
+    other_versions:
+      version: null
+      required: false
+      notes: "Not included in earlier versions"
+
+  # BitsAndBytes - Quantization support
+  bitsandbytes:
+    all_versions:
+      version: ">=0.41.0"
+      required: true
+      cuda_required: true
+      notes: "4/8-bit quantization support"
+
+# Verification tests per version
+verification_tests:
+  base_imports:
+    - "import torch"
+    - "import transformers"
+    - "assert torch.cuda.is_available()"
+    - "print(f'CUDA: {torch.version.cuda}')"
+    - "print(f'Torch: {torch.__version__}')"
+    - "print(f'Transformers: {transformers.__version__}')"
+
+  compiled_extensions_4_33:
+    - "import flash_attn"
+    - "import deepspeed"
+    - "import xformers"
+    - "import bitsandbytes"
+    - "print('✅ All 4.33 extensions loaded')"
+
+  compiled_extensions_4_37:
+    - "import flash_attn"
+    - "import deepspeed"
+    - "import xformers"
+    - "import bitsandbytes"
+    - "print('✅ All 4.37 extensions loaded')"
+
+  compiled_extensions_4_43:
+    - "import flash_attn"
+    - "import deepspeed"
+    - "import xformers"
+    - "import bitsandbytes"
+    - "print('✅ All 4.43 extensions loaded')"
+
+  compiled_extensions_4_49:
+    - "import flash_attn"
+    - "import deepspeed"
+    - "import xformers"
+    - "import bitsandbytes"
+    - "print('✅ All 4.49 extensions loaded')"
+
+  compiled_extensions_4_51:
+    - "import flash_attn"
+    - "import deepspeed"
+    - "import xformers"
+    - "import bitsandbytes"
+    - "import optimum"
+    - "import onnxruntime"
+    - "print('✅ All 4.51 extensions loaded (including ONNX)')"
+
+# Known compatibility issues
+compatibility_notes:
+  - issue: "Flash Attention requires CUDA compute capability >= 7.5"
+    affected_versions: ["all"]
+    workaround: "Use xformers as fallback for older GPUs"
+
+  - issue: "DeepSpeed compilation requires CUDA nvcc"
+    affected_versions: ["all"]
+    workaround: "Use -devel CUDA base image with build tools"
+
+  - issue: "ONNX Runtime GPU requires specific CUDA versions"
+    affected_versions: ["4.51"]
+    workaround: "Use onnxruntime-gpu wheel compatible with CUDA 12.1"
+
+  - issue: "Torch 2.8+ may have breaking changes"
+    affected_versions: ["4.49", "4.51"]
+    workaround: "Lock to specific torch version in requirements"

@@ -1,0 +1,12 @@
+--- a/vlmeval/vlm/qwen2_vl/model.py
++++ b/vlmeval/vlm/qwen2_vl/model.py
+@@ -223,7 +223,8 @@ class Qwen2VLChat(Qwen2VLPromptMixin, BaseModel):
+         self.model_path = model_path
+         
+         # Get HuggingFace token from environment
+-        token = os.getenv('HUGGING_FACE_HUB_TOKEN') or os.getenv('HF_TOKEN')
++        import os as _os
++        token = _os.getenv('HUGGING_FACE_HUB_TOKEN') or _os.getenv('HF_TOKEN')
+         token_kwargs = {'token': token} if token else {}
+         
+         MODEL_CLS = None

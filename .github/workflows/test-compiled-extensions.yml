@@ -1,0 +1,242 @@
+name: Test Compiled Extensions Compatibility
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+    paths:
+      - 'docker/requirements/**'
+      - 'docker/*/Dockerfile'
+      - 'docker/transformers-*/Dockerfile'
+      - 'scripts/test_compiled_extensions.py'
+  pull_request:
+    branches:
+      - main
+      - master
+    paths:
+      - 'docker/requirements/**'
+      - 'docker/*/Dockerfile'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Transformer version to test'
+        required: true
+        type: choice
+        options:
+          - all
+          - '4.33'
+          - '4.37'
+          - '4.43'
+          - '4.49'
+          - '4.51'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/spectravision
+
+jobs:
+  # Matrix test for all transformer versions
+  test-extensions-matrix:
+    name: Test Extensions - ${{ matrix.version }}
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.version == 'all')
+
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ['4.33', '4.37', '4.43', '4.49', '4.51']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull candidate image
+        run: |
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.version }}-candidate || \
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.version }} || \
+          echo "⚠️ Image not found, will need to build"
+
+      - name: Run compiled extensions test in container
+        run: |
+          docker run --rm \
+            -v $(pwd)/scripts:/workspace/scripts:ro \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.version }}-candidate \
+            python3 /workspace/scripts/test_compiled_extensions.py \
+              --version ${{ matrix.version }} \
+              --json || \
+          docker run --rm \
+            -v $(pwd)/scripts:/workspace/scripts:ro \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.version }} \
+            python3 /workspace/scripts/test_compiled_extensions.py \
+              --version ${{ matrix.version }} \
+              --json
+
+      - name: Test base imports (minimal check)
+        run: |
+          docker run --rm \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.version }}-candidate \
+            python3 -c "
+          import sys
+          import torch
+          import transformers as tr
+
+          print(f'✅ Torch: {torch.__version__}')
+          print(f'✅ Transformers: {tr.__version__}')
+          print(f'✅ CUDA available: {torch.cuda.is_available()}')
+          print(f'✅ CUDA version: {torch.version.cuda if torch.cuda.is_available() else \"N/A\"}')
+          " || \
+          docker run --rm \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.version }} \
+            python3 -c "
+          import sys
+          import torch
+          import transformers as tr
+
+          print(f'✅ Torch: {torch.__version__}')
+          print(f'✅ Transformers: {tr.__version__}')
+          print(f'✅ CUDA available: {torch.cuda.is_available()}')
+          print(f'✅ CUDA version: {torch.version.cuda if torch.cuda.is_available() else \"N/A\"}')
+          "
+
+      - name: Test Flash Attention import
+        run: |
+          docker run --rm \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.version }}-candidate \
+            python3 -c "
+          import flash_attn
+          print(f'✅ Flash Attention: {flash_attn.__version__}')
+          " || echo "⚠️ Flash Attention not available"
+
+      - name: Test DeepSpeed import
+        run: |
+          docker run --rm \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.version }}-candidate \
+            python3 -c "
+          import deepspeed
+          print(f'✅ DeepSpeed: {deepspeed.__version__}')
+          " || echo "⚠️ DeepSpeed not available"
+
+      - name: Test XFormers import
+        run: |
+          docker run --rm \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.version }}-candidate \
+            python3 -c "
+          import xformers
+          print(f'✅ XFormers: {xformers.__version__}')
+          " || echo "⚠️ XFormers not available"
+
+      - name: Test BitsAndBytes import
+        run: |
+          docker run --rm \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.version }}-candidate \
+            python3 -c "
+          import bitsandbytes as bnb
+          print(f'✅ BitsAndBytes: {bnb.__version__}')
+          " || echo "⚠️ BitsAndBytes not available"
+
+      # 4.51-specific: ONNX Runtime test
+      - name: Test ONNX Runtime + Optimum (4.51 only)
+        if: matrix.version == '4.51'
+        run: |
+          docker run --rm \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:4.51-candidate \
+            python3 -c "
+          import onnxruntime
+          import optimum
+
+          print(f'✅ ONNX Runtime: {onnxruntime.__version__}')
+          print(f'✅ Optimum: {optimum.__version__}')
+
+          providers = onnxruntime.get_available_providers()
+          print(f'✅ ONNX Providers: {providers}')
+
+          if 'CUDAExecutionProvider' in providers:
+              print('✅ CUDA Execution Provider available')
+          else:
+              print('⚠️ CUDA Execution Provider not available (expected in CPU-only CI)')
+          "
+
+  # Single version test (workflow dispatch)
+  test-single-version:
+    name: Test Extensions - Single Version
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && inputs.version != 'all'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull image
+        run: |
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.version }}-candidate || \
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.version }}
+
+      - name: Run full test suite
+        run: |
+          docker run --rm \
+            -v $(pwd)/scripts:/workspace/scripts:ro \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.version }}-candidate \
+            python3 /workspace/scripts/test_compiled_extensions.py \
+              --version ${{ inputs.version }} \
+              --json || \
+          docker run --rm \
+            -v $(pwd)/scripts:/workspace/scripts:ro \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.version }} \
+            python3 /workspace/scripts/test_compiled_extensions.py \
+              --version ${{ inputs.version }} \
+              --json
+
+  # Summary job
+  test-summary:
+    name: Extensions Test Summary
+    runs-on: ubuntu-latest
+    needs: [test-extensions-matrix]
+    if: always()
+
+    steps:
+      - name: Check test results
+        run: |
+          echo "=================================="
+          echo "COMPILED EXTENSIONS TEST SUMMARY"
+          echo "=================================="
+          echo ""
+          echo "All transformer versions tested for:"
+          echo "  - Torch + CUDA compatibility"
+          echo "  - Flash Attention"
+          echo "  - DeepSpeed"
+          echo "  - XFormers"
+          echo "  - BitsAndBytes"
+          echo "  - ONNX Runtime (4.51 only)"
+          echo ""
+          if [ "${{ needs.test-extensions-matrix.result }}" == "success" ]; then
+            echo "✅ All extension tests passed!"
+          else
+            echo "❌ Some extension tests failed"
+            exit 1
+          fi

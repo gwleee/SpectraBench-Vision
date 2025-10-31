@@ -1,0 +1,27 @@
+# Common dependencies shared across all transformer versions
+
+# Core ML packages
+torch>=2.1.0
+torchvision
+numpy
+pillow
+
+# Vision-Language model dependencies
+deepspeed
+accelerate
+bitsandbytes
+flash-attn
+xformers
+timm
+peft
+sentencepiece
+protobuf
+
+# VLMEvalKit essential dependencies
+pandas
+requests
+tqdm
+matplotlib
+seaborn
+scipy
+scikit-learn

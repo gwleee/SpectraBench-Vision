@@ -1,0 +1,25 @@
+--- a/vlmeval/dataset/image_base.py
++++ b/vlmeval/dataset/image_base.py
+@@ -1,5 +1,6 @@
+ import pandas as pd
+ from abc import abstractmethod
++import os
+ from ..smp import *
+
+
+@@ -83,6 +84,15 @@ class ImageBaseDataset:
+
+         self.data = data
+         self.post_build(dataset)
++
++        # Apply sample limit if VLMEVAL_SAMPLE_LIMIT environment variable is set
++        sample_limit = int(os.getenv('VLMEVAL_SAMPLE_LIMIT', '-1'))
++        if sample_limit > 0:
++            original_len = len(self.data)
++            self.data = self.data.iloc[:sample_limit].reset_index(drop=True)
++            print(f"[SAMPLE LIMIT] Dataset '{dataset}' limited from {original_len} to {len(self.data)} samples "
++                  f"(VLMEVAL_SAMPLE_LIMIT={sample_limit})")
++
+
+     def __len__(self):
+         return len(self.data)

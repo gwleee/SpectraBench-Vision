@@ -1,0 +1,140 @@
+# SpectraVision Benchmark Configurations - Unified Benchmark Set
+# All hardware types use the same comprehensive benchmark set for consistency
+
+benchmarks:
+    # Vision-Language Understanding
+    - name: "MMBench"
+      vlm_name: "MMBench_DEV_EN"
+      samples: 2974
+      purpose: "Multi-modal reasoning"
+      
+    - name: "TextVQA"
+      vlm_name: "TextVQA_VAL"
+      samples: 5000
+      purpose: "Reading text in images"
+      
+    - name: "GQA"
+      vlm_name: "GQA_TestDev_Balanced"
+      samples: 12578
+      purpose: "Compositional reasoning"
+      
+    - name: "MMMU"
+      vlm_name: "MMMU_DEV_VAL"
+      samples: 900
+      purpose: "College-level multi-discipline understanding"
+      
+    # Document Understanding
+    - name: "DocVQA"
+      vlm_name: "DocVQA_VAL"
+      samples: 5349
+      purpose: "Document question answering"
+      
+    - name: "ChartQA"
+      vlm_name: "ChartQA_TEST"
+      samples: 1250
+      purpose: "Chart and graph understanding"
+      
+    - name: "InfoVQA"
+      vlm_name: "InfoVQA_VAL"
+      samples: 2118
+      purpose: "Infographic understanding"
+      
+    # Scene and Object Understanding
+    - name: "OCRBench"
+      vlm_name: "OCRBench"
+      samples: 1000
+      purpose: "OCR capabilities"
+      
+    - name: "AI2D"
+      vlm_name: "AI2D_TEST"
+      samples: 3088
+      purpose: "Science diagram understanding"
+      
+    # Mathematical and Scientific Reasoning
+    - name: "ScienceQA"
+      vlm_name: "ScienceQA_VAL"
+      samples: 4241
+      purpose: "Science question answering"
+      
+    # Spatial and Temporal Reasoning
+    - name: "POPE"
+      vlm_name: "POPE"
+      samples: 3000
+      purpose: "Object existence evaluation"
+      
+    # Instruction Following
+    # - name: "MME"  # DISABLED - VLMEvalKit 'artwork' key error
+    #   vlm_name: "MME"
+    #   samples: 2374
+    #   purpose: "Comprehensive evaluation"
+
+    # Advanced Reasoning
+    - name: "HallusionBench"
+      vlm_name: "HallusionBench"
+      samples: 346
+      purpose: "Hallucination detection"
+
+    # Additional comprehensive benchmarks
+    - name: "MMStar"
+      vlm_name: "MMStar"
+      samples: 1500
+      purpose: "Multi-modal understanding"
+
+    - name: "RealWorldQA"
+      vlm_name: "RealWorldQA"
+      samples: 700
+      purpose: "Real-world reasoning"
+
+    # Additional Comprehensive Benchmarks
+    # - name: "NaturalBench"  # DISABLED - VLMEvalKit silent failure
+    #   vlm_name: "NaturalBenchDataset"
+    #   samples: 3000
+    #   purpose: "Natural imagery VQA (NeurIPS'24)"
+      
+    - name: "VisOnlyQA"
+      vlm_name: "VisOnlyQA-VLMEvalKit"
+      samples: 2000
+      purpose: "Visual perception capabilities"
+      
+    - name: "VizWiz"
+      vlm_name: "VizWiz"
+      samples: 4000
+      purpose: "Visual QA for visually impaired"
+      
+    - name: "SEED"
+      vlm_name: "SEEDBench_IMG"
+      samples: 19000
+      purpose: "Spatial reasoning and understanding"
+      
+    - name: "BLINK"
+      vlm_name: "BLINK"
+      samples: 3807
+      purpose: "Multimodal reasoning benchmark"
+      
+    # Korean Language Benchmarks (NCSOFT)
+    - name: "K-MMBench"
+      vlm_name: "MMBench_DEV_KO"
+      samples: 3000
+      purpose: "Multi-modal reasoning (Korean)"
+
+    - name: "K-SEED"
+      vlm_name: "SEEDBench_IMG_KO"
+      samples: 19000
+      purpose: "Spatial reasoning and understanding (Korean)"
+
+    # - name: "K-MMStar"  # DISABLED - VLMEvalKit error
+    #   vlm_name: "MMStar_KO"
+    #   samples: 1500
+    #   purpose: "Multi-modal understanding (Korean)"
+
+    # - name: "Korean-OCR"  # DISABLED - VLMEvalKit error
+    #   vlm_name: "CCOCR_MultiLanOcr_Korean"
+    #   samples: 150
+    #   purpose: "Korean OCR capabilities"
+
+
+# Total: 20 benchmarks (4 disabled due to VLMEvalKit compatibility issues)
+# 
+# Removed benchmarks: OKVQA, COCO_VAL, MathVista, MMVet (parsing issues)
+# Added benchmarks: NaturalBench, VisOnlyQA, VizWiz, SEED, BLINK (all parsing compatible)
+# Korean benchmarks: K-MMBench, K-SEED, K-MMStar, Korean-OCR (NCSOFT and multilingual OCR, all parsing compatible)

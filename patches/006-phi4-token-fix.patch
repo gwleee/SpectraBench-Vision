@@ -1,0 +1,26 @@
+--- a/vlmeval/vlm/phi4_multimodal.py
++++ b/vlmeval/vlm/phi4_multimodal.py
+@@ -1,4 +1,5 @@
+ from PIL import Image
++import os
+ import torch
+ 
+ from .base import BaseModel
+@@ -17,10 +18,14 @@ class Phi4Multimodal(BaseModel):
+             logging.critical('Please install the latest version transformers.')
+             raise e
+ 
++        # Get HuggingFace token from environment
++        token = os.getenv('HUGGING_FACE_HUB_TOKEN') or os.getenv('HF_TOKEN')
++        token_kwargs = {'token': token} if token else {}
++        
+         model = AutoModelForCausalLM.from_pretrained(
+             model_path, device_map='cuda', trust_remote_code=True,
+-            torch_dtype='auto',attn_implementation='flash_attention_2'
++            torch_dtype='auto',attn_implementation='flash_attention_2',
++            **token_kwargs
+         ).eval()
+-        processor = AutoProcessor.from_pretrained(model_path, trust_remote_code=True)
+-        generation_config = GenerationConfig.from_pretrained(model_path)
++        processor = AutoProcessor.from_pretrained(model_path, trust_remote_code=True, **token_kwargs)
++        generation_config = GenerationConfig.from_pretrained(model_path, **token_kwargs)

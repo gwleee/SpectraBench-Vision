@@ -1,0 +1,49 @@
+{
+  "registry": "ghcr.io/gwleee/spectravision",
+  "promotion_schedule": {
+    "enabled": true,
+    "cron_schedule": "0 2 * * 1",
+    "check_interval_hours": 24
+  },
+  "ci_cd": {
+    "enabled": true,
+    "trigger_on_push": true,
+    "require_all_tests_pass": true,
+    "slack_notifications": false,
+    "webhook_secret": null
+  },
+  "monitoring": {
+    "enabled": true,
+    "alert_thresholds": {
+      "failure_rate_percent": 25,
+      "consecutive_failures": 3
+    },
+    "output_dir": "outputs/automated_promotion_monitoring"
+  },
+  "promotion_rules": {
+    "min_age_hours": 4,
+    "max_age_days": 7,
+    "require_smoke_test": true,
+    "require_mini_benchmark": true,
+    "dry_run": false
+  },
+  "versions": ["4.33", "4.37", "4.49", "4.51"],
+  "notification_channels": {
+    "slack": {
+      "enabled": false,
+      "webhook_url": null,
+      "channel": "#docker-promotions"
+    },
+    "email": {
+      "enabled": false,
+      "smtp_server": null,
+      "recipients": []
+    }
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "outputs/automated_promotion.log",
+    "max_size_mb": 100,
+    "backup_count": 5
+  }
+}

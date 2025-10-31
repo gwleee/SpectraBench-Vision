@@ -1,0 +1,178 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'docker/**'
+      - 'spectravision/**'
+      - '.github/workflows/build-and-push-docker.yml'
+  release:
+    types: [published]
+  workflow_dispatch:  # 수동 실행 가능
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: spectravision
+
+jobs:
+  build-base:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build and push base image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: ./docker/base/Dockerfile
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:base
+        labels: |
+          org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          org.opencontainers.image.description=SpectraVision Base Image
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  build-transformer-versions:
+    needs: build-base
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        version: [4.33, 4.37, 4.43, 4.49, 4.51]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build and push transformer version
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: ./docker/transformers-${{ matrix.version }}/Dockerfile
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ matrix.version }}
+        labels: |
+          org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          org.opencontainers.image.description=SpectraVision Transformers ${{ matrix.version }} Image
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  build-integrated:
+    needs: build-transformer-versions
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build and push integrated system
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: ./docker/integrated/Dockerfile
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
+        labels: |
+          org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          org.opencontainers.image.description=SpectraVision Integrated System - Docker-in-Docker Orchestrator
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  update-compose:
+    needs: build-integrated
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Update docker-compose.prod.yml
+      run: |
+        sed -i "s/yourusername/${{ github.repository_owner }}/g" docker/docker-compose.prod.yml
+
+    - name: Create Quick Start guide
+      run: |
+        cat > QUICK_START_DOCKER.md << EOF
+        # SpectraVision Quick Start with Docker 🚀
+
+        ## 빠른 시작 (5분)
+
+        \`\`\`bash
+        # 1. 저장소 클론
+        git clone https://github.com/${{ github.repository }}.git
+        cd SpectraVision
+
+        # 2. 환경 설정
+        cp .env.template .env
+        # .env 파일에 HF_TOKEN 추가
+
+        # 3. 통합 시스템 실행 (권장)
+        docker run -it --gpus all \\
+          -v /var/run/docker.sock:/var/run/docker.sock \\
+          -v \$(pwd)/outputs:/workspace/outputs \\
+          ghcr.io/gwleee/spectravision:latest
+
+        # 또는 개별 컨테이너 사용
+        docker run --gpus all -it \\
+          -v \$(pwd)/outputs:/workspace/outputs \\
+          ghcr.io/gwleee/spectravision:4.49
+        \`\`\`
+
+        ## 사용 가능한 이미지
+
+        총 **30개 모델**, **24개 벤치마크**, **720개 평가** 가능!
+        EOF
+
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add docker/docker-compose.prod.yml QUICK_START_DOCKER.md
+        git diff --staged --quiet || git commit -m "Auto-update Docker configurations after image build"
+        git push

@@ -1,0 +1,31 @@
+--- a/vlmeval/vlm/vintern_chat.py
++++ b/vlmeval/vlm/vintern_chat.py
+@@ -1,4 +1,5 @@
+ import torch
++import os
+ from transformers import AutoTokenizer, AutoConfig, AutoModel, CLIPImageProcessor
+ import warnings
+ from PIL import Image
+@@ -106,7 +107,12 @@ class VInternLMChat(BaseModel):
+         assert version_cmp(transformers.__version__, '4.36.2', 'ge')
+ 
+         self.model_path = model_path
+-        self.tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True, use_fast=False)
++        
++        # Get HuggingFace token from environment
++        token = os.getenv('HUGGING_FACE_HUB_TOKEN') or os.getenv('HF_TOKEN')
++        self.token_kwargs = {'token': token} if token else {}
++        
++        self.tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True, use_fast=False, **self.token_kwargs)
+ 
+         # Regular expression to match the pattern 'Image' followed by a number, e.g. Image1
+         self.pattern = r'Image(\d+)'
+@@ -132,6 +138,7 @@ class VInternLMChat(BaseModel):
+             model_path,
+             torch_dtype=torch.bfloat16,
+             trust_remote_code=True,
+-            load_in_8bit=load_in_8bit).eval()
++            load_in_8bit=load_in_8bit,
++            **self.token_kwargs).eval()
+         if not load_in_8bit:
+             self.model = self.model.to(device)

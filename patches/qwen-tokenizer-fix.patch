@@ -1,0 +1,14 @@
+--- a/tokenization_qwen.py
++++ b/tokenization_qwen.py
+@@ -31,7 +31,10 @@
+
+ # Download SimSun font for rendering Chinese characters
+ ttf = requests.get("https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen-VL/SimSun.ttf")
+-open("SimSun.ttf", "wb").write(ttf.content)
++# Write to /tmp instead of current directory to avoid permission issues
++import tempfile
++font_path = os.path.join(tempfile.gettempdir(), "SimSun.ttf")
++open(font_path, "wb").write(ttf.content)
+
+
+ class QWenTokenizer(PreTrainedTokenizer):

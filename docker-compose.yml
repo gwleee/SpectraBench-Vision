@@ -1,0 +1,211 @@
+# Docker Compose for SpectraBench-Vision Multi-Container System
+# Implements 3-stage dependency system: 잠금(Lock) → 검증(Verification) → 프로모션(Promotion)
+version: '3.8'
+
+services:
+  # Base image service (for building only)
+  base:
+    build:
+      context: .
+      dockerfile: docker/base/Dockerfile
+      cache_from:
+        - ghcr.io/gwleee/spectravision:base
+    image: ghcr.io/gwleee/spectravision:base
+    profiles:
+      - build
+
+  # Transformer 4.33 - Legacy VLM Models
+  transformers-4-33:
+    build:
+      context: .
+      dockerfile: docker/transformers-4.33/Dockerfile
+      cache_from:
+        - ghcr.io/gwleee/spectravision:base
+        - ghcr.io/gwleee/spectravision:4.33
+    image: ghcr.io/gwleee/spectravision:4.33
+    depends_on:
+      - base
+    environment:
+      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
+      - HF_TOKEN=${HF_TOKEN}
+      - TRANSFORMERS_VERSION=4.33.0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - ./outputs:/workspace/outputs
+      - ./data:/workspace/data
+      - ./.env:/workspace/.env:ro
+    profiles:
+      - transformers-4-33
+      - all
+
+  # Transformer 4.37 - Stable VLM Models
+  transformers-4-37:
+    build:
+      context: .
+      dockerfile: docker/transformers-4.37/Dockerfile
+      cache_from:
+        - ghcr.io/gwleee/spectravision:base
+        - ghcr.io/gwleee/spectravision:4.37
+    image: ghcr.io/gwleee/spectravision:4.37
+    depends_on:
+      - base
+    environment:
+      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
+      - HF_TOKEN=${HF_TOKEN}
+      - TRANSFORMERS_VERSION=4.37.2
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - ./outputs:/workspace/outputs
+      - ./data:/workspace/data
+      - ./.env:/workspace/.env:ro
+    profiles:
+      - transformers-4-37
+      - all
+
+  # Transformer 4.43 - Modern VLM Models
+  transformers-4-43:
+    build:
+      context: .
+      dockerfile: docker/transformers-4.43/Dockerfile
+      cache_from:
+        - ghcr.io/gwleee/spectravision:base
+        - ghcr.io/gwleee/spectravision:4.43
+    image: ghcr.io/gwleee/spectravision:4.43
+    depends_on:
+      - base
+    environment:
+      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
+      - HF_TOKEN=${HF_TOKEN}
+      - TRANSFORMERS_VERSION=4.43.0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - ./outputs:/workspace/outputs
+      - ./data:/workspace/data
+      - ./.env:/workspace/.env:ro
+    profiles:
+      - transformers-4-43
+      - all
+
+  # Transformer 4.49 - Latest VLM Models
+  transformers-4-49:
+    build:
+      context: .
+      dockerfile: docker/transformers-4.49/Dockerfile
+      cache_from:
+        - ghcr.io/gwleee/spectravision:base
+        - ghcr.io/gwleee/spectravision:4.49
+    image: ghcr.io/gwleee/spectravision:4.49
+    depends_on:
+      - base
+    environment:
+      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
+      - HF_TOKEN=${HF_TOKEN}
+      - TRANSFORMERS_VERSION=4.49.0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - ./outputs:/workspace/outputs
+      - ./data:/workspace/data
+      - ./.env:/workspace/.env:ro
+    profiles:
+      - transformers-4-49
+      - all
+
+  # Transformer 4.51 - Cutting-edge VLM Models
+  transformers-4-51:
+    build:
+      context: .
+      dockerfile: docker/transformers-4.51/Dockerfile
+      cache_from:
+        - ghcr.io/gwleee/spectravision:base
+        - ghcr.io/gwleee/spectravision:4.51
+    image: ghcr.io/gwleee/spectravision:4.51
+    depends_on:
+      - base
+    environment:
+      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
+      - HF_TOKEN=${HF_TOKEN}
+      - TRANSFORMERS_VERSION=4.51.0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - ./outputs:/workspace/outputs
+      - ./data:/workspace/data
+      - ./.env:/workspace/.env:ro
+    profiles:
+      - transformers-4-51
+      - all
+
+  # Orchestrator service (main integrated container)
+  orchestrator:
+    build:
+      context: .
+      dockerfile: docker/standalone/Dockerfile
+      cache_from:
+        - ghcr.io/gwleee/spectravision:latest
+    image: ghcr.io/gwleee/spectravision:latest
+    environment:
+      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
+      - HF_TOKEN=${HF_TOKEN}
+      - HOST_UID=${HOST_UID:-1000}
+      - HOST_GID=${HOST_GID:-1000}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # Docker-in-Docker
+      - ./outputs:/workspace/outputs
+      - ./data:/workspace/data
+      - ./.env:/workspace/.env:ro
+    network_mode: host
+    privileged: true
+    profiles:
+      - orchestrator
+      - default
+
+networks:
+  spectravision:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  model_cache:
+    driver: local
+  output_data:
+    driver: local
+  benchmark_data:
+    driver: local

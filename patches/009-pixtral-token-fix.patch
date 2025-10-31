@@ -1,0 +1,23 @@
+--- a/VLMEvalKit/vlmeval/vlm/pixtral.py
++++ b/VLMEvalKit/vlmeval/vlm/pixtral.py
+@@ -1,4 +1,5 @@
+ import torch
++import os
+ from PIL import Image
+ from .base import BaseModel
+ from ..smp import *
+@@ -22,10 +23,13 @@ class Pixtral(BaseModel):
+             logging.critical('Please install `mistral-inference` and `mistral_common`')
+             raise err
+ 
++        # Get HuggingFace token from environment
++        token = os.getenv('HUGGING_FACE_HUB_TOKEN') or os.getenv('HF_TOKEN')
++        
+         if os.path.exists(model_path):
+             cache_path = model_path
+         else:
+             if get_cache_path(model_path, repo_type='models') is None:
+-                snapshot_download(repo_id=model_path)
++                snapshot_download(repo_id=model_path, token=token)
+             cache_path = get_cache_path(self.model_path, repo_type='models')
+ 

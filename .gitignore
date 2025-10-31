@@ -1,0 +1,108 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Outputs
+outputs/
+*.log
+*.csv
+*.tsv
+*.xlsx
+
+# Data and Cache directories
+data/
+cache/
+.cache/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# DISABLED DOCKER VERSIONS - Service discontinued
+# Transformers 4.43 (excluded from production)
+docker/transformers-4.43/
+docker/requirements/transformers-4.43.in
+docker/requirements/transformers-4.43.lock
+run_*443*.sh
+run_eval_443.sh
+
+# Transformers 4.49 (excluded from production)
+docker/transformers-4.49/
+docker/requirements/transformers-4.49.in
+docker/requirements/transformers-4.49.lock
+run_*449*.sh
+run_eval_449.sh
+
+# Transformers 4.51 (excluded from production - lacks critical LLaVA models)
+docker/transformers-4.51/
+docker/requirements/transformers-4.51.in
+docker/requirements/transformers-4.51.lock
+run_*451*.sh
+run_eval_451.sh
+
+# Temporary files
+/tmp/
+*.tmp
+
+# Development/Old Documentation (not for git upload)
+*.md.old
+CLAUDE.md
+CRITICAL_FIXES.md
+QUICKSTART_TEST_MODE.md
+REBOOT_RECOVERY.md
+TESTING_HISTORY.md
+DOCKER_USAGE_GUIDE_EN.md
+docs/
+
+# Development/Test Scripts (not needed for production docker images)
+run_433_eval_test_mode*.sh
+run_eval_437.sh
+test_*.sh
+scripts/automated_promotion.py
+scripts/build_with_smoke_test.sh
+scripts/docker_main.py
+scripts/docker_smoke_test.py
+scripts/generate_locked_requirements.py
+scripts/monitoring_integration.py
+scripts/patch_vlmeval_433.py
+scripts/prepare_vlmeval_data.py
+scripts/promote_docker_image.py
+scripts/runtime_gpu_smoke_test.py
+scripts/test_*.py
+scripts/verify_docker_images.sh

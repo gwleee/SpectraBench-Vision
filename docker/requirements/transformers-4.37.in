@@ -1,0 +1,30 @@
+# Transformers 4.37 base dependencies
+transformers==4.37.2
+tokenizers>=0.15.0
+
+# Core ML packages
+torch>=2.1.0
+torchvision
+numpy>=1.24.0,<2.0  # Pin to 1.x for binary compatibility with compiled extensions
+pillow
+
+# Vision-Language model dependencies
+deepspeed
+accelerate
+bitsandbytes
+# flash-attn - will be built from source in Dockerfile to ensure PyTorch ABI compatibility
+xformers
+timm
+peft
+sentencepiece
+protobuf
+
+# VLMEvalKit essential dependencies
+datasets
+pandas
+requests
+tqdm
+matplotlib
+seaborn
+scipy
+scikit-learn

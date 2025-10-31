@@ -1,0 +1,24 @@
+--- a/VLMEvalKit/vlmeval/vlm/minicpm_v.py
++++ b/VLMEvalKit/vlmeval/vlm/minicpm_v.py
+@@ -1,4 +1,5 @@
+ import torch
++import os
+ from PIL import Image
+ import numpy as np
+ from .base import BaseModel
+@@ -36,9 +37,13 @@ class MiniCPM_V(BaseModel):
+             logging.critical('Please install transformers and sentencepiece.')
+             raise e
+ 
++        # Get HuggingFace token from environment
++        token = os.getenv('HUGGING_FACE_HUB_TOKEN') or os.getenv('HF_TOKEN')
++        token_kwargs = {'token': token} if token else {}
++
+         self.model_path = model_path
+         self.device = torch.cuda.current_device()
+         self.dtype = torch.bfloat16
+-        self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True, torch_dtype=self.dtype)
++        self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True, torch_dtype=self.dtype, **token_kwargs)
+         self.model.eval().cuda()
+-        self.tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
++        self.tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True, **token_kwargs)

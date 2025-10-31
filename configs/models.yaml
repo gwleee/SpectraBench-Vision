@@ -1,0 +1,244 @@
+# SpectraVision Docker Multi-Version Model Configuration
+# NOTE: Currently 4.33 (verified) and 4.37 (LLaVA models) are active in production
+# Versions 4.43, 4.49, 4.51 have been disabled
+
+# ACTIVE: LLaVA models - most important production models
+transformers_4_37:
+  description: "LLaVA models only - testing LLaVA installation fix"
+  version: "4.37.2"
+  models:
+    # Small models (≤3B) - COMMENTED OUT FOR TESTING
+    # - name: "MiniCPM-V-2_6"
+    #   vlm_id: "MiniCPM-V-2_6"
+    #   memory_gb: 12
+    #   token_required: true
+    #   note: "Gated model - requires Hugging Face API token"
+
+    # Medium models (4-10B)
+    - name: "LLaVA-1.5-7B"
+      vlm_id: "llava_v1.5_7b"
+      memory_gb: 25
+      note: "MOST IMPORTANT MODEL - Primary LLaVA variant"
+
+    # - name: "CogVLM-7B"
+    #   vlm_id: "cogvlm-chat"
+    #   memory_gb: 28
+
+    # - name: "ShareGPT4V-7B"
+    #   vlm_id: "sharegpt4v_7b"
+    #   memory_gb: 25
+
+    # Large models (>10B)
+    - name: "LLaVA-1.5-13B"
+      vlm_id: "llava_v1.5_13b"
+      memory_gb: 45
+      note: "MOST IMPORTANT MODEL - Large LLaVA variant"
+
+# ACTIVE: Legacy models - verified working (83.3% success rate)
+transformers_4_33:
+  description: "Legacy models requiring transformers 4.33.0 - Qwen and older models (VERIFIED WORKING)"
+  version: "4.33.0"
+  models:
+    # Medium models (7-9B) - All verified working with 83.3% success rate
+    - name: "Qwen-VL-Chat"
+      vlm_id: "qwen_chat"
+      memory_gb: 25
+      token_required: true
+      note: "Gated model - VLMEvalKit official support - VERIFIED WORKING"
+
+    - name: "mPLUG-Owl2"
+      vlm_id: "mPLUG-Owl2"
+      memory_gb: 26
+      note: "VLMEvalKit official support - VERIFIED WORKING"
+
+    - name: "Monkey-Chat"
+      vlm_id: "monkey-chat"
+      memory_gb: 28
+      note: "VLMEvalKit official support - chat variant - VERIFIED WORKING"
+
+    - name: "InternLM-XComposer2"
+      vlm_id: "XComposer2"
+      memory_gb: 26
+      note: "VLMEvalKit official support - VERIFIED WORKING"
+
+    - name: "InternLM-XComposer"
+      vlm_id: "XComposer"
+      memory_gb: 24
+      note: "VLMEvalKit official support - original version - VERIFIED WORKING"
+
+    # Removed models (incompatible with transformers 4.33):
+    # - InstructBLIP-7B: 'NoneType' object has no attribute 'from_config'
+    # - InstructBLIP-13B: Same error as 7B variant
+    # - VisualGLM-6B: SAT library conflict with transformers 4.33
+    # - MiniMonkey: Silent failure (empty error message)
+    # - IDEFICS-9B: IdeficsForVisionText2Text not available in transformers 4.33 (needs 4.37+)
+    # - ShareCaptioner: Docker permission error (/workspace/.cache/torch/hub)
+
+# DISABLED: Service discontinued - excluded from production
+# transformers_4_43:
+#   description: "Mid-range modern models requiring transformers 4.43.0-4.44.0"
+#   version: "4.43.0"
+#   models:
+#     # Small-medium models
+#     - name: "Phi-3.5-Vision"
+#       vlm_id: "Phi-3.5-Vision"
+#       memory_gb: 18
+#       token_required: true
+#       note: "Gated model - requires Hugging Face API token"
+#
+#     - name: "Moondream2"
+#       vlm_id: "Moondream2"
+#       memory_gb: 8
+#       token_required: true
+#       note: "Gated model - requires Hugging Face API token"
+
+# DISABLED: Service discontinued - excluded from production
+# transformers_4_49:
+#   description: "Latest models requiring transformers 4.49.0+ - SmolVLM, Qwen2.5-VL series"
+#   version: "4.49.0"
+#   models:
+#     # Ultra-small models (≤1B)
+#     - name: "SmolVLM-256M"
+#       vlm_id: "SmolVLM-256M"
+#       memory_gb: 3
+#       token_required: true
+#       note: "Gated model - requires Hugging Face API token"
+#
+#     - name: "SmolVLM-500M"
+#       vlm_id: "SmolVLM-500M"
+#       memory_gb: 4
+#       token_required: true
+#       note: "Gated model - requires Hugging Face API token"
+#
+#     - name: "SmolVLM-1.7B"
+#       vlm_id: "SmolVLM"
+#       memory_gb: 8
+#       token_required: true
+#       note: "Gated model - requires Hugging Face API token"
+#
+#     # Small models (including relocated Qwen2-VL-2B)
+#     - name: "Qwen2-VL-2B"
+#       vlm_id: "Qwen2-VL-2B-Instruct"
+#       memory_gb: 8
+#       token_required: true
+#       note: "Gated model - requires Hugging Face API token (relocated from 4.33 for compatibility)"
+#
+#     - name: "Qwen2.5-VL-3B"
+#       vlm_id: "Qwen2.5-VL-3B-Instruct"
+#       memory_gb: 12
+#       token_required: true
+#       note: "Gated model - requires Hugging Face API token"
+#
+#     - name: "Aria-3.9B"
+#       vlm_id: "Aria"
+#       memory_gb: 15
+#
+#     # Medium models
+#     - name: "Qwen2.5-VL-7B"
+#       vlm_id: "Qwen2.5-VL-7B-Instruct"
+#       memory_gb: 30
+#       token_required: true
+#       note: "Gated model - requires Hugging Face API token"
+#
+#     - name: "Pixtral-12B"
+#       vlm_id: "Pixtral-12B"
+#       memory_gb: 40
+#       token_required: true
+#       note: "Gated model - requires Hugging Face API token"
+#
+#     # Large models (multi-GPU recommended)
+#     - name: "Qwen2.5-VL-32B"
+#       vlm_id: "Qwen2.5-VL-32B-Instruct"
+#       memory_gb: 140
+#       multi_gpu_recommended: true
+#       min_gpu_count: 2
+#       token_required: true
+#       note: "Gated model - requires Hugging Face API token"
+#
+#     - name: "Qwen2.5-VL-72B"
+#       vlm_id: "Qwen2.5-VL-72B-Instruct"
+#       memory_gb: 300
+#       multi_gpu_required: true
+#       min_gpu_count: 4
+#       token_required: true
+#       note: "Gated model - requires Hugging Face API token"
+
+# DISABLED: Service discontinued - excluded from production (lacks critical LLaVA models)
+# transformers_4_51:
+#   description: "Cutting-edge models requiring transformers 4.51.0+ - Latest releases"
+#   version: "4.51.0"
+#   models:
+#     # Large modern models
+#     - name: "Phi-4-Vision"
+#       vlm_id: "Phi-4-Vision"
+#       memory_gb: 45
+#       token_required: true
+#       note: "Gated model - requires Hugging Face API token"
+#
+#     # Ultra-large MoE models (multi-GPU required)
+#     - name: "Llama-4-Scout"
+#       vlm_id: "Llama-4-Scout-17B-16E-Instruct"
+#       memory_gb: 200
+#       multi_gpu_required: true
+#       min_gpu_count: 4
+#       token_required: true
+#       note: "Gated model - requires Hugging Face API token"
+
+# Hardware tier recommendations for Docker deployment
+# NOTE: Supports 4.33 (5 models) and 4.37 (5 models) = 10 total models
+hardware_tiers:
+  budget:
+    gpu_memory: "24-28GB"
+    recommended_containers: ["transformers_4_33", "transformers_4_37"]
+    max_models: 9
+    note: "All 4.33 models + most 4.37 models (excluding LLaVA-13B)"
+
+  consumer:
+    gpu_memory: "28-48GB"
+    recommended_containers: ["transformers_4_33", "transformers_4_37"]
+    max_models: 10
+    note: "All 4.33 and 4.37 models including both LLaVA variants"
+
+  professional:
+    gpu_memory: "48-80GB (single GPU)"
+    recommended_containers: ["transformers_4_33", "transformers_4_37"]
+    max_models: 10
+    note: "All 4.33 and 4.37 models with optimal performance"
+
+  datacenter_single:
+    gpu_memory: "80GB (single GPU)"
+    recommended_containers: ["transformers_4_33", "transformers_4_37"]
+    max_models: 10
+    note: "All 4.33 and 4.37 models (A100/H100)"
+
+  datacenter_multi:
+    gpu_memory: "Any GPU type, multiple cards"
+    gpu_count: "2+ GPUs"
+    recommended_containers: ["transformers_4_33", "transformers_4_37"]
+    max_models: 10
+    supports_distributed: true
+    note: "All models with optimal distribution"
+
+  cluster:
+    gpu_memory: "Any GPU type, 10+ cards"
+    gpu_count: "10-64+ GPUs"
+    recommended_containers: ["transformers_4_33", "transformers_4_37"]
+    max_models: 10
+    supports_distributed: true
+    cluster_mode: true
+    note: "Supports all models with optimal distribution"
+
+# Container deployment strategy
+deployment_strategy:
+  parallel_containers: true  # Two transformer versions active
+  gpu_allocation: "per_container"
+  shared_volumes:
+    - "./outputs:/workspace/outputs"
+    - "./data:/workspace/data"
+    - "./configs:/workspace/configs"
+
+# Model count:
+# Active: 10 models total
+#   - 4.33: 5 models (Qwen-VL-Chat, mPLUG-Owl2, Monkey-Chat, InternLM-XComposer2, InternLM-XComposer)
+#   - 4.37: 5 models (LLaVA-1.5-7B, LLaVA-1.5-13B, MiniCPM-V-2_6, CogVLM-7B, ShareGPT4V-7B) - InternVL2 models excluded due to flash-attn issues
+# Disabled: 25 models (4.43, 4.49, 4.51)
